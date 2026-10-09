@@ -159,6 +159,9 @@ jobs:
           import json
           runpy.run_path('packaging/native_codec_policy.py')['verify_no_extra_codecs'](root)
           assert next(root.rglob('LICENSE')).is_file()
+          native_files=sorted({p.relative_to(root).as_posix() for p in root.rglob('*') if p.is_file() and not p.is_symlink() and (p.suffix.lower() in ('.dll','.dylib','.pyd','.so') or '.framework/Versions/' in p.as_posix())})
+          Path('build/native-library-files.json').write_text(json.dumps(native_files,indent=2)+'\n')
+          print('FINAL NATIVE LIBRARY FILES:',json.dumps(native_files))
           inventory=runpy.run_path('packaging/candidate_inventory.py')['inventory'](root,runpy.run_path('slide_core/version.py')['VERSION'],extension)
           Path('build/candidate-inventory.json').write_text(json.dumps(inventory,indent=2)+'\n')
           errors=runpy.run_path('packaging/audit_release.py')['audit'](root,ffmpeg,Path('vendor/approved/binary-manifest.json'))
@@ -182,6 +185,7 @@ jobs:
             build/qt-replacement.json
             build/qt-replacement-smoke.json
             build/opencv-build.json
+            build/native-library-files.json
           retention-days: 14
       - name: Retain installer only for beta installation
         if: success()
