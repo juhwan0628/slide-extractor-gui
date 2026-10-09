@@ -1,3 +1,4 @@
+from slide_core.version import VERSION
 import hashlib
 import json
 import os
@@ -33,17 +34,17 @@ def fake_app(tmp_path,result=None):
 
 @pytest.mark.skipif(os.name!='posix',reason='POSIX process fixture; native Windows smoke is separate device validation')
 def test_smoke_rejects_stale_success_report(tmp_path):
-    report=tmp_path/'smoke.json';report.write_text(json.dumps({'status':'success','frozen':True,'bundled_tools_checked':True,'version':'0.4.9rc1'}))
+    report=tmp_path/'smoke.json';report.write_text(json.dumps({'status':'success','frozen':True,'bundled_tools_checked':True,'version':VERSION}))
     with pytest.raises(ValueError,match='report'):builder()['run_smoke'](fake_app(tmp_path),report)
 
 @pytest.mark.skipif(os.name!='posix',reason='POSIX process fixture; native Windows smoke is separate device validation')
 def test_smoke_requires_bundled_frozen_result(tmp_path):
-    result={'status':'success','frozen':False,'bundled_tools_checked':False,'version':'0.4.9rc1'}
+    result={'status':'success','frozen':False,'bundled_tools_checked':False,'version':VERSION}
     with pytest.raises(ValueError,match='Bundled'):builder()['run_smoke'](fake_app(tmp_path,result),tmp_path/'report.json')
 
 @pytest.mark.skipif(os.name!='posix',reason='POSIX process fixture; native Windows smoke is separate device validation')
 def test_smoke_accepts_actual_report_from_launched_process(tmp_path):
-    result={'status':'success','frozen':True,'bundled_tools_checked':True,'version':'0.4.9rc1'}
+    result={'status':'success','frozen':True,'bundled_tools_checked':True,'version':VERSION}
     actual=builder()['run_smoke'](fake_app(tmp_path,result),tmp_path/'report.json')
     assert actual==result
 

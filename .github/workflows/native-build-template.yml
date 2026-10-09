@@ -7,6 +7,9 @@ on:
       - '.github/workflows/native-build-template.yml'
       - 'packaging/native_inputs.py'
       - 'packaging/candidate_inventory.py'
+      - 'packaging/desktop_entry.py'
+      - 'slide_core/version.py'
+      - 'slide_core/pdf_only_export.py'
       - 'packaging/native-sources.lock.json'
       - 'packaging/build-ffmpeg.sh'
 permissions:
@@ -125,6 +128,7 @@ jobs:
           import runpy
           for name in ('installed-smoke.json','installer-smoke.json'):
               report=json.loads((Path('build')/name).read_text())
+              assert report['pdf_only_checked'] and report['output_lock_cleanup_checked'],report
               assert report['status']=='success' and report['frozen'] and report['bundled_tools_checked'] and report['version']==runpy.run_path('slide_core/version.py')['VERSION'],report
       - name: Record final bundle inventory and pending release review
         shell: python

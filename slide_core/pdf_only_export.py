@@ -14,8 +14,7 @@ from .models import make_export_snapshot,SlideImage
 from .media import source_matches,MediaError
 from .pts import extract_selected
 from .pdf import write_slides_pdf,validate_slides_pdf
-from .cache import acquire_file_lease
-from .export import OutputCollision,OutputOverwriteRequired,RecoveryRequired,_state,sync_directory
+from .export import OutputCollision,OutputOverwriteRequired,RecoveryRequired,_state,sync_directory,export_file_lease
 
 def export_pdf_only(project,destination,*,overwrite=False,cancel_token=None,progress=None,snapshot=None):
     project.validate()
@@ -60,7 +59,7 @@ def export_pdf_only(project,destination,*,overwrite=False,cancel_token=None,prog
         if progress:progress('verifying',None,None)
         validate_slides_pdf(pdf,images,export_id=export_id)
         if progress:progress('publishing',None,None)
-        with acquire_file_lease(lock):
+        with export_file_lease(lock):
             if cancel_token is not None:cancel_token.raise_if_cancelled()
             if not source_matches(snap.source):raise MediaError('SourceChanged',code='SourceChanged')
             if project.revision!=snap.revision or project.analysis_generation!=snap.analysis_generation:

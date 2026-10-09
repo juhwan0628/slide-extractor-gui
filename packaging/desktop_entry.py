@@ -17,6 +17,7 @@ def smoke(target):
     from slide_core.config import AnalysisSettings
     from slide_core.profiling import AnalysisProfile
     from slide_core.export_v3 import export_project
+    from slide_core.pdf_only_export import export_pdf_only
     from pypdf import PdfReader
     from slide_core.version import VERSION
     result={'version':VERSION,'frozen':bool(getattr(sys,'frozen',False)),'status':'failed'}
@@ -36,9 +37,17 @@ def smoke(target):
             pdf,side=export_project(project,temp/'test.pdf')
             assert len(project.samples)==2
             assert len(PdfReader(pdf).pages)==len(project.pages)>0
+            assert not list(temp.glob('*.lock')), 'Paired export left output lock'
+            pdf_only=temp/'PDF only 한글 경로.pdf'
+            for overwrite in (False,True):
+                export_pdf_only(project,pdf_only,overwrite=overwrite)
+                assert len(PdfReader(pdf_only).pages)==len(project.pages)
+                assert not pdf_only.with_suffix('.json').exists()
+                assert not list(temp.glob('*.lock')), 'PDF-only export left output lock'
             assert profile.report()['decoder_backend']=='cpu-metadata'
             result.update(status='success',sample_count=len(project.samples),page_count=len(project.pages),
-                          decoder_backend='cpu-metadata',bundled_tools_checked=result['frozen'])
+                          decoder_backend='cpu-metadata',bundled_tools_checked=result['frozen'],
+                          pdf_only_checked=True,output_lock_cleanup_checked=True)
     except Exception as exc:
         result['error']=type(exc).__name__+': '+str(exc)
         raise

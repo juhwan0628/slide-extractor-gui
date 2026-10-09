@@ -31,3 +31,22 @@ jobs:
           QT_QPA_PLATFORM: offscreen
           PYTHONPATH: .
         run: python -m pytest -q
+
+  windows-export-locks:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: packaging/requirements-windows-x64.lock
+      - name: Install fixed test environment
+        run: python -m pip install -r packaging/requirements-windows-x64.lock pytest
+      - name: Reproduce output lock cleanup on Windows
+        env:
+          PYTHONPATH: .
+          QT_QPA_PLATFORM: offscreen
+          PYTHONUTF8: '1'
+        run: python -m pytest -q tests/test_export_lock_cleanup.py tests/test_pdf_only_lock_cleanup.py
