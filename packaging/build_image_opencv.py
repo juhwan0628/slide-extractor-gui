@@ -8,16 +8,8 @@ def patch_image_only_source(source_root):
     """Patch only upstream packaging/type metadata for excluded modules."""
     changes = [
         ("setup.py", 'if os.name == "nt"\n            else []', 'if False  # image-only build has no videoio helper\n            else []'),
-        ("opencv/modules/python/src2/typing_stubs_generation/api_refinement.py",
-         "for_each_function_overload)",
-         "for_each_function_overload, ScopeNotFoundError, SymbolNotFoundError)"),
-        ("opencv/modules/python/src2/typing_stubs_generation/api_refinement.py",
-         "    for symbol_name, refine_symbol in NODES_TO_REFINE.items():\n        refine_symbol(root, symbol_name)",
-         "    for symbol_name, refine_symbol in NODES_TO_REFINE.items():\n"
-         "        try:\n            find_function_node(root, symbol_name)\n"
-         "        except (ScopeNotFoundError, SymbolNotFoundError):\n"
-         "            continue  # API excluded from this partial module build\n"
-         "        refine_symbol(root, symbol_name)"),
+        ("setup.py", '[ r"python/cv2/py.typed" ] if sys.version_info >= (3, 6) else []', '[]  # no generated typing metadata in the image-only desktop runtime'),
+        ("setup.py", 'if sys.version_info >= (3, 6):\n        rearrange_cmake_output_data["cv2.typing"]', 'if False:  # typing generator assumes full OpenCV modules\n        rearrange_cmake_output_data["cv2.typing"]'),
     ]
     originals = {}
     modified = {}

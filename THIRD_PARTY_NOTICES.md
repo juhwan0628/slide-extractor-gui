@@ -28,4 +28,4 @@ PyInstaller is a build tool under GPL with the bootloader exception; this does n
 
 qpdf is not bundled. PyMuPDF, SciPy, scikit-image and pytest are excluded from the runtime bundle.
 
-OpenCV image-only builds apply `opencv-image-only.patch` to skip typing refinements for excluded APIs and omit the unused Windows videoio helper from wheel packaging. The exact original source archive, patch and patch SHA-256 are supplied together. No image-processing C++ code is modified.
+OpenCV image-only builds apply `opencv-image-only.patch` to omit development-only typing metadata (whose upstream generator assumes the full module set) and the unused Windows videoio helper from wheel packaging. The exact original source archive, patch and patch SHA-256 are supplied together. No image-processing C++ code is modified.
