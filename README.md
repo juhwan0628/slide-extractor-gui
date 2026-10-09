@@ -5,7 +5,7 @@
 **강의 영상에서 슬라이드를 찾고, 필요한 페이지만 PDF로.**
 
 [![Common source tests](https://github.com/juhwan0628/slide-extractor-gui/actions/workflows/ci.yml/badge.svg)](https://github.com/juhwan0628/slide-extractor-gui/actions/workflows/ci.yml)
-![Beta](https://img.shields.io/badge/beta-0.4.9rc2-6556d9)
+![Beta](https://img.shields.io/badge/beta-0.4.9rc3-6556d9)
 ![macOS](https://img.shields.io/badge/macOS-Apple%20Silicon-20242a)
 ![Windows](https://img.shields.io/badge/Windows-x64-20242a)
 
@@ -29,14 +29,14 @@
 
 ## 다운로드
 
-현재 버전은 **0.4.9rc2 베타**입니다. 두 OS의 설치·분석·PDF 저장 검사를 GitHub Actions에서 통과했습니다. 공개 릴리스 자료 검토는 진행 중이며, 아래는 검증된 테스트 설치본입니다.
+현재 버전은 **0.4.9rc3 베타**입니다. 두 OS의 설치·분석·PDF 저장 검사를 GitHub Actions에서 통과했습니다. MIT 및 제3자 고지·대응 소스 자료는 릴리스에 함께 제공합니다.
 
 | 기기 | 설치 파일 | 설치 안내 |
 |---|---|---|
-| Apple Silicon Mac | [DMG 다운로드](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/37977571499/artifacts/11639648425) | [Mac 설치](INSTALL-MAC.md) |
-| Windows x64 | [설치 EXE 다운로드](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/37977571499/artifacts/11640181724) | [Windows 설치](INSTALL-WINDOWS.md) |
+| Apple Silicon Mac | [DMG 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.9rc3/SlideExtractor-v0.4.9rc3-macOS-arm64.dmg) | [Mac 설치](INSTALL-MAC.md) |
+| Windows x64 | [설치 EXE 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.9rc3/SlideExtractor-v0.4.9rc3-Setup-Windows-x64.exe) | [Windows 설치](INSTALL-WINDOWS.md) |
 
-Actions 다운로드에는 GitHub 로그인이 필요합니다. ZIP을 풀면 해당 OS의 설치 파일 하나가 들어 있습니다. **Python·Qt·FFmpeg·FFprobe는 포함돼 있습니다.** Intel Mac과 Windows ARM은 이번 베타 검증 대상이 아닙니다.
+GitHub Releases에서 설치 파일을 직접 다운로드합니다. **Python·Qt·FFmpeg·FFprobe는 포함돼 있습니다.** Intel Mac과 Windows ARM은 이번 베타 검증 대상이 아닙니다.
 
 베타는 유료 코드 서명·Apple 공증을 적용하지 않았으므로 OS 경고나 실행 차단이 발생할 수 있습니다. 자세한 내용은 각 OS 설치 안내를 참고하세요.
 
@@ -54,6 +54,7 @@ Actions 다운로드에는 GitHub 로그인이 필요합니다. ZIP을 풀면 �
 - 분석·PDF 생성 성능 개선과 Windows 콘솔 깜빡임·저장 오류 수정.
 - PDF 단독 저장 후 남던 `.lock` 수정: 정상 저장, 덮어쓰기, 게시 실패, 취소 시 잠금을 정리합니다.
 - 실제 설치된 Mac·Windows 앱에서 PDF와 PDF+JSON 저장 및 출력 잠금 정리 검사.
+- MIT 라이선스와 앱 내 About / Licenses 안내, 이미지 전용 OpenCV 빌드 및 대응 소스 제공.
 
 [릴리스 노트](RELEASE_NOTES.md) · [검증 기록](packaging/QA_STATUS.md)
 

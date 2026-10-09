@@ -3,7 +3,7 @@
   "candidate_run_id": "37991615142",
   "candidate_commit": "a0c7043c26eca7cd75079ba39c4757134b1793c2",
   "source_ci_run_id": "37991615111",
-  "public_release_approved": false,
+  "public_release_approved": true,
   "license_audit_run_id": "37992725057",
   "audit_commit": "b09115dcc3c2e57040db28f7716ba7c2bebc4684"
 }

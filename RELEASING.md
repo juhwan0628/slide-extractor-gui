@@ -1,44 +1,25 @@
 # 맥·Windows 동시 베타 배포
 
-저장소: `juhwan0628/slide-extractor-gui`. 공통 소스와 `slide_core/version.py` 한 곳에서 버전을 관리합니다.
-사용자는 macOS Apple Silicon `.dmg` 또는 Windows x64 설치 `.exe`를 받습니다. Python·Qt·FFmpeg·FFprobe를 포함하며 개발 환경을 준비할 필요가 없습니다.
+공통 소스와 `slide_core/version.py`에서 버전을 관리합니다. 사용자는 Mac Apple Silicon DMG 또는 Windows x64 설치 EXE를 받습니다. Python·Qt·FFmpeg·FFprobe가 포함됩니다.
 
-## 현재 준비
+## 0.4.9rc3 검증 기록
 
-- 최신 소스 CI: 556 passed, 6 skipped (run 37977571494); Windows 잠금 회귀 검사 7 passed, 1 skipped.
-- 네이티브 후보 run 37977571499: 같은 커밋 53290faa에서 macOS arm64 DMG와 Windows x64 설치 EXE 생성 및 설치본 분석·PDF smoke 모두 성공. 설치 파일 전용 native-installer-* 아티팩트가 있습니다. 공개 릴리스 승인은 별도입니다.
-- `Native installer candidates`가 두 OS에서 고정 FFmpeg 8.1.2 소스를 직접 컴파일합니다. 개인용 Gyan GPL 빌드를 복사하지 않습니다.
-- GPL·nonfree·version3·외부 라이브러리 자동 탐지를 비활성화하고 실제 `-version`의 설정을 확인합니다.
-- Qt 6.12.0, Qt for Python 6.12.0 및 FFmpeg 소스는 `packaging/native-sources.lock.json`의 SHA256으로 확인합니다. 라이선스 원문과 설치된 wheel의 고지 파일을 수집합니다.
-- 최종 후보의 실제 해시, 빌드 provenance, 빈 PATH 분석·PDF smoke 및 설치 smoke를 기록합니다.
-- 후보 빌드는 공개 배포 승인이 아닙니다. `VERIFIED_INPUTS`는 후보에만 허용하며 기존 공개 배포 감사는 계속 `APPROVED` 자료를 요구합니다.
+- 네이티브 빌드: [37991615142](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/37991615142), 두 OS 성공. 실제 빌드 소스는 `a0c7043c26eca7cd75079ba39c4757134b1793c2`입니다.
+- 같은 소스 CI: [37991615111](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/37991615111), 563 passed, 6 skipped.
+- 실제 설치본 출고 검사: [37992725057](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/37992725057), 맥·Windows 모두 PASSED. 설치 파일과 감사 manifest 해시는 `packaging/release-approval.json`에 기록합니다.
+- 실제 설치·분석·PDF/PDF+JSON·출력 잠금 정리와 수정 QtCore의 실행을 검사했습니다. Qt 교체 검사는 호환 바이너리의 버전 문자열 변경 시험이며 임의 Qt ABI 또는 재빌드 호환성을 보장하지 않습니다.
+- 앱 소스는 MIT입니다. GPL 코덱이 확인된 rc2 macOS OpenCV wheel은 공개하지 않으며 rc3는 이미지 전용 OpenCV 소스 빌드를 사용합니다.
+- Mac은 ad-hoc 서명·공증 없음, Windows는 unsigned입니다. 유료 서명·공증은 이번 베타 조건이 아닙니다.
 
-## 실행 순서
+## 출고 절차
 
-1. `Native installer candidates`를 수동 실행하거나 해당 workflow/소스 빌드 설정을 main에 반영합니다. 두 네이티브 러너가 소스 다운로드·컴파일·라이선스 수집·PyInstaller·DMG/Inno Setup·설치 테스트를 자동 수행합니다.
-2. 같은 run의 `native-inputs-macOS-ARM64`, `native-inputs-Windows-X64`는 정확한 소스 아카이브, 원본 라이선스, wheel 고지, 컴파일 설정, 입력 해시와 인벤토리를 담습니다. `native-candidate-*`는 설치 파일 및 실제 설치 테스트 결과를 담습니다. 사용자가 폴더를 만들거나 빌드할 단계가 아닙니다.
-3. `release-gate.txt`에는 아직 미완료인 공개 배포 감사가 기록됩니다. 후보 실행 성공은 설치 빌드/테스트 성공을 의미하며 해당 감사의 성공을 의미하지 않습니다. 입력 단계에 최종 번들 해시를 미리 요구하지 않습니다.
-4. 두 후보에서 실제 Qt 모듈 및 수정 DLL/dylib 실행, wheel의 대응 소스/빌드 수정분, OpenCV의 내장 FFmpeg, 전체 native 의존성과 고지를 검토합니다. 앱 자체 소스 라이선스도 선택해야 합니다. 정확한 소스 아카이브는 14일 CI 보관에서 끝내지 않고 최종 공개 릴리스에 함께 제공해야 합니다.
-5. 관찰된 후보에 맞춰 감사 manifest를 작성하고 `packaging/audit_release.py`를 통과시킵니다. 자동 생성된 입력 자료를 무조건 `APPROVED`로 바꾸지 않습니다.
-6. `audit_release.py --report`로 실제 감사 결과를 기록합니다. `--installer`, `--version`, `--commit`, `--run-id`, `--platform`을 함께 지정하며 실패한 감사는 BLOCKED로 남습니다. 승인 기록의 `audits`에는 각 플랫폼의 이 보고서 내용을 넣습니다. 감사 상태·오류·설치 파일 해시·버전·커밋·run ID가 맞지 않으면 draft 준비가 실패합니다. 검토한 동일 run의 두 설치 파일을 `packaging/release-approval.json`에 버전·커밋·run ID·SHA256으로 기록합니다. 예제는 `release-approval.example.json`입니다.
-7. 후보 커밋에 버전 태그를 만들고 승인 기록이 있는 ref에서 `Prepare reviewed beta draft`를 실행합니다. 태그와 run 커밋, 두 설치 파일의 이름과 해시를 검증해 두 파일 및 SHA256SUMS를 draft prerelease로 모읍니다. 한 OS만 성공하면 동시 릴리스를 만들지 않습니다.
-8. 소스 제공 및 두 설치 파일을 최종 확인한 다음 공개합니다.
+1. `Native installer candidates`에서 두 OS 후보를 빌드합니다. FFmpeg 입력과 실제 실행 설정을 검증하고, OpenCV 이미지 구성, 고정 소스·라이선스 수집, PyInstaller 및 DMG/Inno Setup 설치·빈 PATH 검사를 수행합니다.
+2. 실제 native 라이브러리 목록을 검토하고 그 목록의 해시와 소스 CI/후보 run을 `packaging/candidate-review.json`에 고정합니다. `Audit reviewed installed candidates`는 원본 설치 파일을 새로 설치해 파일·소스·고지·Qt 교체 증거를 대조하고 `audit_release.py`를 실행합니다.
+3. 통과한 동일 두 설치 파일과 보고서를 `packaging/release-approval.json`에 연결합니다. 입력 manifest의 `VERIFIED_INPUTS`나 관찰된 빌드 성공만으로 출고 승인하지 않습니다. 버전·커밋·run ID·해시가 다른 자료는 거부합니다.
+4. `packaging/beta-review.json`은 검증한 후보·소스 CI·별도 감사와 공개 승인 상태를 가리킵니다. `Publish reviewed beta (both OS)`는 실제 보고서·설치 파일·모든 소스 및 패치 해시를 확인하고 private draft에 업로드합니다. GitHub가 관찰한 모든 자산 digest를 로컬 승인 파일과 다시 비교한 뒤에만 공개합니다. 이미 공개된 같은 태그는 덮어쓰지 않습니다.
 
-## 베타 확인
+GitHub 기본 토큰의 과거 커밋 태그 권한 제한 때문에 릴리스 태그는 **검토 자료 정리 커밋**을 가리킬 수 있습니다. 후보 커밋 이후 달라진 파일이 명시적인 문서/검토 자료 허용 목록에만 속하는지 확인합니다. 앱 코드·requirements·빌드 스펙·네이티브 입력 설정이 바뀌면 릴리스 준비가 실패합니다. 실제 빌드 커밋은 BETA_REVIEW.json과 build-manifest.json에 별도로 보존됩니다.
 
-- 일반 사용자 설치·실행, 시스템 Python/FFmpeg 없는 환경.
-- 한국어·공백 경로, 분석·편집·PDF/JSON, 취소·재시도.
-- 콘솔 깜빡임, 저장 완료 후 출력 폴더 `.lock`·임시 파일 정리.
-- 강의 원본·사용자 출력·캐시·인증 정보가 패키지에 없음.
-- 유료 서명·공증은 베타의 필수 조건이 아닙니다. 상태는 unsigned/ad-hoc, not notarized로 안내합니다. 관리자 실행은 Smart App Control의 차단을 해결하지 않습니다.
+소스 제공은 14일 CI 보관으로 끝내지 않습니다. 릴리스에 정확한 FFmpeg·Qt·Qt for Python·OpenCV 등 원본 소스, 수정 패치, 고지·라이선스 원문, 빌드·감사 기록 및 SHA256SUMS를 함께 제공합니다. 다운로드 사용자에게 vendor 폴더 생성이나 Python 설치를 요구하지 않습니다.
 
-
-## 공개 전 릴리스 초안 정리
-
-`Stage beta release for review (draft only)`는 `packaging/beta-review.json`에 연결된 성공한 소스 CI와 네이티브 빌드만 사용합니다. 두 설치본의 frozen/installed PDF 단독·동시 저장과 잠금 검사, 빌드 커밋·run ID·manifest 해시 및 양 플랫폼 대응 소스 해시를 확인합니다. DMG 파일명의 `approved`는 공개 승인으로 오인하지 않도록 릴리스 자산명에서 제거하며 바이너리는 변경하지 않습니다.
-
-설치본 두 개, 정확한 FFmpeg·Qt·Qt for Python 소스, 검증 기록, SHA256SUMS를 **draft prerelease**에 모읍니다. 이 경로는 배포 자료를 검토 가능한 형태로 준비하는 절차이며, 공개·`APPROVED` 전환을 수행하지 않습니다. 이미 공개된 동일 태그의 릴리스는 변경하지 않습니다.
-
-현재 rc2는 앱 라이선스 결정, Qt 수정 라이브러리 실행 및 대응 소스·고지 검토가 남아 있습니다. 공개 전에는 기존 audit_release 및 승인된 동시 배포 절차를 완료해야 합니다.
-
-0.4.9rc2 초안 생성 run [37986792406](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/37986792406): SUCCESS. [관리자용 릴리스 초안](https://github.com/juhwan0628/slide-extractor-gui/releases/tag/untagged-e3368ac5fb04ac6bc2ed)에 DMG, EXE, SHA256SUMS, 대응 소스 3개, 빌드·검토 기록과 관찰 manifest를 첨부했습니다. 초안은 일반 방문자에게 공개되지 않습니다.
+기술 출고 검사는 법적 인증서가 아닙니다. 새로운 dependency나 native wheel/라이브러리를 도입하면 실제 배포 바이트를 기준으로 다시 검토합니다.

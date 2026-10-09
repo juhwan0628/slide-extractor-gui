@@ -1,0 +1,43 @@
+{
+  "status": "APPROVED",
+  "public_release_approved": true,
+  "version": "0.4.9rc3",
+  "commit": "a0c7043c26eca7cd75079ba39c4757134b1793c2",
+  "run_id": "37991615142",
+  "source_ci_run_id": "37991615111",
+  "license_audit_run_id": "37992725057",
+  "audit_commit": "b09115dcc3c2e57040db28f7716ba7c2bebc4684",
+  "assets": {
+    "macos-arm64": {
+      "path": "macOS-ARM64/dist/SlideExtractor-v0.4.9rc3-macOS-arm64-approved.dmg",
+      "sha256": "a9776ea12f3cce7764b05d477230d09202044e46e287ee86a580dc2f5119dd31"
+    },
+    "windows-x64": {
+      "path": "Windows-X64/dist/SlideExtractor-v0.4.9rc3-Setup-Windows-x64.exe",
+      "sha256": "9bea4da0040fac6486c2c238058e132b9d3d751077bb1dce90a3231bb56b3cb0"
+    }
+  },
+  "audits": {
+    "macos-arm64": {
+      "status": "PASSED",
+      "errors": [],
+      "version": "0.4.9rc3",
+      "commit": "a0c7043c26eca7cd75079ba39c4757134b1793c2",
+      "run_id": "37991615142",
+      "platform": "macOS-ARM64",
+      "installer_sha256": "a9776ea12f3cce7764b05d477230d09202044e46e287ee86a580dc2f5119dd31",
+      "manifest_sha256": "893516a0264499d475577bd74873c2e3f5e7a81dee2bf724983126223d3fe66d"
+    },
+    "windows-x64": {
+      "status": "PASSED",
+      "errors": [],
+      "version": "0.4.9rc3",
+      "commit": "a0c7043c26eca7cd75079ba39c4757134b1793c2",
+      "run_id": "37991615142",
+      "platform": "Windows-X64",
+      "installer_sha256": "9bea4da0040fac6486c2c238058e132b9d3d751077bb1dce90a3231bb56b3cb0",
+      "manifest_sha256": "9c80849aeda1a6450bbad3533a52c67a75bbd033ed0668c0d0c36608541137ca"
+    }
+  },
+  "review_scope": "Exact two-platform installers, native inventory, pinned corresponding sources and license copies, installed analysis/PDF/lock smoke and modified Qt runtime smoke. This is a technical release review, not a legal compliance certificate."
+}

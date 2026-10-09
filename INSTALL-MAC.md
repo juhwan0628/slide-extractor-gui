@@ -2,8 +2,8 @@
 
 지원 대상: Apple Silicon Mac (arm64). Intel Mac은 현재 지원하지 않습니다.
 
-1. [베타 설치 파일](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/37977571499/artifacts/11639648425)을 다운로드합니다. Actions 다운로드에는 GitHub 로그인이 필요합니다.
-2. ZIP을 풀고 DMG를 엽니다.
+1. [베타 설치 파일](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.9rc3/SlideExtractor-v0.4.9rc3-macOS-arm64.dmg)을 다운로드합니다.
+2. DMG를 엽니다.
 3. `SlideExtractor.app`을 Applications 폴더로 복사합니다.
 4. Applications에서 앱을 실행합니다. Python·Qt·FFmpeg는 앱에 포함돼 있습니다.
 

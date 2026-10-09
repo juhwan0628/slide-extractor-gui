@@ -66,3 +66,16 @@
 - User-facing README includes a real GUI capture of self-authored synthetic slides, CI/status badges, platform downloads and collapsed developer/test instructions. OS installation pages now describe prebuilt DMG/EXE rather than personal build kits. Legacy developer entry points remain compatible.
 - Release staging workflow run 37986792406 SUCCESS. Draft prerelease v0.4.9rc2 targets the exact tested native source commit and includes both unchanged installers, all three SHA256-verified corresponding source archives, hashes and observed build/review evidence. Public release approval remains false.
 - Existing release assets/gate/packaging checks: 20 passed. actionlint, embedded Python parsing and rendered local Markdown link checks passed. Source CI run 37986792488 succeeded on both jobs. No production application behavior changed.
+
+## 2026-10-09 — 0.4.9rc3 license and native release review
+
+- MIT License applied to application source and included in installed apps; About / Licenses dialog added.
+- Exact rc2 macOS OpenCV avcodec returned GPL version 3 or later with x264/x265. rc2 remains an unpublished superseded draft.
+- rc3 uses pinned source-built image-only OpenCV with videoio/FFmpeg/x264/x265 absent. Exact source archive, packaging patch, build flags and SHA256 are retained.
+- Native source commit a0c7043c26eca7cd75079ba39c4757134b1793c2; native run 37991615142: both OS SUCCESS. Source CI 37991615111: 563 passed, 6 skipped. Remote complete source suite: 569 passed.
+- Both actual DMG/EXE installs, empty PATH, analysis, PDF-only/repeated PDF save, PDF+JSON and output-lock cleanup succeeded.
+- Modified installed QtCore was loaded with qVersion 6.12.9; macOS local ad-hoc re-sign/strict verification and Windows unsigned execution succeeded. This is a compatible binary replacement smoke, not a rebuilt-Qt compatibility guarantee.
+- Independent installed-byte/source/notice audit run 37992725057: both PASSED, errors empty. Exact installer/audit manifest hashes are in packaging/release-approval.json.
+- Actual Qt modules: Mac Core/DBus/Gui/Network/Svg/Widgets; Windows Core/Gui/Network/Svg/Widgets. No GPL-only Qt module or OpenCV video codec helper was found. Mac NumPy has no GCC/libquadmath dylibs; Windows OpenBLAS/GCC exception notices are preserved.
+- Source archives, platform-specific OpenCV patches, original notices, runtime addendum and bound audit reports accompany the release. No paid signing or notarization is added.
+- A release metadata tag may differ from the immutable native build commit only in the workflow's explicit review/documentation allowlist. Any application/build input change fails staging. Candidate commit and actual installer SHA256 remain bound to native and source CI records.

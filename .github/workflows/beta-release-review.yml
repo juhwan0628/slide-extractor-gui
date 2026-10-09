@@ -1,8 +1,8 @@
-name: Stage beta release for review (draft only)
+name: Publish reviewed beta (both OS)
 on:
   push:
     branches: [main]
-    paths: [packaging/beta-review.json, .github/workflows/beta-release-review.yml]
+    paths: [packaging/beta-review.json, packaging/release-approval.json, .github/workflows/beta-release-review.yml]
   workflow_dispatch:
 permissions:
   contents: read
@@ -34,7 +34,9 @@ jobs:
           import json,os,re,subprocess
           from pathlib import Path
           c=json.loads(Path('packaging/beta-review.json').read_text())
-          assert c['public_release_approved'] is False, 'This workflow stages unapproved drafts only'
+          approval=json.loads(Path('packaging/release-approval.json').read_text())
+          assert c['public_release_approved'] is True and approval['public_release_approved'] is True and approval['status']=='APPROVED'
+          assert approval['version']==c['version'] and approval['commit']==c['candidate_commit'] and str(approval['run_id'])==str(c['candidate_run_id'])
           assert re.fullmatch(r'0\.[0-9]+\.[0-9]+rc[0-9]+',c['version'])
           assert re.fullmatch(r'[0-9a-f]{40}',c['candidate_commit'])
           for field,path in [('candidate_run_id','.github/workflows/native-build-template.yml'),('source_ci_run_id','.github/workflows/ci.yml')]:
@@ -47,7 +49,7 @@ jobs:
           assert audit['path']=='.github/workflows/candidate-license-audit.yml' and audit['conclusion']=='success' and audit['head_sha']==c['audit_commit']
           source=subprocess.check_output(['git','show',c['candidate_commit']+':slide_core/version.py'],text=True)
           assert f'VERSION = "{c["version"]}"' in source or f"VERSION = '{c['version']}'" in source
-          allowed={'.github/workflows/candidate-license-audit.yml','.github/workflows/beta-release-review.yml','packaging/review_candidate.py','packaging/candidate-review.json','packaging/beta-review.json','packaging/third-party/OpenSSL-LICENSE.txt','packaging/third-party/RUNTIME-NOTICES.md','RELEASE_NOTES.md'}
+          allowed={'.github/workflows/candidate-license-audit.yml','.github/workflows/beta-release-review.yml','packaging/review_candidate.py','packaging/candidate-review.json','packaging/beta-review.json','packaging/third-party/OpenSSL-LICENSE.txt','packaging/third-party/RUNTIME-NOTICES.md','RELEASE_NOTES.md','README.md','INSTALL-MAC.md','INSTALL-WINDOWS.md','RELEASING.md','packaging/QA_STATUS.md','packaging/release-approval.json','packaging/rc2-superseded.md'}
           changed=set(subprocess.check_output(['git','diff','--name-only',c['candidate_commit'],os.environ['GITHUB_SHA']],text=True).splitlines())
           assert changed<=allowed, 'Application/build inputs changed after candidate: '+str(changed-allowed)
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -69,6 +71,7 @@ jobs:
           import hashlib,json,os,shutil,zipfile
           from pathlib import Path
           c=json.loads(Path('packaging/beta-review.json').read_text())
+          approval=json.loads(Path('packaging/release-approval.json').read_text())
           output=Path('review-assets');output.mkdir()
           evidence=Path('review-evidence');evidence.mkdir()
           observed={}
@@ -94,6 +97,9 @@ jobs:
               observed[platform]={'asset':friendly,'sha256':hashlib.sha256(installer.read_bytes()).hexdigest()}
               audit_dir=Path('license-audits')/platform
               audited=json.loads((audit_dir/'audit-report.json').read_text())
+              key={'macOS-ARM64':'macos-arm64','Windows-X64':'windows-x64'}[platform]
+              assert audited==approval['audits'][key]
+              assert observed[platform]['sha256']==approval['assets'][key]['sha256']
               assert audited['status']=='PASSED' and audited['errors']==[]
               assert audited['version']==c['version'] and audited['commit']==c['candidate_commit'] and str(audited['run_id'])==str(c['candidate_run_id'])
               assert audited['installer_sha256']==observed[platform]['sha256']
@@ -128,7 +134,7 @@ jobs:
               shutil.copy2(Path('native-inputs/macOS-ARM64/sources')/filename,output/filename)
           for extra in Path('packaging/third-party').iterdir():
               if extra.is_file():shutil.copy2(extra,output/extra.name)
-          record={**c,'release_commit':os.environ['GITHUB_SHA'],'status':'AUDITED_DRAFT_READY','installers':observed}
+          record={**c,'release_commit':os.environ['GITHUB_SHA'],'status':'APPROVED_RELEASE','installers':observed}
           (output/'BETA_REVIEW.json').write_text(json.dumps(record,indent=2)+'\n')
           with zipfile.ZipFile(output/'build-and-review-evidence.zip','w',zipfile.ZIP_DEFLATED) as z:
               for path in sorted(evidence.rglob('*')):
@@ -137,15 +143,35 @@ jobs:
           notes=Path('RELEASE_NOTES.md').read_text()
           notes+='\n\n## 검증 기록\n\n같은 커밋의 맥·Windows 설치본, 빈 PATH 분석·PDF·잠금 정리 및 Qt 라이브러리 교체 실행 검사가 통과했습니다. 별도 설치본 출고 감사도 PASSED입니다. 원본 소스·패치·라이선스 및 해시는 첨부 자료에 있습니다. 초기 후보의 release-gate.txt는 승인 전 관찰 기록이며 license-audit/audit-report.json이 최종 출고 검사입니다. 이 릴리스는 아직 공개 전 초안입니다.\n'
           Path('draft-notes.md').write_text(notes)
-      - name: Create or update draft only (never publish)
+      - name: Stage exact approved assets privately
         shell: bash
         run: |
           set -euo pipefail
           if gh release view "$RELEASE_TAG" --json isDraft > existing-release.json 2>/dev/null; then
             python -c "import json; assert json.load(open('existing-release.json'))['isDraft'], 'Cannot overwrite a published release'"
-            gh release edit "$RELEASE_TAG" --draft --prerelease --title "Slide Extractor $RELEASE_TAG — beta review" --notes-file draft-notes.md
+            gh release edit "$RELEASE_TAG" --target "$GITHUB_SHA" --draft --prerelease --title "Slide Extractor $RELEASE_TAG — beta review" --notes-file draft-notes.md
             gh release upload "$RELEASE_TAG" review-assets/* --clobber
           else
             gh release create "$RELEASE_TAG" review-assets/* --target "$GITHUB_SHA" --draft --prerelease --title "Slide Extractor $RELEASE_TAG — beta review" --notes-file draft-notes.md
           fi
+      - name: Verify uploaded bytes and publish exact approved beta
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/releases" > uploaded-releases.json
+          python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          releases=json.loads(Path('uploaded-releases.json').read_text())
+          release=next(r for r in releases if r['tag_name']==os.environ['RELEASE_TAG'])
+          assert release['draft'] is True and release['target_commitish']==os.environ['GITHUB_SHA']
+          assets={a['name']:a for a in release['assets']}
+          expected={p.name for p in Path('review-assets').iterdir()}
+          assert set(assets)==expected
+          for p in Path('review-assets').iterdir():
+              assert assets[p.name]['digest']=='sha256:'+hashlib.sha256(p.read_bytes()).hexdigest()
+          print('All uploaded installer, source, patch, notice and audit bytes match approved files')
+          PY
+          gh release edit "$RELEASE_TAG" --draft=false --prerelease --title "Slide Extractor $RELEASE_TAG (beta)" --notes-file RELEASE_NOTES.md
+          gh release edit v0.4.9rc2 --draft --title "Slide Extractor v0.4.9rc2 — superseded, do not publish" --notes-file packaging/rc2-superseded.md
           gh release view "$RELEASE_TAG" --json url,isDraft,tagName,assets
