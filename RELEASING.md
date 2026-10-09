@@ -40,3 +40,5 @@
 설치본 두 개, 정확한 FFmpeg·Qt·Qt for Python 소스, 검증 기록, SHA256SUMS를 **draft prerelease**에 모읍니다. 이 경로는 배포 자료를 검토 가능한 형태로 준비하는 절차이며, 공개·`APPROVED` 전환을 수행하지 않습니다. 이미 공개된 동일 태그의 릴리스는 변경하지 않습니다.
 
 현재 rc2는 앱 라이선스 결정, Qt 수정 라이브러리 실행 및 대응 소스·고지 검토가 남아 있습니다. 공개 전에는 기존 audit_release 및 승인된 동시 배포 절차를 완료해야 합니다.
+
+0.4.9rc2 초안 생성 run [37986792406](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/37986792406): SUCCESS. [관리자용 릴리스 초안](https://github.com/juhwan0628/slide-extractor-gui/releases/tag/untagged-e3368ac5fb04ac6bc2ed)에 DMG, EXE, SHA256SUMS, 대응 소스 3개, 빌드·검토 기록과 관찰 manifest를 첨부했습니다. 초안은 일반 방문자에게 공개되지 않습니다.

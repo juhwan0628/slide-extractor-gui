@@ -1,4 +1,13 @@
 # Slide Extractor GUI — 배포 라이선스 사전 감사
+
+## 최신 상태 — 2026-10-10
+
+0.4.9rc2의 실제 macOS arm64 DMG와 Windows x64 설치 EXE를 생성하고 두 플랫폼의 설치·분석·PDF 및 잠금 정리 검사를 완료했습니다. 검증한 동일 바이너리와 정확한 FFmpeg 8.1.2·Qt/Qt for Python 6.12.0 소스, 검증 기록·해시를 GitHub **draft prerelease**에 첨부했습니다. 초안 생성 workflow run: 37986792406, 성공.
+
+공개 승인은 아직 완료되지 않았습니다. 앱 소스 라이선스 선택, Qt 수정 라이브러리 실행, wheel 대응 소스/수정분 및 최종 native 의존성·고지 매칭 검토가 남아 있습니다. 기존 자료의 관찰 상태를 근거 없이 APPROVED로 바꾸지 않았습니다. 유료 서명·공증은 베타 공개의 필수 조건으로 두지 않습니다.
+
+아래 내용은 당시의 기록입니다. 초기의 ‘설치 파일 없음’ 및 개발 의존성 설명은 날짜에 따른 이력이며 현재 설치본 검증 결과와 구분하세요.
+
 검토일: 2026-10-08. 목적: 비상업적 GitHub Releases (Windows x64 onedir+Inno Setup; macOS arm64 .app/.dmg). 범위는 현재 소스·requirements 및 Oracle 개발환경에 설치된 바이너리. **아직 Windows/macOS 실제 릴리스 아티팩트가 없으므로 최종 바이너리 구성품 감사는 미완료. 이 문서는 법률 자문이 아니다.**
 
 ## 결론 및 출고 게이트

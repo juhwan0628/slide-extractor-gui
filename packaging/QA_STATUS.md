@@ -59,3 +59,10 @@
 - Frozen and installed smoke now exercise PDF+JSON and PDF-only save/overwrite, and assert `pdf_only_checked` and `output_lock_cleanup_checked`. Historical unrelated output locks are not deleted in bulk.
 
 - Installer-only artifacts: macOS ARM64 11639648425; Windows X64 11640181724. Both native jobs and run 37977571499 concluded SUCCESS. No public GitHub Release was published.
+
+
+## 2026-10-10 Repository presentation and release staging
+
+- User-facing README includes a real GUI capture of self-authored synthetic slides, CI/status badges, platform downloads and collapsed developer/test instructions. OS installation pages now describe prebuilt DMG/EXE rather than personal build kits. Legacy developer entry points remain compatible.
+- Release staging workflow run 37986792406 SUCCESS. Draft prerelease v0.4.9rc2 targets the exact tested native source commit and includes both unchanged installers, all three SHA256-verified corresponding source archives, hashes and observed build/review evidence. Public release approval remains false.
+- Existing release assets/gate/packaging checks: 20 passed. actionlint, embedded Python parsing and rendered local Markdown link checks passed. Source CI run 37986792488 succeeded on both jobs. No production application behavior changed.
