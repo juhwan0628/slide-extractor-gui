@@ -1,14 +1,15 @@
-# Windows 개인용 자동 빌드 — 0.4.9rc1
+# Windows 설치
 
-Python 3.12 64비트와 Python launcher를 준비한 뒤 BUILD-WINDOWS.bat를 더블클릭합니다.
-FFmpeg/FFprobe 다운로드, 해시 확인, 폴더 생성, 패키지 설치, exe 생성, 번들 검증을 자동 처리합니다. 수동 파일 복사나 vendor 폴더 생성은 필요하지 않습니다.
-첫 실행에는 인터넷이 필요합니다. 다운로드를 마친 도구는 다음 빌드에서 해시 확인 후 재사용합니다.
+지원 대상: Windows x64. Windows ARM은 현재 검증 대상이 아닙니다.
 
-간편 키트에서는 결과가 바깥 output 폴더에 생성됩니다.
-그 안의 SlideExtractor-v0.4.9rc1-Windows-x64-personal.zip을 새 폴더에 풀고 VALIDATE-WINDOWS.bat를 실행한 뒤 SlideExtractor.exe를 실행하세요.
-exe 옆 _internal 폴더도 함께 유지합니다. 완성 앱 실행에는 별도 Python/FFmpeg가 필요하지 않습니다.
+1. [베타 설치 파일](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/37977571499/artifacts/11640181724)을 다운로드합니다. Actions 다운로드에는 GitHub 로그인이 필요합니다.
+2. ZIP을 풀고 `SlideExtractor-v0.4.9rc2-Setup-Windows-x64.exe`를 실행합니다.
+3. 설치가 끝나면 시작 메뉴의 Slide Extractor를 엽니다. 기본 설치는 사용자 계정 폴더이며 관리자 권한을 요구하지 않습니다.
 
-대표·긴 강의로 분석→편집→PDF 단독/JSON 동시 저장, 취소, 재실행·캐시 재사용을 확인하세요.
-문제가 생기면 _app/build/personal-windows/build.log와 installed-smoke.json, 또는 완성 앱 폴더의 validation-smoke.json을 보내주세요.
+Python·Qt·FFmpeg·FFprobe를 포함합니다. 빌드 배치 파일 실행이나 vendor 폴더 준비는 필요하지 않습니다.
 
-이 키트는 개인 검증용이며 실제 Windows 네이티브 빌드 성공은 사용자 기기에서 확인해야 합니다.
+현재 베타는 코드 서명을 받지 않았습니다. SmartScreen 경고나 Smart App Control 차단이 발생할 수 있습니다. 두 기능은 다르며 관리자 실행으로 Smart App Control을 우회할 수 있다고 안내하지 않습니다. 시스템 전체 보안 기능을 끄는 설치 절차는 제공하지 않습니다.
+
+처음에는 짧은 영상으로 분석 → 페이지 확인 → Save PDF를 실행해 보세요. [직접 빌드하는 개발자용 안내](packaging/BUILD_PERSONAL.md)는 별도입니다.
+
+[Microsoft 공식 Smart App Control 안내](https://support.microsoft.com/en-gb/windows/security/threat-malware-protection/smart-app-control-frequently-asked-questions)

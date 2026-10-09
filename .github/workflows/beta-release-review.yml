@@ -1,0 +1,124 @@
+name: Stage beta release for review (draft only)
+on:
+  push:
+    branches: [main]
+    paths: [packaging/beta-review.json, .github/workflows/beta-release-review.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: beta-review-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  stage:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify successful candidate and source tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,os,re,subprocess
+          from pathlib import Path
+          c=json.loads(Path('packaging/beta-review.json').read_text())
+          assert c['public_release_approved'] is False, 'This workflow stages unapproved drafts only'
+          assert re.fullmatch(r'0\.[0-9]+\.[0-9]+rc[0-9]+',c['version'])
+          assert re.fullmatch(r'[0-9a-f]{40}',c['candidate_commit'])
+          for field,path in [('candidate_run_id','.github/workflows/native-build-template.yml'),('source_ci_run_id','.github/workflows/ci.yml')]:
+              assert str(c[field]).isdigit()
+              r=json.loads(subprocess.check_output(['gh','api',f"repos/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{c[field]}"],text=True))
+              assert r['repository']['full_name']==os.environ['GITHUB_REPOSITORY']
+              assert r['path']==path and r['conclusion']=='success' and r['event']=='push'
+              assert r['head_sha']==c['candidate_commit']
+          source=subprocess.check_output(['git','show',c['candidate_commit']+':slide_core/version.py'],text=True)
+          assert f'VERSION = "{c["version"]}"' in source or f"VERSION = '{c['version']}'" in source
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write(f"CANDIDATE_RUN_ID={c['candidate_run_id']}\nRELEASE_TAG=v{c['version']}\nCANDIDATE_SHA={c['candidate_commit']}\n")
+          PY
+      - name: Download exact native candidates and corresponding sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          for platform in macOS-ARM64 Windows-X64; do
+            gh run download "$CANDIDATE_RUN_ID" --name "native-candidate-$platform" --dir "candidates/$platform"
+            gh run download "$CANDIDATE_RUN_ID" --name "native-inputs-$platform" --dir "native-inputs/$platform"
+          done
+      - name: Verify installers, reports and sources before staging
+        shell: python
+        run: |
+          import hashlib,json,os,shutil,zipfile
+          from pathlib import Path
+          c=json.loads(Path('packaging/beta-review.json').read_text())
+          output=Path('review-assets');output.mkdir()
+          evidence=Path('review-evidence');evidence.mkdir()
+          observed={}
+          installers={'macOS-ARM64':f"SlideExtractor-v{c['version']}-macOS-arm64-approved.dmg",
+                      'Windows-X64':f"SlideExtractor-v{c['version']}-Setup-Windows-x64.exe"}
+          for platform,filename in installers.items():
+              root=Path('candidates')/platform
+              for name in ('installed-smoke.json','installer-smoke.json'):
+                  report=json.loads((root/'build'/name).read_text())
+                  assert report['status']=='success' and report['frozen'] and report['bundled_tools_checked']
+                  assert report['version']==c['version'] and report['pdf_only_checked'] and report['output_lock_cleanup_checked']
+              manifest=json.loads((root/'build/build-manifest.json').read_text())
+              assert manifest['version']==c['version']
+              assert manifest['provenance']['GITHUB_SHA']==c['candidate_commit']
+              assert str(manifest['provenance']['GITHUB_RUN_ID'])==c['candidate_run_id']
+              inventory=json.loads((root/'build/candidate-inventory.json').read_text())
+              assert inventory['candidate_version']==c['version']
+              assert inventory['build_manifest_sha256']==hashlib.sha256((root/'build/build-manifest.json').read_bytes()).hexdigest()
+              installer=root/'dist'/filename
+              assert installer.is_file() and not installer.is_symlink()
+              friendly=filename.replace('-approved.dmg','.dmg')
+              shutil.copy2(installer,output/friendly)
+              observed[platform]={'asset':friendly,'sha256':hashlib.sha256(installer.read_bytes()).hexdigest()}
+              shutil.copytree(root/'build',evidence/platform)
+              inputs=Path('native-inputs')/platform
+              for item in inputs.iterdir():
+                  if item.name in ('sources','ffmpeg','ffprobe','ffmpeg.exe','ffprobe.exe'):continue
+                  target=evidence/platform/'inputs'/item.name
+                  target.parent.mkdir(exist_ok=True)
+                  if item.is_dir():shutil.copytree(item,target)
+                  elif item.is_file():shutil.copy2(item,target)
+          sources=json.loads(Path('packaging/native-sources.lock.json').read_text())
+          assert sources==json.loads(__import__('subprocess').check_output(['git','show',c['candidate_commit']+':packaging/native-sources.lock.json'],text=True))
+          for component,item in sources.items():
+              filename=item['url'].rsplit('/',1)[-1]
+              for platform in installers:
+                  archive=Path('native-inputs')/platform/'sources'/filename
+                  assert archive.is_file() and hashlib.sha256(archive.read_bytes()).hexdigest()==item['sha256']
+              shutil.copy2(Path('native-inputs/macOS-ARM64/sources')/filename,output/filename)
+          record={**c,'status':'DRAFT_REVIEW_REQUIRED','installers':observed}
+          (output/'BETA_REVIEW.json').write_text(json.dumps(record,indent=2)+'\n')
+          with zipfile.ZipFile(output/'build-and-review-evidence.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for path in sorted(evidence.rglob('*')):
+                  if path.is_file():z.write(path,path.relative_to(evidence))
+          (output/'SHA256SUMS.txt').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.name}\n' for p in sorted(output.iterdir())))
+          notes=Path('RELEASE_NOTES.md').read_text()
+          notes+='\n\n## 공개 전 검토 중 — 아직 배포 승인되지 않은 초안\n\n맥·Windows 설치와 PDF/잠금 검사는 통과했습니다. 앱 소스 라이선스 결정, Qt 수정 라이브러리 실행 및 대응 소스·고지 검토가 남아 있습니다. 첨부한 build-and-review-evidence.zip의 release-gate.txt를 확인해야 합니다. 이 초안 생성은 공개 배포 검사의 통과를 의미하지 않습니다.\n'
+          Path('draft-notes.md').write_text(notes)
+      - name: Create or update draft only (never publish)
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view "$RELEASE_TAG" --json isDraft > existing-release.json 2>/dev/null; then
+            python -c "import json; assert json.load(open('existing-release.json'))['isDraft'], 'Cannot overwrite a published release'"
+            gh release edit "$RELEASE_TAG" --draft --prerelease --title "Slide Extractor $RELEASE_TAG — beta review" --notes-file draft-notes.md
+            gh release upload "$RELEASE_TAG" review-assets/* --clobber
+          else
+            gh release create "$RELEASE_TAG" review-assets/* --target "$CANDIDATE_SHA" --draft --prerelease --title "Slide Extractor $RELEASE_TAG — beta review" --notes-file draft-notes.md
+          fi
+          gh release view "$RELEASE_TAG" --json url,isDraft,tagName,assets

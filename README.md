@@ -1,27 +1,67 @@
-# Slide Extractor GUI
+<div align="center">
 
-로컬 강의 영상의 슬라이드 전환을 분석하고, 타임라인에서 페이지를 편집한 뒤 PDF로 저장하는 데스크톱 앱입니다.
+# Slide Extractor
 
-기존 CLI [slide-extractor](https://github.com/juhwan0628/slide-extractor)와 별도 프로젝트입니다.
-맥과 Windows는 **같은 소스·같은 버전**을 사용합니다.
+**강의 영상에서 슬라이드를 찾고, 필요한 페이지만 PDF로.**
 
-## 설치와 배포 상태
+[![Common source tests](https://github.com/juhwan0628/slide-extractor-gui/actions/workflows/ci.yml/badge.svg)](https://github.com/juhwan0628/slide-extractor-gui/actions/workflows/ci.yml)
+![Beta](https://img.shields.io/badge/beta-0.4.9rc2-6556d9)
+![macOS](https://img.shields.io/badge/macOS-Apple%20Silicon-20242a)
+![Windows](https://img.shields.io/badge/Windows-x64-20242a)
 
-목표 배포 파일은 Apple Silicon Mac용 `.dmg`, Windows x64용 설치 `.exe`입니다. 필요한 Python·Qt·FFmpeg·FFprobe를 포함합니다.
-현재 `0.4.9rc2`의 맥·Windows 설치 후보는 **GitHub Actions에서 생성과 설치본 분석·PDF 검사를 통과했습니다.** 공개 릴리스 검토는 진행 중입니다.
-[성공한 빌드와 테스트 설치 파일](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/37977571499)의 `native-installer-*` 아티팩트를 이용하세요. ZIP 안에는 해당 OS의 설치 파일 하나만 들어 있습니다.
-GitHub Actions와 동시 릴리스 준비 절차는 [RELEASING.md](RELEASING.md)를 참고하세요.
-베타는 유료 서명·공증 없이 준비하므로 OS에 따라 경고나 실행 차단이 발생할 수 있습니다.
+[베타 다운로드](#다운로드) · [사용법](#사용법) · [릴리스](https://github.com/juhwan0628/slide-extractor-gui/releases) · [문제 제보](https://github.com/juhwan0628/slide-extractor-gui/issues)
 
-## 사용 흐름
+</div>
 
-1. 영상을 불러와 분석합니다. CPU 멀티스레드·프레임 메타데이터를 기본으로 사용합니다.
-2. 타임라인에서 페이지 추가·제거·복원·분할·병합과 대표 프레임 변경을 수행합니다.
-3. PDF 또는 PDF와 프로젝트 JSON을 저장합니다. 기존 파일 덮어쓰기는 승인 후 수행합니다.
+![Slide Extractor의 실제 페이지 편집 화면](docs/images/app-review.png)
 
-## 개발 실행
+<sub>직접 제작한 데모 영상을 실제 앱으로 분석한 화면입니다. Linux에서 캡처했으며, OS에 따라 창과 버튼 모양이 다를 수 있습니다.</sub>
 
-Python 3.12와 FFmpeg/FFprobe가 필요합니다. 최종 설치본 사용자는 이 절차를 수행하지 않습니다.
+## 영상에서 PDF까지
+
+**영상 열기 → 슬라이드 분석 → 페이지 편집 → PDF 저장**
+
+- **로컬 처리:** 영상 분석과 PDF 생성은 내 기기에서 수행합니다. 클라우드 업로드나 계정 로그인 없이 사용합니다.
+- **확인하고 편집:** 타임라인과 썸네일로 이동하면서 누락된 페이지를 추가하고, 중복 페이지를 제거하거나 대표 프레임을 바꿉니다.
+- **CPU 최적화:** 멀티스레드와 프레임 메타데이터를 기본으로 활용합니다. 별도 GPU가 필요하지 않습니다.
+- **같은 앱, 두 OS:** 공통 Python·Qt 소스로 Apple Silicon Mac과 Windows x64 설치 파일을 만듭니다.
+- **출력 선택:** 기본은 PDF 단독 저장이며, 고급 설정에서 타임스탬프 JSON을 함께 저장할 수 있습니다.
+
+## 다운로드
+
+현재 버전은 **0.4.9rc2 베타**입니다. 두 OS의 설치·분석·PDF 저장 검사를 GitHub Actions에서 통과했습니다. 공개 릴리스 자료 검토는 진행 중이며, 아래는 검증된 테스트 설치본입니다.
+
+| 기기 | 설치 파일 | 설치 안내 |
+|---|---|---|
+| Apple Silicon Mac | [DMG 다운로드](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/37977571499/artifacts/11639648425) | [Mac 설치](INSTALL-MAC.md) |
+| Windows x64 | [설치 EXE 다운로드](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/37977571499/artifacts/11640181724) | [Windows 설치](INSTALL-WINDOWS.md) |
+
+Actions 다운로드에는 GitHub 로그인이 필요합니다. ZIP을 풀면 해당 OS의 설치 파일 하나가 들어 있습니다. **Python·Qt·FFmpeg·FFprobe는 포함돼 있습니다.** Intel Mac과 Windows ARM은 이번 베타 검증 대상이 아닙니다.
+
+베타는 유료 코드 서명·Apple 공증을 적용하지 않았으므로 OS 경고나 실행 차단이 발생할 수 있습니다. 자세한 내용은 각 OS 설치 안내를 참고하세요.
+
+## 사용법
+
+1. **Open video**로 로컬 영상 파일을 엽니다.
+2. 슬라이드 영역을 확인하고 **Analyze**를 누릅니다. 필요하면 **Slide ROI**로 영역을 조정합니다.
+3. 타임라인과 페이지 목록을 확인합니다. 빠진 페이지는 **Add current frame**, 흐린 페이지는 **Replace selected page**로 수정합니다.
+4. **Save PDF**를 눌러 저장합니다. 기존 파일을 덮어쓸 때는 확인을 요청합니다.
+
+빠른 슬라이드 전환이나 특이한 화면 구성은 자동 분석에서 누락될 수 있으니 저장 전에 페이지를 확인하세요.
+
+## 이번 베타의 변경
+
+- 분석·PDF 생성 성능 개선과 Windows 콘솔 깜빡임·저장 오류 수정.
+- PDF 단독 저장 후 남던 `.lock` 수정: 정상 저장, 덮어쓰기, 게시 실패, 취소 시 잠금을 정리합니다.
+- 실제 설치된 Mac·Windows 앱에서 PDF와 PDF+JSON 저장 및 출력 잠금 정리 검사.
+
+[릴리스 노트](RELEASE_NOTES.md) · [검증 기록](packaging/QA_STATUS.md)
+
+## 개발과 기여
+
+기존 CLI [slide-extractor](https://github.com/juhwan0628/slide-extractor)와 별도 프로젝트입니다. 사용자는 설치 파일을 사용하고, 개발자는 아래 절차로 실행합니다.
+
+Python 3.12와 FFmpeg/FFprobe가 필요합니다.
 
 ```bash
 python3 -m venv .venv
@@ -29,28 +69,35 @@ python3 -m venv .venv
 .venv/bin/python app.py
 ```
 
-Windows 개발 환경에서는 `.venv\Scripts\python.exe`를 사용합니다.
+Windows에서는 `.venv\Scripts\python.exe`를 사용합니다.
 
-## 테스트
+<details>
+<summary>테스트 실행과 저장소 구조</summary>
 
 ```bash
 python -m pip install -r requirements-dev.txt
-QT_QPA_PLATFORM=offscreen PYTHONPATH=. python -m pytest -q
+python -m pytest -q
 ```
 
-테스트 영상은 합성 데이터로 생성합니다. 강의 원본이나 추출된 교안은 저장소에 포함하지 않습니다.
-성능 개선의 상세 기록과 실제 플랫폼별 검증 상태는 [packaging/QA_STATUS.md](packaging/QA_STATUS.md)를 참고하세요.
+화면 없는 Linux 환경은 `QT_QPA_PLATFORM=offscreen PYTHONPATH=. python -m pytest -q`를 사용합니다.
 
-## 구조
+| 경로 | 역할 |
+|---|---|
+| `gui/` | 공통 Qt 화면과 작업 관리 |
+| `slide_core/` | 분석·편집·캐시·PDF 저장 |
+| `tests/` | 기능·실패·취소·동시성 회귀 검사 |
+| `packaging/` | 버전 고정, 앱 패키징과 배포 자료 검증 |
+| `.github/workflows/` | 공통 테스트와 맥·Windows 빌드 |
+| `docs/images/` | README용 실제 앱 화면 |
 
-- `gui/`: 공통 Qt GUI.
-- `slide_core/`: 분석·편집·캐시·PDF 저장.
-- `packaging/`: 고정 빌드 입력, DMG/EXE, 라이선스 자료 및 릴리스 검사.
-- `.github/workflows/`: 공통 테스트, 네이티브 후보 빌드, 검토된 동시 draft 릴리스.
-- `tests/`: 회귀·통합·동시성 검증.
+테스트 영상은 합성 데이터로 생성합니다. 강의 원본·추출 교안·사용자 출력·빌드 결과는 저장소에 포함하지 않습니다. `tests/`는 개발 소스로 유지하며 사용자 설치 파일에 복사하지 않습니다.
+
+</details>
+
+[동시 배포 절차](RELEASING.md) · [개인용 개발 빌드](packaging/BUILD_PERSONAL.md)
 
 ## 이용과 라이선스
 
-사용자가 처리 권한을 가진 로컬 영상을 입력해 사용합니다. 강의 영상·교안 또는 LMS 접근 제어 우회 기능을 배포하지 않습니다.
-앱 자체의 오픈소스 라이선스는 아직 선택되지 않았습니다. 공개 시 별도 `LICENSE`를 확정해야 합니다.
-제3자 의존성 고지는 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), 배포 입력 검토는 [LICENSE_AUDIT.md](LICENSE_AUDIT.md)를 참고하세요.
+처리 권한이 있는 로컬 영상을 입력해 사용하세요. 강의 영상이나 교안은 이 저장소에서 배포하지 않습니다.
+
+앱 소스 라이선스는 아직 선택되지 않았습니다. 제3자 의존성의 라이선스는 별도로 적용됩니다. [고지](THIRD_PARTY_NOTICES.md) · [배포 자료 검토](LICENSE_AUDIT.md)

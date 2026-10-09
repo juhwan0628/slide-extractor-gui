@@ -31,3 +31,12 @@
 - 콘솔 깜빡임, 저장 완료 후 출력 폴더 `.lock`·임시 파일 정리.
 - 강의 원본·사용자 출력·캐시·인증 정보가 패키지에 없음.
 - 유료 서명·공증은 베타의 필수 조건이 아닙니다. 상태는 unsigned/ad-hoc, not notarized로 안내합니다. 관리자 실행은 Smart App Control의 차단을 해결하지 않습니다.
+
+
+## 공개 전 릴리스 초안 정리
+
+`Stage beta release for review (draft only)`는 `packaging/beta-review.json`에 연결된 성공한 소스 CI와 네이티브 빌드만 사용합니다. 두 설치본의 frozen/installed PDF 단독·동시 저장과 잠금 검사, 빌드 커밋·run ID·manifest 해시 및 양 플랫폼 대응 소스 해시를 확인합니다. DMG 파일명의 `approved`는 공개 승인으로 오인하지 않도록 릴리스 자산명에서 제거하며 바이너리는 변경하지 않습니다.
+
+설치본 두 개, 정확한 FFmpeg·Qt·Qt for Python 소스, 검증 기록, SHA256SUMS를 **draft prerelease**에 모읍니다. 이 경로는 배포 자료를 검토 가능한 형태로 준비하는 절차이며, 공개·`APPROVED` 전환을 수행하지 않습니다. 이미 공개된 동일 태그의 릴리스는 변경하지 않습니다.
+
+현재 rc2는 앱 라이선스 결정, Qt 수정 라이브러리 실행 및 대응 소스·고지 검토가 남아 있습니다. 공개 전에는 기존 audit_release 및 승인된 동시 배포 절차를 완료해야 합니다.

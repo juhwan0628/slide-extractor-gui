@@ -1,13 +1,14 @@
-# Apple Silicon 개인용 설치 후보 0.4.9rc1
+# Mac 설치
 
-1. ZIP을 새 폴더에 풀어 기존 프로젝트·가상환경과 분리합니다.
-2. 네이티브 arm64 Python 3.12와 FFmpeg를 준비합니다. 기존 0.4.8 빌드에 사용한 환경을 그대로 사용할 수 있습니다.
-3. Finder에서 `scripts/build-macos-personal.command`를 실행합니다. 실행 권한이 없으면 터미널에서 `bash scripts/build-macos-personal.command`를 실행하세요.
-4. 번들 Qt·FFmpeg·분석·PDF smoke 검사가 통과하면 `dist/SlideExtractor-v0.4.9rc1-macOS-arm64-personal.dmg`가 만들어집니다.
-5. 앱을 Applications로 옮기고 **Applications의 앱**을 실행합니다.
+지원 대상: Apple Silicon Mac (arm64). Intel Mac은 현재 지원하지 않습니다.
 
-빌드 기록은 `build/personal/build.log`, `build-manifest.json`, `installed-smoke.json`에 남습니다. 해시는 DMG 옆 `.sha256` 파일에 기록됩니다. 빌더는 별도 `.venv-native-049rc1` 환경을 만듭니다.
+1. [베타 설치 파일](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/37977571499/artifacts/11639648425)을 다운로드합니다. Actions 다운로드에는 GitHub 로그인이 필요합니다.
+2. ZIP을 풀고 DMG를 엽니다.
+3. `SlideExtractor.app`을 Applications 폴더로 복사합니다.
+4. Applications에서 앱을 실행합니다. Python·Qt·FFmpeg는 앱에 포함돼 있습니다.
 
-설치 후 대표 강의로 분석→편집→PDF 단독/JSON 동시 저장을 확인하세요. 다시 열어 캐시 재사용, 분석·저장 중 취소, 기존 파일 덮어쓰기도 확인하세요. [설치 검증 체크리스트](packaging/QA_STATUS.md)에 기록할 항목이 있습니다.
+현재 베타는 ad-hoc 서명이며 Apple 공증을 받지 않았습니다. “Apple could not verify…” 경고가 표시될 수 있습니다. 출처를 확인한 앱에 한해 실행을 시도한 후 시스템 설정 → 개인정보 보호 및 보안 → 해당 앱의 ‘확인 없이 열기’를 이용할 수 있습니다. 조직이 관리하는 Mac은 별도 정책이 적용될 수 있습니다.
 
-이 개인용 앱은 로컬 FFmpeg를 사용하며 Apple Developer 서명/notarization 완료 제품이 아닙니다. 공개 배포는 별도의 승인된 입력과 검증이 필요합니다.
+처음에는 짧은 영상으로 분석 → 페이지 확인 → Save PDF를 실행해 보세요. [직접 빌드하는 개발자용 안내](packaging/BUILD_PERSONAL.md)는 별도입니다.
+
+[Apple 공식 앱 실행 안내](https://support.apple.com/102445)
