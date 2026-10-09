@@ -1,0 +1,6 @@
+numpy>=2.0
+opencv-python-headless>=4.10
+Pillow>=10.0
+reportlab>=4.2
+pypdf>=5
+PySide6-Essentials>=6.7,<7

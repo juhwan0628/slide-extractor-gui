@@ -1,0 +1,353 @@
+"""Small stdlib advisory file lease shared by cache and export code."""
+import contextlib
+import os
+import stat
+from pathlib import Path
+
+
+class LeaseBusy(RuntimeError):
+    """Another process currently owns this lease or the lock path is unsafe."""
+
+
+@contextlib.contextmanager
+def acquire_file_lease(path):
+    """Hold a non-blocking OS lock, never following a leaf symlink or hardlink."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    created = False
+    flags = os.O_RDWR | getattr(os, "O_BINARY", 0) | getattr(os, "O_NOFOLLOW", 0)
+    try:
+        try:
+            fd = os.open(path, flags | os.O_CREAT | os.O_EXCL, 0o600)
+            created = True
+        except FileExistsError:
+            if path.is_symlink():
+                raise LeaseBusy(f"Unsafe symlink lock: {path}")
+            fd = os.open(path, flags)
+        try:
+            current = os.fstat(fd)
+            observed = path.lstat()
+            if (not stat.S_ISREG(current.st_mode) or current.st_nlink != 1 or
+                    (current.st_dev, current.st_ino) !=
+                    (observed.st_dev, observed.st_ino)):
+                raise LeaseBusy(f"Unsafe lock inode: {path}")
+        except BaseException:
+            os.close(fd)
+            raise
+    except OSError as exc:
+        raise LeaseBusy(f"Unable to acquire lock: {path}") from exc
+    handle = os.fdopen(fd, "r+b", buffering=0)
+    locked = False
+    try:
+        if os.name == "nt":
+            import msvcrt
+            handle.seek(0)
+            if created:
+                handle.write(b"0")
+                handle.flush()
+                os.fsync(handle.fileno())
+            elif current.st_size == 0:
+                raise LeaseBusy(f"Unrecognized empty Windows lock file: {path}")
+            handle.seek(0)
+            try:
+                msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+            except OSError as exc:
+                raise LeaseBusy(str(path)) from exc
+        else:
+            import fcntl
+            try:
+                fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except OSError as exc:
+                raise LeaseBusy(str(path)) from exc
+        locked = True
+        yield handle
+    finally:
+        if locked:
+            try:
+                if os.name == "nt":
+                    import msvcrt
+                    handle.seek(0)
+                    msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
+                else:
+                    import fcntl
+                    fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+            except OSError:
+                pass
+        handle.close()
+
+# M2 T010: Qt-free session ownership, atomic JPEG publishing and safe cleanup.
+import json
+import shutil
+import time
+import uuid
+
+SESSION_BUDGET = 4 * 1024 ** 3
+ROOT_BUDGET = 8 * 1024 ** 3
+FREE_RESERVE = 1024 ** 3
+COMPLETE_TTL = 24 * 3600
+INCOMPLETE_TTL = 3600
+
+
+class CacheBudgetExceeded(RuntimeError):
+    pass
+
+
+class UnsafeCache(RuntimeError):
+    pass
+
+
+def _session_manifest(path):
+    path = Path(path)
+    if path.is_symlink() or not path.is_file():
+        raise UnsafeCache('Unsafe manifest')
+    try:
+        value = json.loads(path.read_text(encoding='utf-8'))
+    except (ValueError, OSError) as exc:
+        raise UnsafeCache('Unparseable manifest') from exc
+    if (not isinstance(value, dict) or set(value) !=
+            {'owner_uuid', 'complete', 'updated_at', 'bytes'} or
+            type(value['owner_uuid']) is not str or
+            str(uuid.UUID(value['owner_uuid'])) != value['owner_uuid'] or
+            type(value['complete']) is not bool or
+            type(value['updated_at']) not in (int, float) or
+            type(value['bytes']) is not int or value['bytes'] < 0):
+        raise UnsafeCache('Invalid cache ownership metadata')
+    return value
+
+
+def _safe_owned_dir(root, directory, expected_id=None):
+    root = Path(root).resolve()
+    directory = Path(directory)
+    if directory.parent != root or directory.is_symlink() or not directory.is_dir():
+        raise UnsafeCache('Cache directory escaped root')
+    manifest = _session_manifest(directory / 'manifest.json')
+    if directory.name != 'session-' + manifest['owner_uuid'] or (expected_id is not None and
+            manifest['owner_uuid'] != expected_id):
+        raise UnsafeCache('Session directory/owner mismatch')
+    for item in directory.iterdir():
+        if item.is_symlink() or (item.name != 'manifest.json' and
+                                item.name != 'lease.lock' and
+                                not (item.is_file() and item.name.endswith('.jpg'))):
+            raise UnsafeCache('Unexpected content in session')
+    return manifest
+
+
+def prune_cache(root, *, now=None):
+    """Remove verified, unlocked expired sessions; never remove an active lease."""
+    root = Path(root).resolve()
+    if not root.exists():
+        return ()
+    clock = time.time() if now is None else now
+    candidates = []
+    for directory in root.iterdir():
+        if directory.is_symlink() or not directory.name.startswith('session-') or not directory.is_dir():
+            continue
+        try:
+            manifest = _safe_owned_dir(root, directory)
+        except (UnsafeCache, ValueError):
+            continue  # Unowned/ambiguous directories must not be removed.
+        ttl = COMPLETE_TTL if manifest['complete'] else INCOMPLETE_TTL
+        if clock - manifest['updated_at'] >= ttl:
+            candidates.append((manifest['updated_at'], directory))
+    removed = []
+    for _, directory in sorted(candidates):
+        try:
+            with acquire_file_lease(directory / 'lease.lock'):
+                _safe_owned_dir(root, directory)
+                shutil.rmtree(directory)
+                removed.append(directory)
+        except (LeaseBusy, UnsafeCache, OSError):
+            continue
+    return tuple(removed)
+
+
+# Quotas are reserved in chunks by cooperating writers. The ledger is only
+# runtime accounting for reproducible cache files, not a durable output journal.
+RESERVATION_CHUNK = 8 * 1024 ** 2
+
+@contextlib.contextmanager
+def _budget_lock(root):
+    deadline = time.monotonic() + 5
+    while True:
+        lease = acquire_file_lease(root / '.cache-budget.lock')
+        try:
+            lease.__enter__()
+            break
+        except LeaseBusy:
+            if time.monotonic() >= deadline:
+                raise
+            time.sleep(.01)
+    try:
+        yield
+    finally:
+        lease.__exit__(None, None, None)
+
+
+def _read_reservations(root):
+    path = root / '.cache-reservations.json'
+    if not path.exists():
+        return {}
+    if path.is_symlink() or not path.is_file():
+        raise UnsafeCache('Unsafe cache reservation ledger')
+    try:
+        records = json.loads(path.read_text())
+        if not isinstance(records, dict):raise ValueError()
+        for owner, ceiling in records.items():
+            if str(uuid.UUID(owner)) != owner or type(ceiling) is not int or ceiling < 0:
+                raise ValueError()
+    except (ValueError, OSError) as exc:
+        raise UnsafeCache('Invalid cache reservation ledger') from exc
+    return records
+
+
+def _write_reservations(root, records):
+    # Unique O_EXCL temporary file; a crashed previous writer cannot block us.
+    temp = root / ('.cache-reservations-' + str(uuid.uuid4()) + '.tmp')
+    try:
+        with temp.open('x') as f:json.dump(records, f)
+        os.replace(temp, root / '.cache-reservations.json')
+    finally:
+        temp.unlink(missing_ok=True)
+
+
+def _reclaim_reservations(root, records, current):
+    for owner in list(records):
+        if owner == current:continue
+        directory = root / ('session-' + owner)
+        if not directory.exists():
+            records.pop(owner)
+            continue
+        if directory.is_symlink():raise UnsafeCache('Unsafe reservation owner')
+        try:
+            with acquire_file_lease(directory / 'lease.lock'):
+                records.pop(owner)  # Closed/crashed writer; bytes remain counted.
+        except LeaseBusy:
+            pass
+
+
+def _root_usage(root):
+    total = 0
+    jpeg_bytes = {}
+    for directory in root.iterdir():
+        if not directory.is_dir() or directory.is_symlink():continue
+        own = 0
+        for file in directory.iterdir():
+            if file.is_file() and not file.is_symlink():
+                size = file.stat().st_size
+                total += size
+                if file.name.endswith('.jpg'):own += size
+        jpeg_bytes[directory.name] = own
+    return total, jpeg_bytes
+
+
+class CacheSession:
+    """One owner retains a lock for the lifetime of a generation."""
+    def __init__(self, root, *, min_free_bytes=FREE_RESERVE,
+                 session_limit=SESSION_BUDGET, root_limit=ROOT_BUDGET):
+        self.root = Path(root).resolve()
+        self.root.mkdir(parents=True, exist_ok=True)
+        self.owner_uuid = str(uuid.uuid4())
+        self.directory = self.root / ('session-' + self.owner_uuid)
+        self.directory.mkdir(mode=0o700)
+        self._lease = acquire_file_lease(self.directory / 'lease.lock')
+        self._lease.__enter__()
+        self.closed = False
+        self.min_free_bytes = min_free_bytes
+        self.session_limit = session_limit
+        self.root_limit = root_limit
+        self._bytes = 0
+        self._reservation = 0
+        self._manifest_count = 0
+        self._manifest_time = time.monotonic()
+        try:
+            self._write_manifest(False)
+        except BaseException:
+            self._lease.__exit__(None, None, None)
+            self.closed = True
+            raise
+
+    def _write_manifest(self, complete):
+        state = {'owner_uuid': self.owner_uuid, 'complete': complete,
+                 'updated_at': time.time(), 'bytes': self._bytes}
+        temp = self.directory / 'manifest.tmp'
+        with temp.open('x', encoding='utf-8') as f:
+            json.dump(state, f, sort_keys=True)
+            f.flush()
+        os.replace(temp, self.directory / 'manifest.json')
+        self._manifest_count = 0
+        self._manifest_time = time.monotonic()
+
+    def write_jpeg(self, index, content):
+        if self.closed or type(index) is not int or index < 0 or not isinstance(content, bytes):
+            raise ValueError('Invalid cache session write')
+        if not content.startswith(b'\xff\xd8') or not content.endswith(b'\xff\xd9'):
+            raise ValueError('Expected complete JPEG data')
+        name = f'{index:08d}.jpg'
+        path = self.directory / name
+        if path.exists() or path.is_symlink():
+            raise UnsafeCache('Sample already exists')
+        if (self._bytes + len(content) > self.session_limit or
+                shutil.disk_usage(self.root).free - len(content) < self.min_free_bytes):
+            raise CacheBudgetExceeded('Insufficient cache budget or free disk reserve')
+        self._reserve(len(content))
+        temp = self.directory / f'{index:08d}.tmp'
+        fd = os.open(temp, os.O_WRONLY | os.O_CREAT | os.O_EXCL |
+                     getattr(os, 'O_NOFOLLOW', 0), 0o600)
+        try:
+            with os.fdopen(fd, 'wb') as f:
+                f.write(content)
+            os.replace(temp, path)
+            self._bytes += len(content)
+            self._manifest_count += 1
+            if self._manifest_count >= 32 or time.monotonic() - self._manifest_time >= 2:
+                self._write_manifest(False)
+        finally:
+            if temp.exists() and not temp.is_symlink():
+                temp.unlink()
+        return path
+
+    def _reserve(self, size):
+        if self._bytes + size <= self._reservation:return
+        with _budget_lock(self.root):
+            records = _read_reservations(self.root)
+            _reclaim_reservations(self.root, records, self.owner_uuid)
+            usage, jpeg_bytes = _root_usage(self.root)
+            outstanding = sum(max(0, ceiling - jpeg_bytes.get('session-' + owner, 0))
+                              for owner, ceiling in records.items())
+            # Reserve headroom for batched manifest byte-count/heartbeat growth.
+            # The scan includes current metadata; future updates must also fit.
+            owners = len(records) + (self.owner_uuid not in records)
+            available = min(self.root_limit - usage - outstanding,
+                            shutil.disk_usage(self.root).free - self.min_free_bytes - outstanding) - 256 * owners
+            ceiling = records.get(self.owner_uuid, self._bytes)
+            needed = self._bytes + size - ceiling
+            if available < needed:
+                raise CacheBudgetExceeded('Insufficient root cache reservation')
+            grant = min(max(RESERVATION_CHUNK, needed), available,
+                        self.session_limit - ceiling)
+            records[self.owner_uuid] = ceiling + grant
+            _write_reservations(self.root, records)
+            self._reservation = records[self.owner_uuid]
+
+    def complete(self):
+        if self.closed:
+            raise RuntimeError('Closed cache')
+        _safe_owned_dir(self.root, self.directory, self.owner_uuid)
+        self._write_manifest(True)
+
+    def close(self):
+        if not self.closed:
+            try:
+                with _budget_lock(self.root):
+                    records = _read_reservations(self.root)
+                    records.pop(self.owner_uuid, None)
+                    _write_reservations(self.root, records)
+            finally:
+                self._lease.__exit__(None, None, None)
+                self.closed = True
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_):
+        self.close()

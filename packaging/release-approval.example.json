@@ -1,0 +1,10 @@
+{
+  "status": "NOT_APPROVED",
+  "version": "0.4.9rc1",
+  "commit": "",
+  "run_id": "",
+  "assets": {
+    "macos-arm64": {"path": "macOS-ARM64/dist/SlideExtractor-v0.4.9rc1-macOS-arm64-approved.dmg", "sha256": ""},
+    "windows-x64": {"path": "Windows-X64/dist/SlideExtractor-v0.4.9rc1-Setup-Windows-x64.exe", "sha256": ""}
+  }
+}

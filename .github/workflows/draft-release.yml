@@ -1,0 +1,65 @@
+name: Prepare reviewed beta draft
+on:
+  workflow_dispatch:
+    inputs:
+      candidate_run_id:
+        description: Reviewed native installer workflow run
+        required: true
+        type: string
+      tag:
+        description: Existing version tag, e.g. v0.4.9rc1
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+jobs:
+  draft:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      CANDIDATE_RUN_ID: ${{ inputs.candidate_run_id }}
+      RELEASE_TAG: ${{ inputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check candidate identity and existing tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$CANDIDATE_RUN_ID" =~ ^[0-9]+$ ]]
+          VERSION=$(python slide_core/version.py)
+          test "$RELEASE_TAG" = "v$VERSION"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CANDIDATE_RUN_ID" > build-run.json
+          python - <<'PY'
+          import json,os,subprocess
+          from pathlib import Path
+          r=json.loads(Path('build-run.json').read_text())
+          assert r['path']=='.github/workflows/native-build-template.yml'
+          assert r['event']=='workflow_dispatch' and r['conclusion']=='success'
+          assert r['repository']['full_name']==os.environ['GITHUB_REPOSITORY']
+          tag_sha=subprocess.check_output(['git','rev-parse',os.environ['RELEASE_TAG']+'^{commit}'],text=True).strip()
+          assert tag_sha==r['head_sha'], 'Tag and native build must identify the same source'
+          Path('candidate-sha.txt').write_text(tag_sha)
+          PY
+      - name: Download both native candidates
+        shell: bash
+        run: |
+          gh run download "$CANDIDATE_RUN_ID" --name native-candidate-macOS-ARM64 --dir candidates/macOS-ARM64
+          gh run download "$CANDIDATE_RUN_ID" --name native-candidate-Windows-X64 --dir candidates/Windows-X64
+      - name: Verify exact reviewed installers
+        shell: bash
+        run: |
+          python packaging/release_assets.py --root candidates --approval packaging/release-approval.json --output release-assets --version "$(python slide_core/version.py)" --commit "$(cat candidate-sha.txt)" --run-id "$CANDIDATE_RUN_ID"
+      - name: Create beta draft with both installers
+        shell: bash
+        run: |
+          gh release create "$RELEASE_TAG" release-assets/* --verify-tag --draft --prerelease --title "Slide Extractor $RELEASE_TAG (beta)" --notes-file RELEASE_NOTES.md

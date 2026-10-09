@@ -1,0 +1,39 @@
+{
+  "target": "windows-x64-or-macos-arm64",
+  "status": "NOT_APPROVED",
+  "ffmpeg": {
+    "supplier": "",
+    "version": "",
+    "sha256": "",
+    "configure": "",
+    "corresponding_source_url": "",
+    "source_sha256": "",
+    "license": "LGPL-2.1-or-later",
+    "bundle_sha256": "",
+    "source_archive_local": ""
+  },
+  "qt": {
+    "version": "",
+    "modules": [],
+    "corresponding_source_url": "",
+    "source_sha256": "",
+    "replacement_verified": false,
+    "license": "LGPL-3.0-only",
+    "source_archive_local": ""
+  },
+  "bundle": {
+    "third_party_notices_included": false,
+    "license_copies_included": false,
+    "sbom_included": false,
+    "pymupdf_absent": false,
+    "candidate_version": "",
+    "build_manifest_sha256": "",
+    "clean_machine_smoke_verified": false,
+    "native_installer_verified": false,
+    "signed_or_notarization_state_recorded": false
+  },
+  "ffprobe": {
+    "sha256": "",
+    "bundle_sha256": ""
+  }
+}

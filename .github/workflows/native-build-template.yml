@@ -1,0 +1,128 @@
+name: Native installer candidates (manual, unsigned beta)
+on:
+  workflow_dispatch:
+    inputs:
+      vendor_run_id:
+        description: Run containing reviewed approved-native-inputs artifacts (tools, manifest, sources, licenses, SBOM)
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+jobs:
+  native-build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-15
+            inputs: macOS-ARM64
+            lock: macos-arm64
+          - os: windows-latest
+            inputs: Windows-X64
+            lock: windows-x64
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    env:
+      PYTHONUTF8: "1"
+      PYTHONIOENCODING: utf-8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: approved-native-inputs-${{ matrix.inputs }}
+          path: vendor/approved
+          run-id: ${{ inputs.vendor_run_id }}
+          github-token: ${{ github.token }}
+      - name: Verify native runner architecture
+        shell: python
+        run: |
+          import platform,sys
+          assert (sys.platform=='darwin' and platform.machine()=='arm64') or (sys.platform=='win32' and platform.machine().lower() in ('amd64','x86_64'))
+      - name: Install exact runtime and builder
+        run: python -m pip install -r packaging/requirements-${{ matrix.lock }}.lock
+      - name: Build candidate and record inputs
+        run: |
+          python -m pip check
+          python packaging/prepare_vendor.py vendor/approved
+          python packaging/build_manifest.py --tools vendor/approved --mode approved --output build/build-manifest.json
+          python -m PyInstaller --clean --noconfirm packaging/SlideExtractor.spec
+      - name: Bundled smoke on macOS
+        if: runner.os == 'macOS'
+        run: |
+          PATH="" QT_QPA_PLATFORM=offscreen dist/SlideExtractor.app/Contents/MacOS/SlideExtractor --smoke-report "$PWD/build/installed-smoke.json"
+          codesign --verify --deep --strict dist/SlideExtractor.app
+          bash packaging/build-macos-dmg.sh
+      - name: Bundled smoke and installer on Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $env:QT_QPA_PLATFORM = "offscreen"
+          $SavedPath = $env:PATH
+          $env:PATH = ""
+          $process = Start-Process -FilePath "dist/SlideExtractor/SlideExtractor.exe" -ArgumentList "--smoke-report", "$PWD/build/installed-smoke.json" -Wait -PassThru
+          $env:PATH = $SavedPath
+          if ($process.ExitCode -ne 0) { throw "Bundled smoke failed" }
+          $env:SLIDE_APP_VERSION = python slide_core/version.py
+          $env:SLIDE_BUNDLE_VERSION = python slide_core/version.py --bundle
+          & "${env:ProgramFiles(x86)}/Inno Setup 6/ISCC.exe" packaging/windows.iss
+          if ($LASTEXITCODE -ne 0) { throw "Installer build failed" }
+      - name: Verify macOS app copied from mounted DMG
+        if: runner.os == 'macOS'
+        run: bash packaging/check-macos-install.sh
+      - name: Verify installed Windows application without elevation
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $version = python slide_core/version.py
+          $installDir = Join-Path $env:RUNNER_TEMP "Slide Extractor installed"
+          $setup = "dist/SlideExtractor-v$version-Setup-Windows-x64.exe"
+          $p = Start-Process -FilePath $setup -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', "/DIR=`"$installDir`"" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "Installer failed" }
+          $env:PATH = ""
+          $env:QT_QPA_PLATFORM = "offscreen"
+          $p = Start-Process -FilePath "$installDir/SlideExtractor.exe" -ArgumentList '--smoke-report', "$PWD/build/installer-smoke.json" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "Installed application failed" }
+      - name: Validate observed smoke result
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          import runpy
+          for name in ('installed-smoke.json','installer-smoke.json'):
+              report=json.loads((Path('build')/name).read_text())
+              assert report['status']=='success' and report['frozen'] and report['bundled_tools_checked'] and report['version']==runpy.run_path('slide_core/version.py')['VERSION'],report
+      - name: Audit actual bundle against supplied release evidence
+        shell: python
+        run: |
+          import runpy,sys
+          from pathlib import Path
+          root=Path('dist/SlideExtractor.app' if sys.platform=='darwin' else 'dist/SlideExtractor')
+          extension='.exe' if sys.platform=='win32' else ''
+          ffmpeg=next(root.rglob('ffmpeg'+extension))
+          import hashlib,json
+          hashed=lambda path:hashlib.sha256(path.read_bytes()).hexdigest()
+          inventory={'candidate_version':runpy.run_path('slide_core/version.py')['VERSION'],
+                     'build_manifest_sha256':hashed(next(root.rglob('build-manifest.json'))),
+                     'tools':{name:{'bundle_sha256':hashed(next(root.rglob(name+extension)))} for name in ('ffmpeg','ffprobe')}}
+          Path('build/candidate-inventory.json').write_text(json.dumps(inventory,indent=2)+'\n')
+          errors=runpy.run_path('packaging/audit_release.py')['audit'](root,ffmpeg,Path('vendor/approved/binary-manifest.json'))
+          Path('build/release-gate.txt').write_text('\n'.join(errors) or 'PRELIMINARY GATE PASSED; manual review required')
+          assert not errors,errors
+      - name: Retain candidate and evidence (does not publish a release)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-candidate-${{ matrix.inputs }}
+          path: |
+            dist/
+            build/build-manifest.json
+            build/installed-smoke.json
+            build/installer-smoke.json
+            build/release-gate.txt
+            build/candidate-inventory.json
+            build/SlideExtractor/
+          retention-days: 14

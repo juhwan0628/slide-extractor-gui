@@ -1,0 +1,14 @@
+# Exact release-candidate build inputs. Python 3.12 required.
+numpy==2.5.3
+opencv-python-headless==5.0.0.93
+Pillow==12.3.0
+reportlab==5.0.1
+pypdf==6.19.0
+PySide6-Essentials==6.11.2
+shiboken6==6.11.2
+charset-normalizer==3.5.2
+packaging==26.3
+setuptools==84.0.0
+altgraph==0.17.5
+pyinstaller==6.22.3
+pyinstaller-hooks-contrib==2026.8
