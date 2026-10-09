@@ -1,0 +1,131 @@
+name: Inspect exact native libraries and Qt replacement
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/native-library-review.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inspect:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-15
+            platform: macOS-ARM64
+            lock: macos-arm64
+          - os: windows-latest
+            platform: Windows-X64
+            lock: windows-x64
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+      QT_QPA_PLATFORM: offscreen
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r packaging/requirements-${{ matrix.lock }}.lock
+      - name: Inspect installed wheel codec configuration
+        shell: python
+        run: |
+          import cv2,ctypes,json,hashlib,sys
+          from pathlib import Path
+          from PySide6 import QtCore
+          print(cv2.getBuildInformation())
+          report={'opencv_version':cv2.__version__,'qt_version':QtCore.qVersion(),'libraries':[]}
+          roots=[Path(cv2.__file__).parent,Path(cv2.__file__).parent.parent/'opencv_python_headless.libs']
+          for root in roots:
+              if not root.is_dir():continue
+              for p in root.rglob('*'):
+                  if not p.is_file():continue
+                  if any(t in p.name.lower() for t in ('avcodec','avformat','ffmpeg','x264','x265')):
+                      data=p.read_bytes();entry={'name':p.name,'sha256':hashlib.sha256(data).hexdigest()}
+                      import re
+                      entry['configuration_strings']=[x.decode('utf8','replace') for x in re.findall(rb'[^\x00]{0,200}--enable-(?:gpl|nonfree|libx264|libx265)[^\x00]{0,200}',data)]
+                      if 'avcodec' in p.name:
+                          try:
+                              lib=ctypes.CDLL(str(p));lib.avcodec_configuration.restype=ctypes.c_char_p
+                              entry['configure']=lib.avcodec_configuration().decode()
+                              lib.avcodec_license.restype=ctypes.c_char_p;entry['license']=lib.avcodec_license().decode()
+                          except Exception as e:entry['inspection_error']=str(e)
+                      report['libraries'].append(entry)
+          print('NATIVE_REVIEW',json.dumps(report))
+          Path('wheel-review.json').write_text(json.dumps(report,indent=2))
+      - name: Download tested installer
+        run: gh run download 37977571499 --name native-installer-${{ matrix.platform }} --dir installer
+      - name: Install macOS candidate copy
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          set -euo pipefail
+          hdiutil attach installer/*.dmg -mountpoint "$RUNNER_TEMP/slide-review-dmg" -nobrowse
+          ditto "$RUNNER_TEMP/slide-review-dmg/SlideExtractor.app" "$RUNNER_TEMP/SlideExtractor.app"
+          hdiutil detach "$RUNNER_TEMP/slide-review-dmg"
+      - name: Install Windows candidate
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $setup = (Get-ChildItem installer -Filter *.exe).FullName
+          $target = Join-Path $env:RUNNER_TEMP 'SlideExtractor-review'
+          $p = Start-Process -FilePath $setup -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',"/DIR=`"$target`"" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw 'Install failed' }
+      - name: Inventory installed native files and replace QtCore
+        shell: python
+        run: |
+          import hashlib,json,os,sys
+          from pathlib import Path
+          root=Path(os.environ['RUNNER_TEMP'])/('SlideExtractor.app' if sys.platform=='darwin' else 'SlideExtractor-review')
+          names=[]
+          for p in root.rglob('*'):
+              if p.is_file() and (p.suffix.lower() in ('.dll','.dylib','.so','.pyd') or (p.parent.name=='A' and p.name.startswith('Qt'))):
+                  names.append({'path':str(p.relative_to(root)),'sha256':hashlib.sha256(p.read_bytes()).hexdigest()})
+          Path('installed-native-inventory.json').write_text(json.dumps(names,indent=2))
+          core=next(p for p in root.rglob('Qt6Core.dll' if sys.platform=='win32' else 'QtCore') if p.is_file() and not p.is_symlink())
+          data=core.read_bytes();needle=b'6.12.0\x00'
+          count=data.count(needle);assert count>0,(str(core),count)
+          changed=data.replace(needle,b'6.12.9\x00')
+          core.chmod(core.stat().st_mode|0o200);core.write_bytes(changed)
+          record={'method':'QtCore qVersion string patch; compatible test copy only','path':str(core.relative_to(root)),
+                  'occurrences':count,'original_sha256':hashlib.sha256(data).hexdigest(),'modified_sha256':hashlib.sha256(changed).hexdigest()}
+          assert record['original_sha256']!=record['modified_sha256']
+          Path('qt-replacement.json').write_text(json.dumps(record,indent=2))
+          print('QT_REPLACEMENT',json.dumps(record))
+      - name: Run modified macOS candidate
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          set -euo pipefail
+          codesign --force --deep --sign - "$RUNNER_TEMP/SlideExtractor.app"
+          codesign --verify --deep --strict "$RUNNER_TEMP/SlideExtractor.app"
+          PATH="" "$RUNNER_TEMP/SlideExtractor.app/Contents/MacOS/SlideExtractor" --smoke-report "$PWD/qt-modified-smoke.json"
+      - name: Run modified Windows candidate
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $exe = Join-Path $env:RUNNER_TEMP 'SlideExtractor-review/SlideExtractor.exe'
+          $env:PATH = ''
+          $p = Start-Process -FilePath $exe -ArgumentList '--smoke-report',"$PWD/qt-modified-smoke.json" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw 'Modified Qt application failed' }
+      - name: Verify observed smoke
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          r=json.loads(Path('qt-modified-smoke.json').read_text())
+          assert r['status']=='success' and r['frozen'] and r['pdf_only_checked'] and r['output_lock_cleanup_checked'],r
+          print('Modified installed Qt candidate smoke PASSED')
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-library-review-${{ matrix.platform }}
+          path: |
+            wheel-review.json
+            installed-native-inventory.json
+            qt-replacement.json
+            qt-modified-smoke.json
+          retention-days: 14

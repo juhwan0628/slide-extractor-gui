@@ -100,4 +100,4 @@ python -m pytest -q
 
 처리 권한이 있는 로컬 영상을 입력해 사용하세요. 강의 영상이나 교안은 이 저장소에서 배포하지 않습니다.
 
-앱 소스 라이선스는 아직 선택되지 않았습니다. 제3자 의존성의 라이선스는 별도로 적용됩니다. [고지](THIRD_PARTY_NOTICES.md) · [배포 자료 검토](LICENSE_AUDIT.md)
+앱 코드는 [MIT 라이선스](LICENSE)로 공개합니다. 제3자 의존성의 라이선스는 별도로 적용됩니다. [고지](THIRD_PARTY_NOTICES.md) · [배포 자료 검토](LICENSE_AUDIT.md)
