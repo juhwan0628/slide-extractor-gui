@@ -1,0 +1,74 @@
+name: Audit reviewed installed candidates
+on:
+  push:
+    branches: [main]
+    paths: ['packaging/candidate-review.json', '.github/workflows/candidate-license-audit.yml', 'packaging/review_candidate.py']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-15
+            platform: macOS-ARM64
+          - os: windows-latest
+            platform: Windows-X64
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate reviewed candidate identity and source CI
+        shell: python
+        run: |
+          import json,os,subprocess
+          from pathlib import Path
+          c=json.loads(Path('packaging/candidate-review.json').read_text())
+          assert c['native_inventory_reviewed'] is True
+          for field,path in [('candidate_run_id','.github/workflows/native-build-template.yml'),('source_ci_run_id','.github/workflows/ci.yml')]:
+              r=json.loads(subprocess.check_output(['gh','api',f"repos/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{c[field]}"],text=True))
+              assert r['conclusion']=='success' and r['head_sha']==c['candidate_commit'] and r['path']==path
+          with open(os.environ['GITHUB_ENV'],'a') as f:f.write('CANDIDATE_RUN_ID='+str(c['candidate_run_id'])+'\n')
+      - name: Download exact candidate and corresponding source materials
+        run: |
+          gh run download ${{ env.CANDIDATE_RUN_ID }} --name native-candidate-${{ matrix.platform }} --dir candidate
+          gh run download ${{ env.CANDIDATE_RUN_ID }} --name native-inputs-${{ matrix.platform }} --dir inputs
+      - name: Install original macOS DMG copy
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          set -euo pipefail
+          hdiutil attach candidate/dist/*.dmg -mountpoint "$RUNNER_TEMP/audit-dmg" -nobrowse
+          ditto "$RUNNER_TEMP/audit-dmg/SlideExtractor.app" "$RUNNER_TEMP/SlideExtractor-audit.app"
+          hdiutil detach "$RUNNER_TEMP/audit-dmg"
+          codesign --verify --deep --strict "$RUNNER_TEMP/SlideExtractor-audit.app"
+      - name: Install original Windows EXE without elevation
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $setup = (Get-ChildItem candidate/dist -Filter '*Setup-Windows-x64.exe').FullName
+          $target = Join-Path $env:RUNNER_TEMP 'SlideExtractor-audit'
+          $p = Start-Process -FilePath $setup -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',"/DIR=`"$target`"" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw 'Install failed' }
+      - name: Audit original installed bytes and exact evidence
+        shell: python
+        run: |
+          import os,subprocess,sys
+          from pathlib import Path
+          root=Path(os.environ['RUNNER_TEMP'])/('SlideExtractor-audit.app' if sys.platform=='darwin' else 'SlideExtractor-audit')
+          subprocess.run([sys.executable,'packaging/review_candidate.py','--root',str(root),'--inputs','inputs','--candidate','candidate','--config','packaging/candidate-review.json','--platform','${{ matrix.platform }}','--output','audit-results'],check=True)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reviewed-audit-${{ matrix.platform }}
+          path: audit-results/
+          if-no-files-found: error
+          retention-days: 30
