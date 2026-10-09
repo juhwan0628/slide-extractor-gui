@@ -43,9 +43,12 @@ jobs:
               assert r['repository']['full_name']==os.environ['GITHUB_REPOSITORY']
               assert r['path']==path and r['conclusion']=='success' and r['event']=='push'
               assert r['head_sha']==c['candidate_commit']
+          audit=json.loads(subprocess.check_output(['gh','api',f"repos/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{c['license_audit_run_id']}"],text=True))
+          assert audit['path']=='.github/workflows/candidate-license-audit.yml' and audit['conclusion']=='success' and audit['head_sha']==c['audit_commit']
           source=subprocess.check_output(['git','show',c['candidate_commit']+':slide_core/version.py'],text=True)
           assert f'VERSION = "{c["version"]}"' in source or f"VERSION = '{c['version']}'" in source
           with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write(f"AUDIT_RUN_ID={c['license_audit_run_id']}\n")
               f.write(f"CANDIDATE_RUN_ID={c['candidate_run_id']}\nRELEASE_TAG=v{c['version']}\nCANDIDATE_SHA={c['candidate_commit']}\n")
           PY
       - name: Download exact native candidates and corresponding sources
@@ -55,6 +58,7 @@ jobs:
           for platform in macOS-ARM64 Windows-X64; do
             gh run download "$CANDIDATE_RUN_ID" --name "native-candidate-$platform" --dir "candidates/$platform"
             gh run download "$CANDIDATE_RUN_ID" --name "native-inputs-$platform" --dir "native-inputs/$platform"
+            gh run download "$AUDIT_RUN_ID" --name "reviewed-audit-$platform" --dir "license-audits/$platform"
           done
       - name: Verify installers, reports and sources before staging
         shell: python
@@ -85,7 +89,14 @@ jobs:
               friendly=filename.replace('-approved.dmg','.dmg')
               shutil.copy2(installer,output/friendly)
               observed[platform]={'asset':friendly,'sha256':hashlib.sha256(installer.read_bytes()).hexdigest()}
+              audit_dir=Path('license-audits')/platform
+              audited=json.loads((audit_dir/'audit-report.json').read_text())
+              assert audited['status']=='PASSED' and audited['errors']==[]
+              assert audited['version']==c['version'] and audited['commit']==c['candidate_commit'] and str(audited['run_id'])==str(c['candidate_run_id'])
+              assert audited['installer_sha256']==observed[platform]['sha256']
+              assert audited['manifest_sha256']==hashlib.sha256((audit_dir/'reviewed-manifest.json').read_bytes()).hexdigest()
               shutil.copytree(root/'build',evidence/platform)
+              shutil.copytree(audit_dir,evidence/platform/'license-audit')
               inputs=Path('native-inputs')/platform
               for item in inputs.iterdir():
                   if item.name in ('sources','ffmpeg','ffprobe','ffmpeg.exe','ffprobe.exe'):continue
@@ -93,6 +104,17 @@ jobs:
                   target.parent.mkdir(exist_ok=True)
                   if item.is_dir():shutil.copytree(item,target)
                   elif item.is_file():shutil.copy2(item,target)
+          for platform in installers:
+              inputs=Path('native-inputs')/platform
+              opencv=json.loads((inputs/'opencv-build.json').read_text())
+              patch=inputs/'sources'/opencv['source_patch']
+              assert hashlib.sha256(patch.read_bytes()).hexdigest()==opencv['source_patch_sha256']
+              shutil.copy2(patch,output/f'opencv-image-only-{platform}.patch')
+              # Durable source-built FFmpeg inputs for subsequent CI builds.
+              with zipfile.ZipFile(output/f'ffmpeg-inputs-{platform}.zip','w',zipfile.ZIP_DEFLATED) as z:
+                  for name in ('ffmpeg','ffprobe','ffmpeg.exe','ffprobe.exe','binary-manifest.json'):
+                      path=inputs/name
+                      if path.is_file():z.write(path,name)
           sources=json.loads(Path('packaging/native-sources.lock.json').read_text())
           assert sources==json.loads(__import__('subprocess').check_output(['git','show',c['candidate_commit']+':packaging/native-sources.lock.json'],text=True))
           for component,item in sources.items():
@@ -101,14 +123,16 @@ jobs:
                   archive=Path('native-inputs')/platform/'sources'/filename
                   assert archive.is_file() and hashlib.sha256(archive.read_bytes()).hexdigest()==item['sha256']
               shutil.copy2(Path('native-inputs/macOS-ARM64/sources')/filename,output/filename)
-          record={**c,'status':'DRAFT_REVIEW_REQUIRED','installers':observed}
+          for extra in Path('packaging/third-party').iterdir():
+              if extra.is_file():shutil.copy2(extra,output/extra.name)
+          record={**c,'status':'AUDITED_DRAFT_READY','installers':observed}
           (output/'BETA_REVIEW.json').write_text(json.dumps(record,indent=2)+'\n')
           with zipfile.ZipFile(output/'build-and-review-evidence.zip','w',zipfile.ZIP_DEFLATED) as z:
               for path in sorted(evidence.rglob('*')):
                   if path.is_file():z.write(path,path.relative_to(evidence))
           (output/'SHA256SUMS.txt').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.name}\n' for p in sorted(output.iterdir())))
           notes=Path('RELEASE_NOTES.md').read_text()
-          notes+='\n\n## 공개 전 검토 중 — 아직 배포 승인되지 않은 초안\n\n맥·Windows 설치와 PDF/잠금 검사는 통과했습니다. 앱 소스 라이선스 결정, Qt 수정 라이브러리 실행 및 대응 소스·고지 검토가 남아 있습니다. 첨부한 build-and-review-evidence.zip의 release-gate.txt를 확인해야 합니다. 이 초안 생성은 공개 배포 검사의 통과를 의미하지 않습니다.\n'
+          notes+='\n\n## 검증 기록\n\n같은 커밋의 맥·Windows 설치본, 빈 PATH 분석·PDF·잠금 정리 및 Qt 라이브러리 교체 실행 검사가 통과했습니다. 별도 설치본 출고 감사도 PASSED입니다. 원본 소스·패치·라이선스 및 해시는 첨부 자료에 있습니다. 초기 후보의 release-gate.txt는 승인 전 관찰 기록이며 license-audit/audit-report.json이 최종 출고 검사입니다. 이 릴리스는 아직 공개 전 초안입니다.\n'
           Path('draft-notes.md').write_text(notes)
       - name: Create or update draft only (never publish)
         shell: bash
