@@ -5,7 +5,8 @@
 
 ## 현재 준비
 
-- 공통 소스의 첫 GitHub CI: 541 passed, 6 skipped (run 37969021769).
+- 최신 소스 CI: 553 passed, 6 skipped (run 37972733336).
+- 네이티브 후보 run 37972733321: 같은 커밋 b04bfbff에서 macOS arm64 DMG와 Windows x64 설치 EXE 생성 및 설치본 분석·PDF smoke 모두 성공. 설치 파일 전용 native-installer-* 아티팩트가 있습니다. 공개 릴리스 승인은 별도입니다.
 - `Native installer candidates`가 두 OS에서 고정 FFmpeg 8.1.2 소스를 직접 컴파일합니다. 개인용 Gyan GPL 빌드를 복사하지 않습니다.
 - GPL·nonfree·version3·외부 라이브러리 자동 탐지를 비활성화하고 실제 `-version`의 설정을 확인합니다.
 - Qt 6.12.0, Qt for Python 6.12.0 및 FFmpeg 소스는 `packaging/native-sources.lock.json`의 SHA256으로 확인합니다. 라이선스 원문과 설치된 wheel의 고지 파일을 수집합니다.

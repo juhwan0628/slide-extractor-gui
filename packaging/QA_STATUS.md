@@ -36,3 +36,15 @@
 - 출력 잠금 파일 정리 변경은 서버에서 539개 테스트 및 4프로세스 반복 충돌 검증을 통과했습니다. 해당 변경의 실제 Mac/Windows 재검증은 별도입니다.
 - GitHub Actions는 새 GUI 저장소용으로 준비 중이며 아직 실행하지 않았습니다. 서버 테스트 결과를 GitHub 러너 통과로 표현하지 않습니다.
 - 유료 서명·공증은 베타 필수 조건에서 제외합니다. 배포 자료와 실제 구성품 검토는 유지합니다.
+
+
+## 2026-10-10 GitHub native candidate checkpoint
+
+- Source commit b04bfbffadb7c8de3b8e775626ac7c20596c4da9, version 0.4.9rc1. Native run 37972733321: both macOS arm64 and Windows x64 SUCCESS.
+- macOS: source-built FFmpeg, frozen empty-PATH analysis/PDF smoke, strict ad-hoc codesign verification, DMG creation and mounted-DMG copied-app smoke passed.
+- Windows: source-built static FFmpeg, frozen empty-PATH analysis/PDF smoke, Inno Setup installer and installed-app empty-PATH smoke passed. The hosted runner account is not a separate standard-user security-policy test; unsigned code bypassing Smart App Control is not claimed.
+- Source CI 37972733336: 553 passed, 6 skipped. Remote Linux suite: 559 passed in 38.90s.
+- Actual CI failures fixed: FFmpeg log is ffbuild/config.log; inventory selects tools files instead of licenses/ffmpeg directory. Deterministic directory-first reproduction failed with IsADirectoryError before the fix, then passed.
+- Input artifacts retain pinned FFmpeg/Qt/Qt for Python sources, original licenses, wheel notices and observed inventories. Official FFmpeg 8.1.2 PGP signature independently verified.
+- native-installer-* artifacts contain only the corresponding DMG/EXE; no manual build scripts or source folders.
+- Unsigned/ad-hoc installation test candidates; not public release approval. Modified Qt-library execution, final native/wheel sources and notices review, app license choice and release approval remain pending. No GitHub Release published.

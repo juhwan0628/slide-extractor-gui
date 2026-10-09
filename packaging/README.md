@@ -1,6 +1,6 @@
 # Release licensing and packaging gate
 
-Status: RELEASE HOLD. Actual Windows/macOS installer artifacts have not been built or approved.
+Status: RELEASE HOLD. Windows/macOS installation candidates were built and smoke-tested in GitHub run 37972733321 (2026-10-10). Public redistribution approval is still pending.
 
 ## Decisions
 - Windows x64: PyInstaller onedir, Inno Setup installer, optional portable ZIP.

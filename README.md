@@ -8,7 +8,8 @@
 ## 설치와 배포 상태
 
 목표 배포 파일은 Apple Silicon Mac용 `.dmg`, Windows x64용 설치 `.exe`입니다. 필요한 Python·Qt·FFmpeg·FFprobe를 포함합니다.
-현재 `0.4.9rc1`은 베타 후보이며 **이 저장소용 공개 설치 파일은 아직 생성·검증되지 않았습니다.**
+현재 `0.4.9rc1`의 맥·Windows 설치 후보는 **GitHub Actions에서 생성과 설치본 분석·PDF 검사를 통과했습니다.** 공개 릴리스 검토는 진행 중입니다.
+[성공한 빌드와 테스트 설치 파일](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/37972733321)의 `native-installer-*` 아티팩트를 이용하세요. ZIP 안에는 해당 OS의 설치 파일 하나만 들어 있습니다.
 GitHub Actions와 동시 릴리스 준비 절차는 [RELEASING.md](RELEASING.md)를 참고하세요.
 베타는 유료 서명·공증 없이 준비하므로 OS에 따라 경고나 실행 차단이 발생할 수 있습니다.
 
