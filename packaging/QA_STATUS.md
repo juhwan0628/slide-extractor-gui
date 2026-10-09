@@ -1,4 +1,4 @@
-# 0.4.9rc1 검증 상태
+# 0.4.9rc2 검증 상태
 
 ## 서버에서 확인
 
@@ -48,3 +48,14 @@
 - Input artifacts retain pinned FFmpeg/Qt/Qt for Python sources, original licenses, wheel notices and observed inventories. Official FFmpeg 8.1.2 PGP signature independently verified.
 - native-installer-* artifacts contain only the corresponding DMG/EXE; no manual build scripts or source folders.
 - Unsigned/ad-hoc installation test candidates; not public release approval. Modified Qt-library execution, final native/wheel sources and notices review, app license choice and release approval remain pending. No GitHub Release published.
+
+
+## 2026-10-10 PDF-only lock regression — verified native candidates
+
+- Default PDF-only export used the persistent cache lease rather than the output lease cleanup wrapper. Previous paired PDF+JSON checks did not cover this path. The common exporter now uses `export_file_lease` on both platforms.
+- RED: three regression tests reproduced leftover locks after save/overwrite, publication failure and cancellation. GREEN after the shared lease change: all three pass; output concurrency and replacement safety tests retained.
+- Remote Linux full suite: 562 passed in 39.50s. Source CI run 37977571494: 556 passed, 6 skipped. Its actual Windows lock job: 7 passed, 1 skipped (POSIX-only rename test).
+- Native candidate source: 53290faa60ea4091da9af4dccc4ae5aa9dfa39bb, version 0.4.9rc2, run 37977571499. Both macOS mounted-DMG installation and Windows installer installation passed; frozen/installed analysis/PDF smoke and both lock-cleanup assertions passed on both OSes.
+- Frozen and installed smoke now exercise PDF+JSON and PDF-only save/overwrite, and assert `pdf_only_checked` and `output_lock_cleanup_checked`. Historical unrelated output locks are not deleted in bulk.
+
+- Installer-only artifacts: macOS ARM64 11639648425; Windows X64 11640181724. Both native jobs and run 37977571499 concluded SUCCESS. No public GitHub Release was published.
