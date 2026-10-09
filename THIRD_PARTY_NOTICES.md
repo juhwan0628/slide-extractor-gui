@@ -27,3 +27,5 @@ The matching FFmpeg, Qt, Qt for Python and image-only OpenCV sources and build r
 PyInstaller is a build tool under GPL with the bootloader exception; this does not change the application's MIT license. Inno Setup is used to create the Windows installer and has its own license. Compiler tools and development tests are not application runtime components.
 
 qpdf is not bundled. PyMuPDF, SciPy, scikit-image and pytest are excluded from the runtime bundle.
+
+OpenCV image-only builds apply `opencv-image-only.patch` to skip typing refinements for excluded APIs and omit the unused Windows videoio helper from wheel packaging. The exact original source archive, patch and patch SHA-256 are supplied together. No image-processing C++ code is modified.
