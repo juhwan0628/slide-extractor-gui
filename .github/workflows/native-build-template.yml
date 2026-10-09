@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/native-build-template.yml'
       - 'packaging/native_inputs.py'
+      - 'packaging/candidate_inventory.py'
       - 'packaging/native-sources.lock.json'
       - 'packaging/build-ffmpeg.sh'
 permissions:
@@ -132,12 +133,9 @@ jobs:
           from pathlib import Path
           root=Path('dist/SlideExtractor.app' if sys.platform=='darwin' else 'dist/SlideExtractor')
           extension='.exe' if sys.platform=='win32' else ''
-          ffmpeg=next(root.rglob('ffmpeg'+extension))
-          import hashlib,json
-          hashed=lambda path:hashlib.sha256(path.read_bytes()).hexdigest()
-          inventory={'candidate_version':runpy.run_path('slide_core/version.py')['VERSION'],
-                     'build_manifest_sha256':hashed(next(root.rglob('build-manifest.json'))),
-                     'tools':{name:{'bundle_sha256':hashed(next(root.rglob(name+extension)))} for name in ('ffmpeg','ffprobe')}}
+          ffmpeg=next(p for p in root.rglob('ffmpeg'+extension) if p.is_file() and 'tools' in p.relative_to(root).parts)
+          import json
+          inventory=runpy.run_path('packaging/candidate_inventory.py')['inventory'](root,runpy.run_path('slide_core/version.py')['VERSION'],extension)
           Path('build/candidate-inventory.json').write_text(json.dumps(inventory,indent=2)+'\n')
           errors=runpy.run_path('packaging/audit_release.py')['audit'](root,ffmpeg,Path('vendor/approved/binary-manifest.json'))
           Path('build/release-gate.txt').write_text('\n'.join(errors) or 'PRELIMINARY GATE PASSED; manual review required')
@@ -150,11 +148,21 @@ jobs:
         with:
           name: native-candidate-${{ matrix.inputs }}
           path: |
-            dist/
+            dist/*.dmg
+            dist/*Setup-Windows-x64.exe
             build/build-manifest.json
             build/installed-smoke.json
             build/installer-smoke.json
             build/release-gate.txt
             build/candidate-inventory.json
-            build/SlideExtractor/
+          retention-days: 14
+      - name: Retain installer only for beta installation
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-installer-${{ matrix.inputs }}
+          path: |
+            dist/*.dmg
+            dist/*Setup-Windows-x64.exe
+          if-no-files-found: error
           retention-days: 14
