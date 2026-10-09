@@ -176,6 +176,8 @@ class Window(QMainWindow):
         self.redo_action=edit_menu.addAction('Redo')
         self.redo_action.setShortcuts([QKeySequence('Ctrl+Shift+Z'),QKeySequence('Ctrl+Y')])
         self.redo_action.triggered.connect(self.redo_edit)
+        help_menu=self.menuBar().addMenu('Help')
+        help_menu.addAction('About / Licenses…',self.show_about)
         split.setSizes([850,350])
         self.progress=QProgressBar();self.progress.setRange(0,1);self.progress.setValue(0)
         self.progress.hide()  # M8: only the analysis screen owns a visible progress indicator.
@@ -212,6 +214,18 @@ class Window(QMainWindow):
         self.advanced_button.setVisible(preparation)
         self.open_button.setVisible(preparation)
         self.cancel_button.hide()
+
+    def show_about(self):
+        from slide_core.version import VERSION
+        QMessageBox.about(self,'About Slide Extractor',
+            f'<h3>Slide Extractor {VERSION}</h3>'
+            '<p>Copyright © 2026 Juhwan Heo · MIT License.</p>'
+            '<p>This app uses Qt/PySide6 under LGPLv3 and FFmpeg/FFprobe under LGPLv2.1 or later. '
+            'You may modify and replace these libraries and tools.</p>'
+            '<p>Original license texts are included in the app’s licenses folder. '
+            'See SOURCE_AND_REPLACEMENT.md for replacement instructions.</p>'
+            '<p><a href="https://github.com/juhwan0628/slide-extractor-gui/releases">'
+            'Source archives and third-party notices</a></p>')
 
     def return_to_preparation(self):
         if self.stage!='review' or self.jobs.worker is not None:return

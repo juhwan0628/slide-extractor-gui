@@ -9,6 +9,7 @@ import subprocess
 
 def smoke(target):
     os.environ.setdefault('QT_QPA_PLATFORM','offscreen')
+    from PySide6.QtCore import qVersion
     from PySide6.QtWidgets import QApplication
     from gui.window import Window
     from slide_core.tools import executable
@@ -45,7 +46,7 @@ def smoke(target):
                 assert not pdf_only.with_suffix('.json').exists()
                 assert not list(temp.glob('*.lock')), 'PDF-only export left output lock'
             assert profile.report()['decoder_backend']=='cpu-metadata'
-            result.update(status='success',sample_count=len(project.samples),page_count=len(project.pages),
+            result.update(status='success',qt_runtime_version=qVersion(),sample_count=len(project.samples),page_count=len(project.pages),
                           decoder_backend='cpu-metadata',bundled_tools_checked=result['frozen'],
                           pdf_only_checked=True,output_lock_cleanup_checked=True)
     except Exception as exc:

@@ -12,6 +12,11 @@ on:
       - 'slide_core/pdf_only_export.py'
       - 'packaging/native-sources.lock.json'
       - 'packaging/build-ffmpeg.sh'
+      - 'packaging/build_image_opencv.py'
+      - 'packaging/opencv-image-only.json'
+      - 'packaging/SlideExtractor.spec'
+      - 'THIRD_PARTY_NOTICES.md'
+      - 'LICENSE'
 permissions:
   contents: read
   actions: read
@@ -44,33 +49,22 @@ jobs:
           assert (sys.platform=='darwin' and platform.machine()=='arm64') or (sys.platform=='win32' and platform.machine().lower() in ('amd64','x86_64'))
       - name: Install exact runtime and builder
         run: python -m pip install -r packaging/requirements-${{ matrix.lock }}.lock
-      - name: Download and verify pinned FFmpeg source
-        run: python packaging/native_inputs.py build/native-sources --download-ffmpeg-only
-      - name: Prepare macOS assembler
-        if: runner.os == 'macOS'
-        run: command -v nasm || brew install nasm
-      - uses: msys2/setup-msys2@v2
-        if: runner.os == 'Windows'
-        with:
-          msystem: UCRT64
-          update: true
-          install: >-
-            make
-            mingw-w64-ucrt-x86_64-gcc
-            mingw-w64-ucrt-x86_64-nasm
-      - name: Build pinned FFmpeg on macOS
-        if: runner.os == 'macOS'
-        run: bash packaging/build-ffmpeg.sh
-      - name: Build pinned FFmpeg on Windows
-        if: runner.os == 'Windows'
-        shell: msys2 {0}
-        run: bash packaging/build-ffmpeg.sh
+      - name: Restore previously verified source-built FFmpeg inputs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download 37977571499 --name native-inputs-${{ matrix.inputs }} --dir vendor/approved
+      - name: Validate restored exact FFmpeg inputs
+        run: python packaging/prepare_vendor.py vendor/approved --candidate
+      - name: Build pinned image-only OpenCV (no bundled video codecs)
+        run: python packaging/build_image_opencv.py
       - uses: actions/cache@v4
         with:
           path: vendor/approved/sources
           key: corresponding-sources-${{ hashFiles('packaging/native-sources.lock.json') }}
       - name: Collect exact sources, licenses and observed inventory
-        run: python packaging/native_inputs.py vendor/approved
+        run: |
+          python -c "import shutil; shutil.rmtree('vendor/approved/licenses',ignore_errors=True)"
+          python packaging/native_inputs.py vendor/approved
       - name: Retain source and input evidence for review
         uses: actions/upload-artifact@v4
         with:
@@ -120,12 +114,36 @@ jobs:
           $env:QT_QPA_PLATFORM = "offscreen"
           $p = Start-Process -FilePath "$installDir/SlideExtractor.exe" -ArgumentList '--smoke-report', "$PWD/build/installer-smoke.json" -Wait -PassThru
           if ($p.ExitCode -ne 0) { throw "Installed application failed" }
+      - name: Check installed Qt replacement on macOS
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python packaging/verify_qt_replacement.py "$RUNNER_TEMP/Slide Extractor installed.app" build/qt-replacement.json
+          codesign --force --deep --sign - "$RUNNER_TEMP/Slide Extractor installed.app"
+          codesign --verify --deep --strict "$RUNNER_TEMP/Slide Extractor installed.app"
+          PATH="" QT_QPA_PLATFORM=offscreen "$RUNNER_TEMP/Slide Extractor installed.app/Contents/MacOS/SlideExtractor" --smoke-report "$PWD/build/qt-replacement-smoke.json"
+      - name: Check installed Qt replacement on Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $installDir = Join-Path $env:RUNNER_TEMP "Slide Extractor installed"
+          python packaging/verify_qt_replacement.py "$installDir" build/qt-replacement.json
+          if ($LASTEXITCODE -ne 0) { throw 'Qt replacement failed' }
+          $env:PATH = ''
+          $env:QT_QPA_PLATFORM = 'offscreen'
+          $p = Start-Process -FilePath "$installDir/SlideExtractor.exe" -ArgumentList '--smoke-report', "$PWD/build/qt-replacement-smoke.json" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw 'Modified Qt execution failed' }
       - name: Validate observed smoke result
         shell: python
         run: |
           import json
           from pathlib import Path
           import runpy
+          replacement=json.loads(Path('build/qt-replacement.json').read_text())
+          modified=json.loads(Path('build/qt-replacement-smoke.json').read_text())
+          assert modified['status']=='success' and modified['qt_runtime_version']==replacement['expected_runtime_version'],modified
+          assert modified['pdf_only_checked'] and modified['output_lock_cleanup_checked']
           for name in ('installed-smoke.json','installer-smoke.json'):
               report=json.loads((Path('build')/name).read_text())
               assert report['pdf_only_checked'] and report['output_lock_cleanup_checked'],report
@@ -139,6 +157,8 @@ jobs:
           extension='.exe' if sys.platform=='win32' else ''
           ffmpeg=next(p for p in root.rglob('ffmpeg'+extension) if p.is_file() and 'tools' in p.relative_to(root).parts)
           import json
+          runpy.run_path('packaging/native_codec_policy.py')['verify_no_extra_codecs'](root)
+          assert next(root.rglob('LICENSE')).is_file()
           inventory=runpy.run_path('packaging/candidate_inventory.py')['inventory'](root,runpy.run_path('slide_core/version.py')['VERSION'],extension)
           Path('build/candidate-inventory.json').write_text(json.dumps(inventory,indent=2)+'\n')
           errors=runpy.run_path('packaging/audit_release.py')['audit'](root,ffmpeg,Path('vendor/approved/binary-manifest.json'))
@@ -159,6 +179,9 @@ jobs:
             build/installer-smoke.json
             build/release-gate.txt
             build/candidate-inventory.json
+            build/qt-replacement.json
+            build/qt-replacement-smoke.json
+            build/opencv-build.json
           retention-days: 14
       - name: Retain installer only for beta installation
         if: success()

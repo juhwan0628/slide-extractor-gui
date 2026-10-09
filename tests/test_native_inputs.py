@@ -49,3 +49,13 @@ def test_verified_inputs_are_only_accepted_for_candidate_builds(tmp_path):
     (tmp_path/'binary-manifest.json').write_text(json.dumps(data))
     with pytest.raises(ValueError,match='not approved'):prepare(tmp_path)
     assert len(prepare(tmp_path,candidate=True))==2
+
+def test_spdx_license_directory_copies_original_lgpl_text(tmp_path):
+    archive=tmp_path/'qt-source.tar.xz'
+    text=b'GNU LESSER GENERAL PUBLIC LICENSE Version 3'
+    with tarfile.open(archive,'w:xz') as stream:
+        info=tarfile.TarInfo('qtbase/LICENSES/LGPL-3.0-only.txt');info.size=len(text)
+        stream.addfile(info,io.BytesIO(text))
+    copied=module()['source_licenses'](archive,tmp_path/'licenses','qt')
+    assert len(copied)==1
+    assert copied[0].read_bytes()==text

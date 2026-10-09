@@ -52,7 +52,7 @@ def source_licenses(archive,destination,component):
             path=PurePosixPath(member.name)
             if path.is_absolute() or '..' in path.parts or '\\' in member.name:raise ValueError('unsafe source member')
             if not member.isfile():continue
-            if not any(k in path.name.lower() for k in ('copying','license','notice')):continue
+            if not any(k in path.name.lower() for k in ('copying','license','notice','copyright','ofl')) and not any(part.lower()=='licenses' for part in path.parts):continue
             # Preserve complete original text and relative names, never extract archive paths directly.
             target=Path(destination)/component/Path(*path.parts)
             target.parent.mkdir(parents=True,exist_ok=True)
@@ -100,16 +100,9 @@ def collect(root):
     data=input_manifest(root,sources,output)
     (root/'binary-manifest.json').write_text(json.dumps(data,indent=2)+'\n',encoding='utf-8')
     (root/'SBOM.json').write_text(json.dumps({'status':'OBSERVED_INPUT_INVENTORY','components':packages+[{'name':'FFmpeg','version':sources['ffmpeg']['version']},{'name':'Python','version':platform.python_version()},{'name':'Qt','version':sources['qt']['version']}],'license_files':license_index},indent=2)+'\n',encoding='utf-8')
-    (root/'SOURCE_AND_REPLACEMENT.md').write_text('''# Source and library replacement — candidate materials
-
-The separate native-inputs artifact contains the exact pinned FFmpeg, Qt and Qt for Python source archives, original license copies and observed package inventory. These source archives must accompany the eventual public release; a short-lived CI artifact is not permanent public source access.
-
-FFmpeg/FFprobe are separate executables built without GPL, nonfree, version3 or autodetected external libraries. Build commands are in packaging/build-ffmpeg.sh. Replace the binaries in tools with a compatible modified build.
-
-Qt/PySide6/shiboken6 libraries remain dynamically loaded in the PyInstaller onedir bundle. With the app closed, replace compatible DLLs/dylibs and associated plugins in the installed directory. macOS modified bundles may require local ad-hoc re-signing; do not disable system security globally. Actual modified-library execution has not yet been verified. The unsigned beta does not restrict reverse engineering needed to debug modifications to LGPL components.
-
-The inventory is not an approval or a complete native dependency audit. Qt wheel build patches, OpenCV bundled FFmpeg corresponding sources, modified-library execution and final native dependency matching remain review items. Public release stays on hold until the review is complete.
-''',encoding='utf-8')
+    shutil.copyfile(ROOT/'packaging/SOURCE_AND_REPLACEMENT.md',root/'SOURCE_AND_REPLACEMENT.md')
+    if (ROOT/'build/opencv-build.json').is_file():
+        shutil.copyfile(ROOT/'build/opencv-build.json',root/'opencv-build.json')
     return data
 
 if __name__=='__main__':

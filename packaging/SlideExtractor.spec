@@ -15,7 +15,7 @@ extension = '.exe' if sys.platform=='win32' else ''
 binaries = [(str(vendor/(name+extension)), 'tools') for name in ('ffmpeg', 'ffprobe')]
 if not all(Path(path).is_file() for path, _ in binaries):
     raise RuntimeError(f'Missing {mode} FFmpeg inputs: {vendor}')
-datas = [(str(root/name), '.') for name in ('THIRD_PARTY_NOTICES.md', 'LICENSE_AUDIT.md')]
+datas = [(str(root/name), '.') for name in ('LICENSE', 'THIRD_PARTY_NOTICES.md', 'LICENSE_AUDIT.md')]
 # Required approved distribution materials; personal builds have a different contract.
 for name in ('licenses', 'SBOM.json', 'SOURCE_AND_REPLACEMENT.md'):
     item=vendor/name
