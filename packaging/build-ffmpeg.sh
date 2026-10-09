@@ -19,4 +19,4 @@ esac
 ./configure "${FLAGS[@]}"
 make -j "${SLIDE_BUILD_JOBS:-$(getconf _NPROCESSORS_ONLN)}" ffmpeg$EXT ffprobe$EXT
 cp "ffmpeg$EXT" "ffprobe$EXT" "$OUTPUT_DIR/"
-cp config.h config.log ffbuild/config.mak "$OUTPUT_DIR/"
+cp config.h ffbuild/config.log ffbuild/config.mak "$OUTPUT_DIR/"
