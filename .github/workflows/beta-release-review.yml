@@ -47,6 +47,9 @@ jobs:
           assert audit['path']=='.github/workflows/candidate-license-audit.yml' and audit['conclusion']=='success' and audit['head_sha']==c['audit_commit']
           source=subprocess.check_output(['git','show',c['candidate_commit']+':slide_core/version.py'],text=True)
           assert f'VERSION = "{c["version"]}"' in source or f"VERSION = '{c['version']}'" in source
+          allowed={'.github/workflows/candidate-license-audit.yml','.github/workflows/beta-release-review.yml','packaging/review_candidate.py','packaging/candidate-review.json','packaging/beta-review.json','packaging/third-party/OpenSSL-LICENSE.txt','packaging/third-party/RUNTIME-NOTICES.md','RELEASE_NOTES.md'}
+          changed=set(subprocess.check_output(['git','diff','--name-only',c['candidate_commit'],os.environ['GITHUB_SHA']],text=True).splitlines())
+          assert changed<=allowed, 'Application/build inputs changed after candidate: '+str(changed-allowed)
           with open(os.environ['GITHUB_ENV'],'a') as f:
               f.write(f"AUDIT_RUN_ID={c['license_audit_run_id']}\n")
               f.write(f"CANDIDATE_RUN_ID={c['candidate_run_id']}\nRELEASE_TAG=v{c['version']}\nCANDIDATE_SHA={c['candidate_commit']}\n")
@@ -125,7 +128,7 @@ jobs:
               shutil.copy2(Path('native-inputs/macOS-ARM64/sources')/filename,output/filename)
           for extra in Path('packaging/third-party').iterdir():
               if extra.is_file():shutil.copy2(extra,output/extra.name)
-          record={**c,'status':'AUDITED_DRAFT_READY','installers':observed}
+          record={**c,'release_commit':os.environ['GITHUB_SHA'],'status':'AUDITED_DRAFT_READY','installers':observed}
           (output/'BETA_REVIEW.json').write_text(json.dumps(record,indent=2)+'\n')
           with zipfile.ZipFile(output/'build-and-review-evidence.zip','w',zipfile.ZIP_DEFLATED) as z:
               for path in sorted(evidence.rglob('*')):
@@ -143,6 +146,6 @@ jobs:
             gh release edit "$RELEASE_TAG" --draft --prerelease --title "Slide Extractor $RELEASE_TAG — beta review" --notes-file draft-notes.md
             gh release upload "$RELEASE_TAG" review-assets/* --clobber
           else
-            gh release create "$RELEASE_TAG" review-assets/* --target "$CANDIDATE_SHA" --draft --prerelease --title "Slide Extractor $RELEASE_TAG — beta review" --notes-file draft-notes.md
+            gh release create "$RELEASE_TAG" review-assets/* --target "$GITHUB_SHA" --draft --prerelease --title "Slide Extractor $RELEASE_TAG — beta review" --notes-file draft-notes.md
           fi
           gh release view "$RELEASE_TAG" --json url,isDraft,tagName,assets
