@@ -44,7 +44,7 @@ jobs:
           from pathlib import Path
           r=json.loads(Path('build-run.json').read_text())
           assert r['path']=='.github/workflows/native-build-template.yml'
-          assert r['event']=='workflow_dispatch' and r['conclusion']=='success'
+          assert r['event'] in ('workflow_dispatch','push') and r['conclusion']=='success'
           assert r['repository']['full_name']==os.environ['GITHUB_REPOSITORY']
           tag_sha=subprocess.check_output(['git','rev-parse',os.environ['RELEASE_TAG']+'^{commit}'],text=True).strip()
           assert tag_sha==r['head_sha'], 'Tag and native build must identify the same source'
@@ -55,10 +55,24 @@ jobs:
         run: |
           gh run download "$CANDIDATE_RUN_ID" --name native-candidate-macOS-ARM64 --dir candidates/macOS-ARM64
           gh run download "$CANDIDATE_RUN_ID" --name native-candidate-Windows-X64 --dir candidates/Windows-X64
+      - name: Download matching corresponding sources
+        shell: bash
+        run: |
+          gh run download "$CANDIDATE_RUN_ID" --name native-inputs-macOS-ARM64 --dir native-inputs/macOS-ARM64
+          gh run download "$CANDIDATE_RUN_ID" --name native-inputs-Windows-X64 --dir native-inputs/Windows-X64
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          sources=json.loads(Path('packaging/native-sources.lock.json').read_text())
+          for platform in ('macOS-ARM64','Windows-X64'):
+              for item in sources.values():
+                  archive=Path('native-inputs')/platform/'sources'/item['url'].rsplit('/',1)[-1]
+                  assert archive.is_file() and hashlib.sha256(archive.read_bytes()).hexdigest()==item['sha256']
+          PY
       - name: Verify exact reviewed installers
         shell: bash
         run: |
-          python packaging/release_assets.py --root candidates --approval packaging/release-approval.json --output release-assets --version "$(python slide_core/version.py)" --commit "$(cat candidate-sha.txt)" --run-id "$CANDIDATE_RUN_ID"
+          python packaging/release_assets.py --root candidates --sources native-inputs/macOS-ARM64/sources --approval packaging/release-approval.json --output release-assets --version "$(python slide_core/version.py)" --commit "$(cat candidate-sha.txt)" --run-id "$CANDIDATE_RUN_ID"
       - name: Create beta draft with both installers
         shell: bash
         run: |

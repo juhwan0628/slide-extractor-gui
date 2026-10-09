@@ -6,10 +6,10 @@ import os
 import sys
 from pathlib import Path
 
-def prepare(root):
+def prepare(root, *, candidate=False):
     root=Path(root)
     data=json.loads((root/'binary-manifest.json').read_text())
-    if data.get('status')!='APPROVED':
+    if data.get('status') not in ({'APPROVED','VERIFIED_INPUTS'} if candidate else {'APPROVED'}):
         raise ValueError('Supplier input manifest not approved')
     extension='.exe' if sys.platform=='win32' else ''
     tools=[]
@@ -28,4 +28,6 @@ def prepare(root):
 if __name__=='__main__':
     parser=argparse.ArgumentParser()
     parser.add_argument('root',type=Path)
-    prepare(parser.parse_args().root)
+    parser.add_argument('--candidate',action='store_true')
+    args=parser.parse_args()
+    prepare(args.root,candidate=args.candidate)

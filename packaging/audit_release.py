@@ -114,8 +114,21 @@ def main():
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--ffmpeg", type=Path, required=True)
     parser.add_argument("--manifest", type=Path, required=True)
+    parser.add_argument('--report',type=Path)
+    parser.add_argument('--installer',type=Path)
+    for name in ('version','commit','run-id','platform'):parser.add_argument('--'+name)
     args = parser.parse_args()
+    if args.report and not all((args.installer,args.version,args.commit,args.run_id,args.platform)):
+        parser.error('--report requires --installer, --version, --commit, --run-id and --platform')
     errors = audit(args.root, args.ffmpeg, args.manifest)
+    if args.report:
+        if not args.installer.is_file():errors.append('Reviewed installer missing')
+        report={'status':'BLOCKED' if errors else 'PASSED','errors':errors,'version':args.version,
+                'commit':args.commit,'run_id':args.run_id,'platform':args.platform,
+                'installer_sha256':sha256(args.installer) if args.installer.is_file() else None,
+                'manifest_sha256':sha256(args.manifest)}
+        args.report.parent.mkdir(parents=True,exist_ok=True)
+        args.report.write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
     for item in errors:
         print("FAIL:", item)
     print("RELEASE BLOCKED" if errors else "PRELIMINARY GATE PASSED; manual review required")
