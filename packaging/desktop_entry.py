@@ -1,5 +1,6 @@
 """Native app entry with a real bundled-tool/Qt/analysis/export smoke check."""
 import json
+from contextlib import ExitStack
 import os
 from pathlib import Path
 import sys
@@ -91,12 +92,14 @@ def smoke(target):
             assert all(Path(value).resolve().is_relative_to(root) for value in tools.values()), 'Bundled media tools missing'
         app=QApplication.instance() or QApplication([])
         window=Window();window.show();app.processEvents();window.close();app.processEvents()
-        with tempfile.TemporaryDirectory(prefix='slide-installed-smoke-') as temp:
+        with tempfile.TemporaryDirectory(prefix='slide-installed-smoke-') as temp, ExitStack() as cleanup:
             temp=Path(temp);video=temp/'test.mp4'
             subprocess.run([tools['ffmpeg'],'-hide_banner','-loglevel','error','-y','-f','lavfi','-i',
                 'testsrc2=size=320x180:rate=4:duration=4','-c:v','mpeg4','-q:v','2',str(video)],check=True,timeout=60)
             profile=AnalysisProfile()
             project,_=analyze_project(probe_source(video),AnalysisSettings(fps=0.5,roi_mode='full'),temp/'cache',profile=profile)
+            # The smoke owns this Project; end its pin before Windows temp deletion.
+            cleanup.callback(project._cache_pin.close)
             pdf,side=export_project(project,temp/'test.pdf')
             assert len(project.samples)==2
             assert len(PdfReader(pdf).pages)==len(project.pages)>0
