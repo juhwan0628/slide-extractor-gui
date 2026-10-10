@@ -83,3 +83,32 @@ def navigate(project:Project, current_id:str|None,delta:int):
     if not project.pages:return None
     index=next((i for i,p in enumerate(project.pages) if p.page_id==current_id),0)
     return project.pages[max(0,min(len(project.pages)-1,index+delta))].page_id
+
+
+def merge_pages(project:Project,page_ids):
+    """Collapse selected pages to the chronologically last representative."""
+    selected=set(page_ids)
+    known={page.page_id for page in project.pages}
+    if not selected<=known:return EditResult('rejected',None,(),'UnknownPage')
+    if len(selected)<2:
+        focus=next(iter(selected),None)
+        return EditResult('no_op',focus,(),'NeedMultiplePages')
+    last=max((p for p in project.pages if p.page_id in selected),
+             key=lambda p:project.sample_time(p.representative_sample_id))
+    representative=last  # Keep the exact original frame and provenance.
+    proposed=[representative if p.page_id==last.page_id else p for p in project.pages
+              if p.page_id not in selected or p.page_id==last.page_id]
+    rows=[i for i,p in enumerate(project.pages) if p.page_id in selected]
+    return _publish(project,proposed,last.page_id,rows)
+
+
+def delete_pages(project:Project,page_ids):
+    """Delete all selected pages atomically, recording one revision."""
+    selected=set(page_ids)
+    known={page.page_id for page in project.pages}
+    if not selected<=known:return EditResult('rejected',None,(),'UnknownPage')
+    if not selected:return EditResult('no_op',None,(),'EmptySelection')
+    rows=[i for i,p in enumerate(project.pages) if p.page_id in selected]
+    proposed=[p for p in project.pages if p.page_id not in selected]
+    focus=proposed[min(rows[0],len(proposed)-1)].page_id if proposed else None
+    return _publish(project,proposed,focus,rows)

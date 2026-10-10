@@ -55,12 +55,12 @@ jobs:
         run: gh run download 37977571499 --name native-inputs-${{ matrix.inputs }} --dir vendor/approved
       - name: Validate restored exact FFmpeg inputs
         run: python packaging/prepare_vendor.py vendor/approved --candidate
-      - name: Build pinned image-only OpenCV (no bundled video codecs)
-        run: python packaging/build_image_opencv.py
       - uses: actions/cache@v4
         with:
           path: vendor/approved/sources
           key: corresponding-sources-${{ hashFiles('packaging/native-sources.lock.json') }}
+      - name: Build pinned image-only OpenCV (no bundled video codecs)
+        run: python packaging/build_image_opencv.py
       - name: Collect exact sources, licenses and observed inventory
         run: |
           python -c "import shutil; shutil.rmtree('vendor/approved/licenses',ignore_errors=True)"
@@ -147,6 +147,7 @@ jobs:
           for name in ('installed-smoke.json','installer-smoke.json'):
               report=json.loads((Path('build')/name).read_text())
               assert report['pdf_only_checked'] and report['output_lock_cleanup_checked'],report
+              assert report['manual_editing_checked'] and report['keyboard_editing_checked'] and report['edited_export_checked'],report
               assert report['status']=='success' and report['frozen'] and report['bundled_tools_checked'] and report['version']==runpy.run_path('slide_core/version.py')['VERSION'],report
       - name: Record final bundle inventory and pending release review
         shell: python

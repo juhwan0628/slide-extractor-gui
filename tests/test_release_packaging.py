@@ -30,7 +30,7 @@ def test_shared_spec_uses_entrypoint_data_and_version(tmp_path,monkeypatch):
     assert all(Path(p).name in ('ffmpeg','ffprobe') for p,_ in calls['binaries'])
     assert {Path(p).name for p,_ in calls['datas']} >= {'THIRD_PARTY_NOTICES.md','LICENSE_AUDIT.md'}
     assert calls['bundle']['version']==BUNDLE_VERSION
-    assert VERSION.startswith('0.4.9')
+    assert VERSION.startswith(BUNDLE_VERSION)
 
 def test_archive_contains_complete_build_inputs(tmp_path):
     module=runpy.run_path(str(ROOT/'packaging/build_source_zip.py'))
@@ -54,4 +54,5 @@ def test_manifest_records_exact_tools_and_packages(tmp_path):
     assert result['tools']['ffmpeg']['sha256']
     assert '--disable-gpl' in result['tools']['ffmpeg']['version_output']
     assert result['packages']['numpy']
-    assert result['version'].startswith('0.4.9')
+    from slide_core.version import VERSION
+    assert result['version']==VERSION

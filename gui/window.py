@@ -5,7 +5,7 @@ from pathlib import Path
 from tempfile import gettempdir
 from uuid import uuid4
 import subprocess,sys
-from PySide6.QtCore import Qt,QTimer,QSignalBlocker,QSize,QSettings
+from PySide6.QtCore import Qt,QTimer,QSignalBlocker,QSize,QSettings,QItemSelectionModel
 from PySide6.QtGui import QPixmap,QImage,QKeySequence,QShortcut,QIcon
 from PySide6.QtWidgets import (QApplication,QMainWindow,QWidget,QVBoxLayout,QHBoxLayout,
    QPushButton,QLabel,QComboBox,QFileDialog,QMessageBox,QListView,QSlider,QSplitter,
@@ -18,11 +18,12 @@ from slide_core.models import Rect,CancelledError
 from slide_core.export import recover_export,RecoveryRequired,OutputOverwriteRequired,snapshot_export,snapshot_pdf
 from slide_core.export_v3 import export_project
 from slide_core.pdf_only_export import export_pdf_only
-from slide_core.editing import add_page,delete_page,replace_page
+from slide_core.editing import add_page,delete_page,replace_page,merge_pages,delete_pages
 from .state import Controller,State
 from .workers import JobCoordinator
 from .images import ImageLoader
 from .page_model import PageModel
+from .page_view import PageView
 from slide_core.editing import navigate
 from .playback import PlaybackClock
 from .regions import RegionDialog
@@ -152,11 +153,14 @@ class Window(QMainWindow):
         self.delete_button.hide()
         self._edit_controls=edits
         right=QWidget();self.page_panel=right;rl=QVBoxLayout(right);split.addWidget(right)
-        rl.addWidget(QLabel('Pages · chronological'))
-        self.page_view=QListView();self.page_view.setModel(self.page_model)
+        self.selection_label=QLabel('Pages · chronological · 0 selected')
+        rl.addWidget(self.selection_label)
+        self.page_view=PageView();self.page_view.setModel(self.page_model)
         self.page_view.setIconSize(QSize(150,85))
         self.page_view.setUniformItemSizes(True)
         self.page_view.clicked.connect(self._page_clicked)
+        self.page_view.selectionModel().currentChanged.connect(lambda current,_:self._page_clicked(current))
+        self.page_view.selectionModel().selectionChanged.connect(lambda *_:self._refresh_actions())
         self.page_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.page_view.customContextMenuRequested.connect(self._page_context_menu)
         rl.addWidget(self.page_view)
@@ -170,12 +174,26 @@ class Window(QMainWindow):
         action_row.addWidget(self.undo_button);action_row.addWidget(self.redo_button)
         rl.addLayout(action_row)
         edit_menu=self.menuBar().addMenu('Edit')
+        self.merge_action=edit_menu.addAction('Merge selected · keep last')
+        self.merge_action.setShortcut(QKeySequence('Ctrl+M'))
+        self.merge_action.triggered.connect(self.merge_selected_pages)
+        self.delete_action=edit_menu.addAction('Delete selected pages')
+        self.delete_action.setShortcuts([QKeySequence('Delete'),QKeySequence('Backspace')])
+        self.delete_action.triggered.connect(self.delete_selected_pages)
+        self.select_all_action=edit_menu.addAction('Select all pages')
+        self.select_all_action.setShortcuts(QKeySequence.keyBindings(QKeySequence.StandardKey.SelectAll))
+        self.select_all_action.triggered.connect(self.page_view.selectAll)
+        edit_menu.addSeparator()
         self.undo_action=edit_menu.addAction('Undo')
         self.undo_action.setShortcuts([QKeySequence.StandardKey.Undo])
         self.undo_action.triggered.connect(self.undo_edit)
         self.redo_action=edit_menu.addAction('Redo')
-        self.redo_action.setShortcuts([QKeySequence('Ctrl+Shift+Z'),QKeySequence('Ctrl+Y')])
+        redo_keys=QKeySequence.keyBindings(QKeySequence.StandardKey.Redo)+[QKeySequence('Ctrl+Shift+Z'),QKeySequence('Ctrl+Y')]
+        self.redo_action.setShortcuts([QKeySequence(key) for key in dict.fromkeys(k.toString() for k in redo_keys)])
         self.redo_action.triggered.connect(self.redo_edit)
+        for action in (self.merge_action,self.delete_action,self.select_all_action,self.undo_action,self.redo_action):
+            action.setShortcutContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
+            self.page_view.addAction(action)
         help_menu=self.menuBar().addMenu('Help')
         help_menu.addAction('About / Licenses…',self.show_about)
         split.setSizes([850,350])
@@ -326,6 +344,8 @@ class Window(QMainWindow):
 
     def _refresh_actions(self):
         a=self.controller.actions()
+        count=len(self.selected_page_ids())
+        self.selection_label.setText(f'Pages · chronological · {count} selected')
         self.open_button.setEnabled(a['open']);self.crop_button.setEnabled(a['region'])
         self.mask_button.setEnabled(a['region']);self.fps.setEnabled(a['region'])
         self.reset_roi.setEnabled(a['region']);self.clear_mask.setEnabled(a['region'])
@@ -335,6 +355,9 @@ class Window(QMainWindow):
         self.advanced_button.setEnabled(self.jobs.worker is None)
         self.play_button.setEnabled(a['playback']);self.slider.setEnabled(a['playback'])
         self.delete_button.setEnabled(a['edit'] and bool(self.controller.focus_page_id))
+        self.merge_action.setEnabled(self.stage=='review' and a['edit'] and count>=2)
+        self.delete_action.setEnabled(self.stage=='review' and a['edit'] and count>0)
+        self.select_all_action.setEnabled(self.stage=='review' and a['edit'] and self.page_model.rowCount()>0)
         self._update_edit_buttons()
         self.page_menu.setEnabled(a['edit'] and bool(self.controller.focus_page_id))
         self.undo_button.setEnabled(a['edit'] and bool(self.history.undo_stack))
@@ -351,7 +374,7 @@ class Window(QMainWindow):
         exists=bool(sample and any(p.representative_sample_id==sample.sample_id for p in project.pages))
         focused=next((p for p in project.pages if p.page_id==self.controller.focus_page_id),None) if ready else None
         self.add_button.setEnabled(ready and not exists)
-        self.replace_button.setEnabled(ready and focused is not None and not exists)
+        self.replace_button.setEnabled(ready and focused is not None and len(self.selected_page_ids())==1 and not exists)
 
     def _stop_play(self):
         self.tick_timer.stop()
@@ -696,6 +719,10 @@ class Window(QMainWindow):
             self.page_view.setCurrentIndex(self.page_model.index(row))
             self._page_clicked(self.page_model.index(row))
 
+    def selected_page_ids(self):
+        return tuple(self.page_model.data(index,self.page_model.PageId)
+                     for index in sorted(self.page_view.selectionModel().selectedRows(),key=lambda i:i.row()))
+
     def _current_page_menu(self):
         index=self.page_view.currentIndex()
         if index.isValid():self._show_page_menu(self.page_menu.mapToGlobal(self.page_menu.rect().bottomLeft()),index)
@@ -703,19 +730,65 @@ class Window(QMainWindow):
     def _page_context_menu(self,pos):
         index=self.page_view.indexAt(pos)
         if index.isValid():
-            self.page_view.setCurrentIndex(index)
+            if not self.page_view.selectionModel().isSelected(index):
+                self.page_view.setCurrentIndex(index)
+            else:
+                self.page_view.selectionModel().setCurrentIndex(index,QItemSelectionModel.SelectionFlag.NoUpdate)
             self._page_clicked(index)
             self._show_page_menu(self.page_view.mapToGlobal(pos),index)
 
     def _show_page_menu(self,position,index):
         if not self.controller.actions()['edit'] or not index.isValid():return
         menu=QMenu(self)
-        deletion=menu.addAction('Delete page')
-        chosen=menu.exec(position)
-        if chosen is deletion:self.delete_page()
+        menu.addAction(self.merge_action)
+        menu.addAction(self.delete_action)
+        menu.exec(position)
+
+    def _select_page_ids(self,page_ids,focus=None,anchor=None,base=()):
+        selected=set(page_ids)
+        model=self.page_view.selectionModel()
+        with QSignalBlocker(model):
+            model.clearSelection()
+            for row in range(self.page_model.rowCount()):
+                index=self.page_model.index(row)
+                pid=index.data(self.page_model.PageId)
+                if pid in selected:
+                    model.select(index,QItemSelectionModel.SelectionFlag.Select|QItemSelectionModel.SelectionFlag.Rows)
+                if pid==focus:
+                    model.setCurrentIndex(index,QItemSelectionModel.SelectionFlag.NoUpdate)
+            if focus is None:
+                model.setCurrentIndex(self.page_model.index(-1),QItemSelectionModel.SelectionFlag.NoUpdate)
+        self.page_view.restore_range(anchor or focus,base)
+        self._refresh_actions()
+
+    def _bulk_edit(self,operation):
+        if self.stage!='review' or not self.controller.actions()['edit']:return
+        project=self.controller.project
+        selected=self.selected_page_ids()
+        if not selected:return
+        before=self._snapshot()
+        old=[p.page_id for p in project.pages]
+        result=operation(project,selected)
+        if result.status!='changed':return
+        self._stop_play()
+        self._update_after_edit(result,old)
+        self._select_page_ids((result.focus_page_id,) if result.focus_page_id else (),result.focus_page_id)
+        if result.focus_page_id:
+            page=next(p for p in project.pages if p.page_id==result.focus_page_id)
+            self.current_index=next(i for i,s in enumerate(project.samples) if s.sample_id==page.representative_sample_id)
+            self.seek_index(self.current_index)
+        self.history.record(project,before,self._snapshot())
+        self.info.setText(f'{operation.__name__.replace("_"," ").capitalize()}: {len(selected)} selected · Undo available')
+        self._refresh_actions()
+
+    def merge_selected_pages(self):
+        self._bulk_edit(merge_pages)
+
+    def delete_selected_pages(self):
+        self._bulk_edit(delete_pages)
 
     def _snapshot(self):
-        return Snapshot(tuple(self.controller.project.pages),self.controller.focus_page_id)
+        return Snapshot(tuple(self.controller.project.pages),self.controller.focus_page_id,self.selected_page_ids(),self.current_index,self.page_view.range_anchor,self.page_view.range_base)
 
     def _restore_snapshot(self,snapshot):
         project=self.controller.project
@@ -728,10 +801,10 @@ class Window(QMainWindow):
         project.pages=list(snapshot.pages)
         project.revision+=1
         self._update_after_edit(EditResult('changed',snapshot.focus,()),old_ids)
-        if snapshot.focus:
-            page=next((p for p in project.pages if p.page_id==snapshot.focus),None)
-            if page:
-                self.seek_seconds(float(project.sample_time(page.representative_sample_id)))
+        self._select_page_ids(snapshot.selection if snapshot.selection is not None else ((snapshot.focus,) if snapshot.focus else ()),snapshot.focus,snapshot.range_anchor,snapshot.range_base)
+        if snapshot.sample_index is not None:
+            self.current_index=max(0,min(snapshot.sample_index,len(project.samples)-1))
+            self.seek_index(self.current_index)
         self._refresh_actions()
 
     def undo_edit(self):
@@ -770,7 +843,9 @@ class Window(QMainWindow):
     def _update_after_edit(self,result,old_ids):
         if result.status!='changed':
             self.info.setText(result.code or result.status);return
-        self.page_model.sync(old_ids)
+        # Core pages are already committed; intermediate model rows are stale.
+        with QSignalBlocker(self.page_view.selectionModel()):
+            self.page_model.sync(old_ids)
         self.controller.adopted_edit(result.focus_page_id)
         self.timeline.update()
         if result.focus_page_id:
@@ -790,8 +865,11 @@ class Window(QMainWindow):
         old=[p.page_id for p in project.pages]
         before=self._snapshot()
         result=add_page(project,project.samples[self.current_index].actual_time)
-        if result.status=='changed':self.history.record(project,before,Snapshot(tuple(project.pages),result.focus_page_id))
         self._update_after_edit(result,old)
+        if result.status=='changed':
+            self._select_page_ids((result.focus_page_id,),result.focus_page_id)
+            self.history.record(project,before,self._snapshot())
+            self._refresh_actions()
 
     def replace_page(self):
         project=self.controller.project
@@ -799,8 +877,11 @@ class Window(QMainWindow):
         old=[p.page_id for p in project.pages]
         before=self._snapshot()
         result=replace_page(project,self.controller.focus_page_id,project.samples[self.current_index].actual_time)
-        if result.status=='changed':self.history.record(project,before,Snapshot(tuple(project.pages),result.focus_page_id))
         self._update_after_edit(result,old)
+        if result.status=='changed':
+            self._select_page_ids((result.focus_page_id,),result.focus_page_id)
+            self.history.record(project,before,self._snapshot())
+            self._refresh_actions()
 
     def delete_page(self):
         project=self.controller.project
@@ -808,10 +889,12 @@ class Window(QMainWindow):
         old=[p.page_id for p in project.pages]
         before=self._snapshot()
         result=delete_page(project,self.controller.focus_page_id)
-        if result.status=='changed':
-            self.history.record(project,before,Snapshot(tuple(project.pages),result.focus_page_id))
-            self._undo_delete=(project,before.pages,before.focus)
         self._update_after_edit(result,old)
+        if result.status=='changed':
+            self._select_page_ids((result.focus_page_id,) if result.focus_page_id else (),result.focus_page_id)
+            self.history.record(project,before,self._snapshot())
+            self._undo_delete=(project,before.pages,before.focus)
+            self._refresh_actions()
 
     def export_pending(self):
         if not self.controller.actions()['export'] or self.jobs.worker is not None:return

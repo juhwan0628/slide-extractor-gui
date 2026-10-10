@@ -5,6 +5,10 @@ from dataclasses import dataclass
 class Snapshot:
     pages: tuple
     focus: str | None
+    selection: tuple | None = None
+    sample_index: int | None = None
+    range_anchor: str | None = None
+    range_base: tuple = ()
 
 class EditHistory:
     def __init__(self,limit=100):
