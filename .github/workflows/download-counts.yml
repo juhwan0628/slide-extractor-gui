@@ -1,7 +1,7 @@
 name: Refresh installer download counts
 on:
   schedule:
-    - cron: '17 */6 * * *'
+    - cron: '17 * * * *'
   release:
     types: [published]
   workflow_dispatch:
