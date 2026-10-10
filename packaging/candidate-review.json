@@ -1,11 +1,11 @@
 {
-  "version": "0.4.9rc3",
-  "candidate_run_id": "37991615142",
-  "candidate_commit": "a0c7043c26eca7cd75079ba39c4757134b1793c2",
-  "source_ci_run_id": "37991615111",
+  "version": "0.4.10rc1",
+  "candidate_run_id": "38015387743",
+  "candidate_commit": "36365be00f0ff5991231d5f4d74b28e12f962e4f",
+  "source_ci_run_id": "38015387742",
   "native_inventory_reviewed": true,
   "reviewed_native_inventory_sha256": {
-    "macOS-ARM64": "b5a38756bc6f06caf0bd264cb693af88c3903acd8811776a854333786c6d00ef",
-    "Windows-X64": "dc5b96eb5f83a1f74b464bf8bee9a86794f814c26c989b0fd5a3cd35a96b190a"
+    "macOS-ARM64": "46c10541090c1c0ba7120c563b48548722e47d7e8d5669dbbaf5babc67a80186",
+    "Windows-X64": "c58cec3224d220df987c0396dc3b162dd3d1decf6e3c3eeab839be7744fcf112"
   }
 }
