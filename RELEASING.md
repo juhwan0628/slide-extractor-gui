@@ -2,6 +2,15 @@
 
 공통 소스와 `slide_core/version.py`에서 버전을 관리합니다. 사용자는 Mac Apple Silicon DMG 또는 Windows x64 설치 EXE를 받습니다. Python·Qt·FFmpeg·FFprobe가 포함됩니다.
 
+## 0.4.10rc2 안정성 검증 기록
+
+- 공통 소스: `ddf7ba086a45dfe79fa0da61dfe48f97af5358c2`. 서버 전체 **619 passed in 50.75s**. [같은 소스 CI 38050474696](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/38050474696): Linux **613 passed, 6 skipped**; Windows 캐시 **21 passed, 1 skipped, 2 deselected**, 출력 잠금 **7 passed, 1 skipped**.
+- 만료·용량 압박 캐시 자동 정리, 현재/재사용/다른 프로세스 캐시 보호, 취소·실패 부분 캐시 정리; 영상 열기 실패·취소 시 Undo/Redo와 준비 상태 보존; 복구 잠금·접근 오류 안내. 기존 분석 알고리즘은 유지합니다.
+- [네이티브 설치본 38050474664](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/38050474664): 두 OS 성공. 실제 DMG/EXE 설치 후 분석·수동 편집·키보드·PDF 출력·잠금 정리·QtCore 교체 실행 검사를 통과했습니다.
+- 설치 검사 소유 캐시 잠금을 임시 폴더 삭제 전에 해제하는 Windows 호환 수정을 포함합니다. 성공·실패 정리 회귀가 실패→통과하고 독립 리뷰를 통과했습니다. 첫 실행 38049486364의 후보는 출고 대상에서 제외합니다.
+- [별도 원본 설치본 출고 감사 38051180933](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/38051180933): 두 OS PASSED, errors 없음. 실제 native 파일 목록은 rc1 승인 구성과 동일합니다. 정확한 원본 설치본·출고 manifest 해시는 `packaging/release-approval.json`에 고정합니다.
+- 유료 서명·공증 정책과 지원 아키텍처는 유지합니다.
+
 ## 0.4.10rc1 검증 기록
 
 - 공통 소스: `36365be00f0ff5991231d5f4d74b28e12f962e4f`. 로컬 전체 597 passed; [같은 소스 CI 38015387742](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/38015387742) 591 passed, 6 skipped. Windows 출력 잠금 검사 7 passed, 1 skipped.

@@ -1,9 +1,9 @@
 {
-  "version": "0.4.10rc1",
-  "candidate_run_id": "38015387743",
-  "candidate_commit": "36365be00f0ff5991231d5f4d74b28e12f962e4f",
-  "source_ci_run_id": "38015387742",
+  "version": "0.4.10rc2",
+  "candidate_run_id": "38050474664",
+  "candidate_commit": "ddf7ba086a45dfe79fa0da61dfe48f97af5358c2",
+  "source_ci_run_id": "38050474696",
   "public_release_approved": true,
-  "license_audit_run_id": "38015955293",
-  "audit_commit": "4e656bf97adc8e3f9d3a7edbfd259bbc0bcb18d7"
+  "license_audit_run_id": "38051180933",
+  "audit_commit": "7964a00371fb18f2270a50695956445da64109da"
 }

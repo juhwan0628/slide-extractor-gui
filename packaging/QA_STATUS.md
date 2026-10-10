@@ -11,7 +11,9 @@
 - 실제 Windows CI에 캐시 삭제·활성 잠금·별도 프로세스 보호 검사를 추가합니다.
 - 설치 검사의 TemporaryDirectory는 Windows에서 열린 캐시 잠금 파일을 제거할 수 없습니다. 검사 소유 Project의 pin을 ExitStack으로 먼저 해제하도록 수정했고 성공·실패 정리 회귀 2개가 실패→통과했습니다. 첫 후보 실행 `38049486364`는 대체되며 해당 Mac 후보도 최종 출고 대상이 아닙니다. Windows 정지는 검사 코드의 수명 불일치가 원인일 가능성이 높으며 새 설치본 실행으로 확인합니다.
 - 첫 소스 커밋 `637ebea8e3a3a5dc151eeeaf9173825909961224`의 CI `38049486305`: Linux 611 passed, 6 skipped; Windows 캐시 21 passed, 1 skipped, 2 deselected / 출력 잠금 7 passed, 1 skipped.
-- 이 기록 시점의 rc2 네이티브 설치본은 아직 빌드·출고 감사 전입니다. 아래 rc1 설치본 검증은 rc2 검증을 대신하지 않습니다.
+- 최종 공통 소스 `ddf7ba086a45dfe79fa0da61dfe48f97af5358c2`, CI `38050474696`: Linux 613 passed, 6 skipped; Windows 캐시 21 passed, 1 skipped, 2 deselected / 출력 잠금 7 passed, 1 skipped.
+- 네이티브 실행 `38050474664`: macOS arm64와 Windows x64 모두 성공. 번들·실제 설치 앱의 빈 PATH 분석, 수동 편집·키보드·PDF/PDF+JSON·출력 잠금 정리 및 QtCore 교체 실행 검사 통과. Windows 임시 폴더 정리도 종료 코드 0으로 완료.
+- 별도 원본 설치본 출고 감사 `38051180933` (감사 소스 `7964a00371fb18f2270a50695956445da64109da`): 두 OS PASSED, errors 없음. 실제 네이티브 파일 목록은 기존 승인본과 동일하며 새 설치본과 감사 manifest 해시는 release-approval.json에 고정합니다. 아래 rc1 검증은 역사 기록입니다.
 
 ## 2026-10-10 학교 커뮤니티 공개 전 점검
 

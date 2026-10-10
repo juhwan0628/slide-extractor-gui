@@ -1,4 +1,4 @@
-# Slide Extractor 0.4.10rc1 베타
+# Slide Extractor 0.4.10rc2 베타
 
 강의 영상에서 슬라이드 전환을 분석하고, 타임라인에서 페이지를 편집해 PDF로 저장합니다.
 
@@ -6,8 +6,8 @@
 
 | 기기 | 다운로드 |
 |---|---|
-| Apple Silicon Mac | **[Mac DMG 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.10rc1/SlideExtractor-v0.4.10rc1-macOS-arm64.dmg)** |
-| Windows x64 | **[Windows 설치 EXE 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.10rc1/SlideExtractor-v0.4.10rc1-Setup-Windows-x64.exe)** |
+| Apple Silicon Mac | **[Mac DMG 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.10rc2/SlideExtractor-v0.4.10rc2-macOS-arm64.dmg)** |
+| Windows x64 | **[Windows 설치 EXE 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.10rc2/SlideExtractor-v0.4.10rc2-Setup-Windows-x64.exe)** |
 
 **자기 기기에 맞는 설치 파일 하나만 받으면 됩니다.**
 
@@ -15,7 +15,14 @@
 - Windows x64: `Setup-Windows-x64.exe`를 실행합니다. 사용자 계정 폴더에 설치하며 관리자 권한을 요구하지 않습니다.
 - Python과 FFmpeg는 포함되어 있습니다. 직접 설치하거나 빌드할 필요가 없습니다.
 
-## 변경 사항
+## 이번 버전의 수정
+
+- 반복 분석으로 쌓인 미사용 캐시를 자동 정리합니다. 현재 프로젝트·재분석·다른 앱 인스턴스의 사용 중인 캐시는 보호합니다.
+- 분석 취소·실패 시 부분 캐시를 정리하고, 디스크 여유 공간이 부족하면 미사용 캐시 회수를 먼저 시도합니다.
+- 새 영상 열기 실패·취소 시 기존 프로젝트의 Undo/Redo와 ROI 준비 상태를 유지합니다.
+- 중단된 PDF 출력 복구가 잠금·권한 오류로 막히면 안내를 표시하고 복구 자료를 보존합니다.
+
+## 기존 주요 기능
 
 - Shift 범위 선택, Ctrl/Cmd 개별 선택, 전체 선택과 선택 개수 표시.
 - 우클릭 Merge는 선택 중 마지막 시점의 원본 페이지를 남기며 나머지 선택 페이지를 제거합니다. 선택하지 않은 페이지는 유지합니다.
@@ -41,7 +48,7 @@
 
 ## 개발·라이선스 자료
 
-[대응 소스·라이선스·검증 자료 ZIP](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.10rc1/SlideExtractor-v0.4.10rc1-Sources-Licenses.zip) · [SHA-256 해시](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.10rc1/SHA256SUMS.txt)
+[대응 소스·라이선스·검증 자료 ZIP](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.10rc2/SlideExtractor-v0.4.10rc2-Sources-Licenses.zip) · [SHA-256 해시](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.10rc2/SHA256SUMS.txt)
 
 자료 ZIP은 일반 설치에 필요하지 않습니다. Qt·FFmpeg 등 정확한 원본 소스, OpenCV 수정 패치, 두 OS의 라이선스·빌드·출고 검사 기록과 FFmpeg 빌드 입력을 모았습니다. 내부 README와 docs/SOURCE_AND_REPLACEMENT.md에서 구성과 라이브러리 교체 방법을 확인할 수 있습니다. 원래 자료의 바이트와 해시는 보존됩니다.
 
@@ -50,4 +57,4 @@ GitHub가 자동으로 제공하는 **Source code ZIP / tar.gz**는 앱 저장�
 
 ## 검증 기록
 
-공통 소스 검사 597개 통과. 같은 소스의 GitHub CI 및 macOS arm64·Windows x64 설치본 검사와 별도 출고 감사를 통과했습니다. 설치된 앱에서 수동 편집·키보드 입력·실행 취소 후 Shift 선택과 편집 후 PDF/JSON 저장을 검증했습니다. [검증 상세](https://github.com/juhwan0628/slide-extractor-gui/blob/main/RELEASING.md).
+서버 전체 소스 검사 619개 통과. GitHub Linux 검사 613개 통과·6개 플랫폼 전용 제외, 실제 Windows 캐시 검사 21개와 출력 잠금 검사 7개 통과. 같은 소스의 GitHub CI 및 macOS arm64·Windows x64 설치본 검사와 별도 출고 감사를 통과했습니다. 설치된 앱에서 수동 편집·키보드 입력·실행 취소 후 Shift 선택과 편집 후 PDF/JSON 저장을 검증했습니다. [검증 상세](https://github.com/juhwan0628/slide-extractor-gui/blob/main/RELEASING.md).
