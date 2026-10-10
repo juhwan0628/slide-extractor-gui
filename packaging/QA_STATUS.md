@@ -79,3 +79,15 @@
 - Actual Qt modules: Mac Core/DBus/Gui/Network/Svg/Widgets; Windows Core/Gui/Network/Svg/Widgets. No GPL-only Qt module or OpenCV video codec helper was found. Mac NumPy has no GCC/libquadmath dylibs; Windows OpenBLAS/GCC exception notices are preserved.
 - Source archives, platform-specific OpenCV patches, original notices, runtime addendum and bound audit reports accompany the release. No paid signing or notarization is added.
 - A release metadata tag may differ from the immutable native build commit only in the workflow's explicit review/documentation allowlist. Any application/build input change fails staging. Candidate commit and actual installer SHA256 remain bound to native and source CI records.
+
+
+## 2026-10-10 — 0.4.10rc1 manual page editing
+
+- Shift range / Ctrl-Cmd individual selection and selection count; selected right-click preserves the set. Merge retains the chronologically last exact Page identity/frame/metadata and preserves unselected pages. Bulk deletion is atomic.
+- Undo/Redo restores pages, selection, current focus, preview sample and native Shift anchor/base selection; 100-edit history. Edit shortcuts are restricted to the page list; text inputs and busy states are tested.
+- Fresh whole-branch review reproduced stale Qt model-row callbacks and lost Shift anchors after Undo. Both received failing regressions then fixes; reverse/disjoint ranges and subsequent plain navigation also pass.
+- Real synthetic exports verify edited PDF/JSON counts, stable page IDs and timestamps, PDF-only export, no leftover output locks and unchanged source bytes. Automatic analysis remains unchanged.
+- Remote full suite: 597 passed in 44.80s, exit0. Same source CI 38015387742: 591 passed, 6 skipped; Windows locks 7 passed, 1 skipped. actionlint and diff checks passed.
+- Immutable candidate commit 36365be00f0ff5991231d5f4d74b28e12f962e4f, native run 38015387743: both OS SUCCESS. Empty PATH bundled app, installed DMG/EXE app, manual editing/keyboard/edited export and modified QtCore smoke passed.
+- Native inventory delta is only QtTest framework/binding on Mac and Qt6Test.dll/QtTest.pyd on Windows. Official Qt Test 6.12 licensing: https://doc.qt.io/qt-6.12/qttest-index.html#licenses-and-attributions. Full pinned source archives and original license copies include this module. No extra video codec was found.
+- Independent fresh installed-byte/source/notice audit run 38015955293, review commit 4e656bf97adc8e3f9d3a7edbfd259bbc0bcb18d7: both PASSED, errors empty. Exact installer and audit-manifest SHA256 are bound in release-approval.json.

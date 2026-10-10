@@ -46,3 +46,8 @@
 자료 ZIP은 일반 설치에 필요하지 않습니다. Qt·FFmpeg 등 정확한 원본 소스, OpenCV 수정 패치, 두 OS의 라이선스·빌드·출고 검사 기록과 FFmpeg 빌드 입력을 모았습니다. 내부 README와 docs/SOURCE_AND_REPLACEMENT.md에서 구성과 라이브러리 교체 방법을 확인할 수 있습니다. 원래 자료의 바이트와 해시는 보존됩니다.
 
 GitHub가 자동으로 제공하는 **Source code ZIP / tar.gz**는 앱 저장소 소스입니다. 외부 라이브러리의 대응 소스는 위 자료 ZIP에 있습니다.
+
+
+## 검증 기록
+
+공통 소스 검사 597개 통과. 같은 소스의 GitHub CI 및 macOS arm64·Windows x64 설치본 검사와 별도 출고 감사를 통과했습니다. 설치된 앱에서 수동 편집·키보드 입력·실행 취소 후 Shift 선택과 편집 후 PDF/JSON 저장을 검증했습니다. [검증 상세](https://github.com/juhwan0628/slide-extractor-gui/blob/main/RELEASING.md).

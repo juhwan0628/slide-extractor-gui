@@ -1,43 +1,43 @@
 {
   "status": "APPROVED",
   "public_release_approved": true,
-  "version": "0.4.9rc3",
-  "commit": "a0c7043c26eca7cd75079ba39c4757134b1793c2",
-  "run_id": "37991615142",
-  "source_ci_run_id": "37991615111",
-  "license_audit_run_id": "37992725057",
-  "audit_commit": "b09115dcc3c2e57040db28f7716ba7c2bebc4684",
+  "version": "0.4.10rc1",
+  "commit": "36365be00f0ff5991231d5f4d74b28e12f962e4f",
+  "run_id": "38015387743",
+  "source_ci_run_id": "38015387742",
+  "license_audit_run_id": "38015955293",
+  "audit_commit": "4e656bf97adc8e3f9d3a7edbfd259bbc0bcb18d7",
   "assets": {
     "macos-arm64": {
-      "path": "macOS-ARM64/dist/SlideExtractor-v0.4.9rc3-macOS-arm64-approved.dmg",
-      "sha256": "a9776ea12f3cce7764b05d477230d09202044e46e287ee86a580dc2f5119dd31"
+      "path": "macOS-ARM64/dist/SlideExtractor-v0.4.10rc1-macOS-arm64-approved.dmg",
+      "sha256": "121f3454f606bd6fa13cb8cbf7c0a95b344f7289fdcf090410243450842db4c5"
     },
     "windows-x64": {
-      "path": "Windows-X64/dist/SlideExtractor-v0.4.9rc3-Setup-Windows-x64.exe",
-      "sha256": "9bea4da0040fac6486c2c238058e132b9d3d751077bb1dce90a3231bb56b3cb0"
+      "path": "Windows-X64/dist/SlideExtractor-v0.4.10rc1-Setup-Windows-x64.exe",
+      "sha256": "f0d142ec3902ba04a5f6bf890368f061db9cc1771151396f36558ca4ed8c0f82"
     }
   },
   "audits": {
     "macos-arm64": {
       "status": "PASSED",
       "errors": [],
-      "version": "0.4.9rc3",
-      "commit": "a0c7043c26eca7cd75079ba39c4757134b1793c2",
-      "run_id": "37991615142",
+      "version": "0.4.10rc1",
+      "commit": "36365be00f0ff5991231d5f4d74b28e12f962e4f",
+      "run_id": "38015387743",
       "platform": "macOS-ARM64",
-      "installer_sha256": "a9776ea12f3cce7764b05d477230d09202044e46e287ee86a580dc2f5119dd31",
-      "manifest_sha256": "893516a0264499d475577bd74873c2e3f5e7a81dee2bf724983126223d3fe66d"
+      "installer_sha256": "121f3454f606bd6fa13cb8cbf7c0a95b344f7289fdcf090410243450842db4c5",
+      "manifest_sha256": "bd8ff9b63ebbc8be4651a26e45489fad3001211749a194570b40a0dd34379029"
     },
     "windows-x64": {
       "status": "PASSED",
       "errors": [],
-      "version": "0.4.9rc3",
-      "commit": "a0c7043c26eca7cd75079ba39c4757134b1793c2",
-      "run_id": "37991615142",
+      "version": "0.4.10rc1",
+      "commit": "36365be00f0ff5991231d5f4d74b28e12f962e4f",
+      "run_id": "38015387743",
       "platform": "Windows-X64",
-      "installer_sha256": "9bea4da0040fac6486c2c238058e132b9d3d751077bb1dce90a3231bb56b3cb0",
-      "manifest_sha256": "9c80849aeda1a6450bbad3533a52c67a75bbd033ed0668c0d0c36608541137ca"
+      "installer_sha256": "f0d142ec3902ba04a5f6bf890368f061db9cc1771151396f36558ca4ed8c0f82",
+      "manifest_sha256": "bf03c5484564a6bf30205d857816ed143fb37052f8b0636cf794e057757d7704"
     }
   },
-  "review_scope": "Exact two-platform installers, native inventory, pinned corresponding sources and license copies, installed analysis/PDF/lock smoke and modified Qt runtime smoke. This is a technical release review, not a legal compliance certificate."
+  "review_scope": "Exact two-platform installers, native inventory including Qt Test, pinned sources and original licenses, installed selection/Merge/delete/Undo/Redo/Shift anchor and edited PDF/JSON smoke, output lock cleanup and modified Qt runtime. Technical release review, not legal certification."
 }

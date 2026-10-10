@@ -5,7 +5,7 @@
 **강의 영상에서 슬라이드를 찾고, 필요한 페이지만 PDF로.**
 
 [![Common source tests](https://github.com/juhwan0628/slide-extractor-gui/actions/workflows/ci.yml/badge.svg)](https://github.com/juhwan0628/slide-extractor-gui/actions/workflows/ci.yml)
-![Beta](https://img.shields.io/badge/beta-0.4.9rc3-6556d9)
+![Beta](https://img.shields.io/badge/beta-0.4.10rc1-6556d9)
 ![macOS](https://img.shields.io/badge/macOS-Apple%20Silicon-20242a)
 ![Windows](https://img.shields.io/badge/Windows-x64-20242a)
 
@@ -29,14 +29,14 @@
 
 ## 다운로드
 
-현재 버전은 **0.4.9rc3 베타**입니다. 두 OS의 설치·분석·PDF 저장 검사를 GitHub Actions에서 통과했습니다. MIT 및 제3자 고지·대응 소스 자료는 릴리스에 함께 제공합니다.
+현재 버전은 **0.4.10rc1 베타**입니다. 두 OS의 설치·분석·PDF 저장 검사를 GitHub Actions에서 통과했습니다. MIT 및 제3자 고지·대응 소스 자료는 릴리스에 함께 제공합니다.
 
 | 기기 | 설치 파일 | 설치 안내 |
 |---|---|---|
-| Apple Silicon Mac | [DMG 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.9rc3/SlideExtractor-v0.4.9rc3-macOS-arm64.dmg) | [Mac 설치](INSTALL-MAC.md) |
-| Windows x64 | [설치 EXE 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.9rc3/SlideExtractor-v0.4.9rc3-Setup-Windows-x64.exe) | [Windows 설치](INSTALL-WINDOWS.md) |
+| Apple Silicon Mac | [DMG 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.10rc1/SlideExtractor-v0.4.10rc1-macOS-arm64.dmg) | [Mac 설치](INSTALL-MAC.md) |
+| Windows x64 | [설치 EXE 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.10rc1/SlideExtractor-v0.4.10rc1-Setup-Windows-x64.exe) | [Windows 설치](INSTALL-WINDOWS.md) |
 
-일반 사용자는 위 설치 파일 하나만 받으면 됩니다. [대응 소스·라이선스·검증 자료 ZIP](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.9rc3/SlideExtractor-v0.4.9rc3-Sources-Licenses.zip)은 개발·라이선스 확인용이며 설치에 필요하지 않습니다.
+일반 사용자는 위 설치 파일 하나만 받으면 됩니다. [대응 소스·라이선스·검증 자료 ZIP](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.10rc1/SlideExtractor-v0.4.10rc1-Sources-Licenses.zip)은 개발·라이선스 확인용이며 설치에 필요하지 않습니다.
 
 GitHub Releases에서 설치 파일을 직접 다운로드합니다. **Python·Qt·FFmpeg·FFprobe는 포함돼 있습니다.** Intel Mac과 Windows ARM은 이번 베타 검증 대상이 아닙니다.
 
@@ -69,9 +69,7 @@ GitHub Releases에서 설치 파일을 직접 다운로드합니다. **Python·Q
 
 필기가 누적되거나 같은 페이지를 재방문하는 영상은 수동 Merge로 정리할 수 있습니다. 자동 필기·재방문 처리 개선은 향후 연구 과제로 남겨두며 이번 버전의 변화 감지 알고리즘은 유지합니다.
 
-## 0.4.10rc1 후보의 변경
-
-수동 편집 기능은 새 베타 후보 기준입니다. Mac·Windows 설치본 검증이 끝나면 다운로드를 갱신합니다.
+## 이번 베타의 변경
 
 - Shift 범위 선택, Ctrl/Cmd 개별 선택과 선택 개수 표시.
 - 선택 페이지 일괄 Merge·삭제, 선택과 프리뷰까지 복원하는 Undo/Redo.

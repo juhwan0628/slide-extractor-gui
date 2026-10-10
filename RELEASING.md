@@ -2,6 +2,14 @@
 
 공통 소스와 `slide_core/version.py`에서 버전을 관리합니다. 사용자는 Mac Apple Silicon DMG 또는 Windows x64 설치 EXE를 받습니다. Python·Qt·FFmpeg·FFprobe가 포함됩니다.
 
+## 0.4.10rc1 검증 기록
+
+- 공통 소스: `36365be00f0ff5991231d5f4d74b28e12f962e4f`. 로컬 전체 597 passed; [같은 소스 CI 38015387742](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/38015387742) 591 passed, 6 skipped. Windows 출력 잠금 검사 7 passed, 1 skipped.
+- [네이티브 후보 38015387743](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/38015387743): macOS arm64 / Windows x64 모두 성공. 실제 설치본에서 Shift 선택·Merge·삭제·Undo/Redo·Shift 기준점 복원, 편집 후 PDF/PDF+JSON 및 잠금 정리, QtCore 교체 실행 검사를 통과했습니다.
+- [별도 설치본 출고 감사 38015955293](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/38015955293): 두 OS 모두 PASSED. 원본 설치 파일과 감사 manifest 해시는 `packaging/release-approval.json`에 고정합니다.
+- 기존 승인 인벤토리에서 추가된 native 구성은 설치본 검사에 쓰이는 Qt Test 모듈과 바인딩입니다. LGPLv3 대상 Qt 모듈이며 고정된 전체 Qt / Qt for Python 소스와 원문 라이선스에 포함됩니다. 다른 native 라이브러리나 OpenCV 영상 코덱은 추가되지 않았습니다.
+- 변화 감지·분석 알고리즘은 유지합니다. 필기 누적과 페이지 재방문의 자동 처리는 향후 연구 과제입니다.
+
 ## 0.4.9rc3 검증 기록
 
 - 네이티브 빌드: [37991615142](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/37991615142), 두 OS 성공. 실제 빌드 소스는 `a0c7043c26eca7cd75079ba39c4757134b1793c2`입니다.
