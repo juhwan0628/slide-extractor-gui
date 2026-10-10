@@ -2,7 +2,7 @@ name: Publish reviewed beta (both OS)
 on:
   push:
     branches: [main]
-    paths: [packaging/beta-review.json, packaging/release-approval.json, .github/workflows/beta-release-review.yml]
+    paths: [packaging/beta-review.json, packaging/release-approval.json]
   workflow_dispatch:
 permissions:
   contents: read
@@ -49,7 +49,7 @@ jobs:
           assert audit['path']=='.github/workflows/candidate-license-audit.yml' and audit['conclusion']=='success' and audit['head_sha']==c['audit_commit']
           source=subprocess.check_output(['git','show',c['candidate_commit']+':slide_core/version.py'],text=True)
           assert f'VERSION = "{c["version"]}"' in source or f"VERSION = '{c['version']}'" in source
-          allowed={'.github/workflows/candidate-license-audit.yml','.github/workflows/beta-release-review.yml','packaging/review_candidate.py','packaging/candidate-review.json','packaging/beta-review.json','packaging/third-party/OpenSSL-LICENSE.txt','packaging/third-party/RUNTIME-NOTICES.md','RELEASE_NOTES.md','README.md','INSTALL-MAC.md','INSTALL-WINDOWS.md','RELEASING.md','packaging/QA_STATUS.md','packaging/release-approval.json','packaging/rc2-superseded.md'}
+          allowed={'.github/workflows/candidate-license-audit.yml','.github/workflows/beta-release-review.yml','packaging/review_candidate.py','packaging/candidate-review.json','packaging/beta-review.json','packaging/third-party/OpenSSL-LICENSE.txt','packaging/third-party/RUNTIME-NOTICES.md','RELEASE_NOTES.md','README.md','INSTALL-MAC.md','INSTALL-WINDOWS.md','RELEASING.md','packaging/QA_STATUS.md','packaging/release-approval.json','packaging/rc2-superseded.md','packaging/compact_release.py','packaging/compact-release.json','.github/workflows/compact-release.yml','tests/test_compact_release.py'}
           changed=set(subprocess.check_output(['git','diff','--name-only',c['candidate_commit'],os.environ['GITHUB_SHA']],text=True).splitlines())
           assert changed<=allowed, 'Application/build inputs changed after candidate: '+str(changed-allowed)
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -143,6 +143,9 @@ jobs:
           notes=Path('RELEASE_NOTES.md').read_text()
           notes+='\n\n## 검증 기록\n\n같은 커밋의 맥·Windows 설치본, 빈 PATH 분석·PDF·잠금 정리 및 Qt 라이브러리 교체 실행 검사가 통과했습니다. 별도 설치본 출고 감사도 PASSED입니다. 원본 소스·패치·라이선스 및 해시는 첨부 자료에 있습니다. 초기 후보의 release-gate.txt는 승인 전 관찰 기록이며 license-audit/audit-report.json이 최종 출고 검사입니다. 이 릴리스는 아직 공개 전 초안입니다.\n'
           Path('draft-notes.md').write_text(notes)
+      - name: Consolidate corresponding sources, licenses and evidence
+        shell: bash
+        run: python packaging/compact_release.py --input review-assets --output public-assets --version "${RELEASE_TAG#v}"
       - name: Stage exact approved assets privately
         shell: bash
         run: |
@@ -150,9 +153,9 @@ jobs:
           if gh release view "$RELEASE_TAG" --json isDraft > existing-release.json 2>/dev/null; then
             python -c "import json; assert json.load(open('existing-release.json'))['isDraft'], 'Cannot overwrite a published release'"
             gh release edit "$RELEASE_TAG" --target "$GITHUB_SHA" --draft --prerelease --title "Slide Extractor $RELEASE_TAG — beta review" --notes-file draft-notes.md
-            gh release upload "$RELEASE_TAG" review-assets/* --clobber
+            gh release upload "$RELEASE_TAG" public-assets/* --clobber
           else
-            gh release create "$RELEASE_TAG" review-assets/* --target "$GITHUB_SHA" --draft --prerelease --title "Slide Extractor $RELEASE_TAG — beta review" --notes-file draft-notes.md
+            gh release create "$RELEASE_TAG" public-assets/* --target "$GITHUB_SHA" --draft --prerelease --title "Slide Extractor $RELEASE_TAG — beta review" --notes-file draft-notes.md
           fi
       - name: Verify uploaded bytes and publish exact approved beta
         shell: bash
@@ -166,9 +169,9 @@ jobs:
           release=next(r for r in releases if r['tag_name']==os.environ['RELEASE_TAG'])
           assert release['draft'] is True and release['target_commitish']==os.environ['GITHUB_SHA']
           assets={a['name']:a for a in release['assets']}
-          expected={p.name for p in Path('review-assets').iterdir()}
+          expected={p.name for p in Path('public-assets').iterdir()}
           assert set(assets)==expected
-          for p in Path('review-assets').iterdir():
+          for p in Path('public-assets').iterdir():
               assert assets[p.name]['digest']=='sha256:'+hashlib.sha256(p.read_bytes()).hexdigest()
           print('All uploaded installer, source, patch, notice and audit bytes match approved files')
           PY

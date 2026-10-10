@@ -36,6 +36,8 @@
 | Apple Silicon Mac | [DMG 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.9rc3/SlideExtractor-v0.4.9rc3-macOS-arm64.dmg) | [Mac 설치](INSTALL-MAC.md) |
 | Windows x64 | [설치 EXE 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.9rc3/SlideExtractor-v0.4.9rc3-Setup-Windows-x64.exe) | [Windows 설치](INSTALL-WINDOWS.md) |
 
+일반 사용자는 위 설치 파일 하나만 받으면 됩니다. [대응 소스·라이선스·검증 자료 ZIP](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.9rc3/SlideExtractor-v0.4.9rc3-Sources-Licenses.zip)은 개발·라이선스 확인용이며 설치에 필요하지 않습니다.
+
 GitHub Releases에서 설치 파일을 직접 다운로드합니다. **Python·Qt·FFmpeg·FFprobe는 포함돼 있습니다.** Intel Mac과 Windows ARM은 이번 베타 검증 대상이 아닙니다.
 
 베타는 유료 코드 서명·Apple 공증을 적용하지 않았으므로 OS 경고나 실행 차단이 발생할 수 있습니다. 자세한 내용은 각 OS 설치 안내를 참고하세요.

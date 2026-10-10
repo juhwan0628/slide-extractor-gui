@@ -1,0 +1,107 @@
+{
+  "version": "0.4.9rc3",
+  "tag": "v0.4.9rc3",
+  "release_id": 408360252,
+  "assets": [
+    {
+      "name": "BETA_REVIEW.json",
+      "size": 770,
+      "digest": "sha256:aafa0d7ec1d8d3a13cdde134a70e07a8cfee665af99f1e23bc7c31aefde6d94b"
+    },
+    {
+      "name": "build-and-review-evidence.zip",
+      "size": 6784163,
+      "digest": "sha256:5605eaa7126c437042c1dc88297b3aedb85b43cf4cd0722f8ddb30904e8d6e85"
+    },
+    {
+      "name": "charset_normalizer-3.5.2.tar.gz",
+      "size": 172659,
+      "digest": "sha256:39de2a259fc954455c57274dc94c79d5842774e1247a016aff30bc0efed0f4ef"
+    },
+    {
+      "name": "ffmpeg-8.1.2.tar.xz",
+      "size": 11710924,
+      "digest": "sha256:464beb5e7bf0c311e68b45ae2f04e9cc2af88851abb4082231742a74d97b524c"
+    },
+    {
+      "name": "ffmpeg-inputs-macOS-ARM64.zip",
+      "size": 20149669,
+      "digest": "sha256:53e1f32413165c3a2663c52b50a034fbac0531439328cbaa74c90703f3300479"
+    },
+    {
+      "name": "ffmpeg-inputs-Windows-X64.zip",
+      "size": 25465143,
+      "digest": "sha256:abb47bfb4fba687a65137e1f1f91570a658d5fdf3d386a2e98a066afc0f467eb"
+    },
+    {
+      "name": "numpy-2.5.3.tar.gz",
+      "size": 20791231,
+      "digest": "sha256:df2d5874ff183595a4ba404edd04f6bd9b5505c1d7708573f6a6c17489a67563"
+    },
+    {
+      "name": "opencv-image-only-macOS-ARM64.patch",
+      "size": 964,
+      "digest": "sha256:608616b85f5d8791f7bb55e613fc3e5dc5b57d0a5d1a63037ea77f6bea8eded2"
+    },
+    {
+      "name": "opencv-image-only-Windows-X64.patch",
+      "size": 993,
+      "digest": "sha256:bfbf89c53f0bdc316fbb9e94e7921ac267cbd79edbfdc4f290799a17b0c49514"
+    },
+    {
+      "name": "opencv_python_headless-5.0.0.93.tar.gz",
+      "size": 81817738,
+      "digest": "sha256:b82f9831daab90b725c7c1ee1b36cb5732c367096ac76d119e64e14eb70d5f3c"
+    },
+    {
+      "name": "OpenSSL-LICENSE.txt",
+      "size": 10175,
+      "digest": "sha256:7d5450cb2d142651b8afa315b5f238efc805dad827d91ba367d8516bc9d49e7a"
+    },
+    {
+      "name": "pillow-12.3.0.tar.gz",
+      "size": 47025035,
+      "digest": "sha256:3b8182a766685eaa002637e28b4ec8d6b18819a0c71f579bf0dbaa5830297cce"
+    },
+    {
+      "name": "pypdf-6.19.0.tar.gz",
+      "size": 7033266,
+      "digest": "sha256:bbc43aca292369ccc6cbc8a921991ecf2538a3587ab5a116eff06c321d647155"
+    },
+    {
+      "name": "pyside-setup-everywhere-src-6.12.0.tar.xz",
+      "size": 18211772,
+      "digest": "sha256:099c1a597cf33c1b000e11cf68a0b82d216fb802bf81726efc720394f10c7751"
+    },
+    {
+      "name": "qt-everywhere-src-6.12.0.tar.xz",
+      "size": 443394020,
+      "digest": "sha256:98ff4f44bac6ec3e1e62ee2a4316ae0e3d15badb015d753cc0268a20db52f165"
+    },
+    {
+      "name": "reportlab-5.0.1.tar.gz",
+      "size": 3945711,
+      "digest": "sha256:ebd13154be1c8515e665de70bd2d303ae9ddc3ef47e44afd5116441ca0283a26"
+    },
+    {
+      "name": "RUNTIME-NOTICES.md",
+      "size": 1092,
+      "digest": "sha256:1c4b9e6ed434322114c9848c6e7f8c1682e2d78ec7473f9f395790ef1d9d9805"
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "size": 1808,
+      "digest": "sha256:796d38cb64ff006b78d814019dee1fdb368078de4da9dc944839199f80a080e5"
+    },
+    {
+      "name": "SlideExtractor-v0.4.9rc3-macOS-arm64.dmg",
+      "size": 84072374,
+      "digest": "sha256:a9776ea12f3cce7764b05d477230d09202044e46e287ee86a580dc2f5119dd31"
+    },
+    {
+      "name": "SlideExtractor-v0.4.9rc3-Setup-Windows-x64.exe",
+      "size": 69237931,
+      "digest": "sha256:9bea4da0040fac6486c2c238058e132b9d3d751077bb1dce90a3231bb56b3cb0"
+    }
+  ]
+}

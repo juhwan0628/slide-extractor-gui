@@ -20,6 +20,14 @@
 
 GitHub 기본 토큰의 과거 커밋 태그 권한 제한 때문에 릴리스 태그는 **검토 자료 정리 커밋**을 가리킬 수 있습니다. 후보 커밋 이후 달라진 파일이 명시적인 문서/검토 자료 허용 목록에만 속하는지 확인합니다. 앱 코드·requirements·빌드 스펙·네이티브 입력 설정이 바뀌면 릴리스 준비가 실패합니다. 실제 빌드 커밋은 BETA_REVIEW.json과 build-manifest.json에 별도로 보존됩니다.
 
+## 릴리스 에셋 구성
+
+직접 업로드하는 파일은 설치 DMG·설치 EXE·Sources-Licenses.zip·SHA256SUMS.txt 네 개입니다. GitHub 자동 Source code ZIP/tar.gz를 포함하면 사용자가 보는 에셋은 여섯 개입니다. 일반 사용자 다운로드는 릴리스 설명 맨 위에서 안내합니다.
+
+Sources-Licenses.zip은 대응 소스, OS별 패치, 라이선스, 빌드 입력·감사 자료와 원래 파일별 해시를 보존합니다. packaging/compact_release.py는 원래 자료의 파일 목록과 SHA-256을 검증하고, 압축 후 다시 모든 자료 바이트를 검증합니다. 외부 SHA256SUMS.txt는 설치 파일 두 개와 자료 ZIP을 가리킵니다.
+
+이미 공개된 릴리스의 자료 정리는 별도 Consolidate published release assets 워크플로로 수행합니다. 고정된 원래 릴리스 ID·파일 목록·해시와 대조하며, 새 자료 ZIP과 해시 파일의 GitHub digest를 확인한 후에만 기존 개별 자료를 삭제합니다. 설치 파일과 태그는 변경하지 않습니다. 중단 후 재실행할 때는 이미 업로드한 ZIP에서 원래 자료를 복구해 재검증합니다.
+
 소스 제공은 14일 CI 보관으로 끝내지 않습니다. 릴리스에 정확한 FFmpeg·Qt·Qt for Python·OpenCV 등 원본 소스, 수정 패치, 고지·라이선스 원문, 빌드·감사 기록 및 SHA256SUMS를 함께 제공합니다. 다운로드 사용자에게 vendor 폴더 생성이나 Python 설치를 요구하지 않습니다.
 
 기술 출고 검사는 법적 인증서가 아닙니다. 새로운 dependency나 native wheel/라이브러리를 도입하면 실제 배포 바이트를 기준으로 다시 검토합니다.
