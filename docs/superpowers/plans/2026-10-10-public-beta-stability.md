@@ -38,4 +38,4 @@ Interfaces: unchanged public GUI methods; reset at successful probe adoption. Sh
 Files: .github/workflows/ci.yml, packaging/QA_STATUS.md.
 - [x] Add cache lifecycle tests to real Windows CI; verify actionlint and latest full suite.
 - [x] Independent whole-branch review; fix important findings with RED→GREEN.
-- [ ] Publish reviewed source changes to GitHub; preserve screenshot and current release metadata; report installed beta availability accurately.
+- [x] Publish reviewed source changes to GitHub; preserve screenshot and current release metadata; report installed beta availability accurately.
