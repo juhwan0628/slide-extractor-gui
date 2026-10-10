@@ -248,7 +248,7 @@ def _decode_stream(source, vf, width, height, *, timeout=120, cancelled=None, se
 
 
 def sample_stream(source:SourceRef,cache_root:Path,*,fps:Fraction=Fraction(1),
-                  cancelled=None,timeout=120,progress=None,profile=None,decode_options=None):
+                  cancelled=None,timeout=120,progress=None,profile=None,decode_options=None,cache_owner=None):
     """Select bucket-first frames, 1 or 0.5 fps, preserving source PTS."""
     fps=Fraction(fps)
     if fps not in (Fraction(1),Fraction(1,2)):
@@ -273,7 +273,7 @@ def sample_stream(source:SourceRef,cache_root:Path,*,fps:Fraction=Fraction(1),
     from .profiling import measured
     samples=[]
     if progress:progress('sampling',None,None)
-    with CacheSession(cache_root) as session:
+    with CacheSession(cache_root, auto_prune=True, discard_on_error=True) as session:
         prior=-1
         decoded=_decode_stream(source,vf,pipe.cache_width,pipe.cache_height,
                                timeout=timeout,cancelled=cancelled,decode_options=decode_options)
@@ -306,6 +306,8 @@ def sample_stream(source:SourceRef,cache_root:Path,*,fps:Fraction=Fraction(1),
             raise MediaError('InvalidTiming: empty decoded video',code='InvalidTiming')
         if not source_matches(source):raise MediaError('SourceChanged',code='SourceChanged')
         session.complete()
+        if cache_owner is not None:
+            cache_owner(session.retain())
         return tuple(samples),session.directory
 
 

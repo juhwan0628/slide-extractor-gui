@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (QApplication,QMainWindow,QWidget,QVBoxLayout,QHBo
    QPushButton,QLabel,QComboBox,QFileDialog,QMessageBox,QListView,QSlider,QSplitter,
    QProgressBar,QStackedWidget,QMenu,QToolButton,QCheckBox,QDialog,QDialogButtonBox,QFormLayout)
 from slide_core.config import AnalysisSettings
+from slide_core.cache import LeaseBusy
 from slide_core.analysis import analyze_project,requires_reanalysis
 from slide_core.profiling import profile_directory
 from slide_core.media import probe_source
@@ -336,11 +337,17 @@ class Window(QMainWindow):
                 QMessageBox.StandardButton.Yes|QMessageBox.StandardButton.No,
                 QMessageBox.StandardButton.No)
             if reply!=QMessageBox.StandardButton.Yes:continue
-            try:
-                recovered=recover_export(parent)
-                self.info.setText(f'Recovered {len(recovered)} interrupted export(s)')
-            except (RecoveryRequired,OSError,ValueError) as exc:
-                QMessageBox.warning(self,'Manual recovery required',str(exc))
+            self._recover_export_folder(parent)
+
+    def _recover_export_folder(self,parent):
+        try:
+            recovered=recover_export(parent)
+        except (RecoveryRequired,LeaseBusy,OSError) as exc:
+            QMessageBox.warning(self,'Export recovery unavailable',
+                                f'{exc}\nJournal/backup files remain in {parent}. Retry after other exports finish.')
+            return False
+        self.info.setText(f'Recovered {len(recovered)} interrupted export(s)')
+        return True
 
     def _refresh_actions(self):
         a=self.controller.actions()
@@ -387,9 +394,8 @@ class Window(QMainWindow):
         self.open_source(Path(path))
 
     def open_source(self,path):
-        self._stop_play();self.history.reset();self._undo_delete=None;self.controller.begin_probe();self._set_stage('empty');self._refresh_actions()
+        self._stop_play();self.controller.begin_probe();self._set_stage('empty');self._refresh_actions()
         self._job_type='probe'
-        self._first_frame=None;self._suggested_roi=None
         self._job_id=self.jobs.start(self._prepare_source,path)
 
     @staticmethod
@@ -533,7 +539,7 @@ class Window(QMainWindow):
             self._stop_play();self.images.switch(None)
             source,first=result
             self.controller.complete_probe(source)
-            self.history.reset()
+            self.history.reset();self._undo_delete=None
             self.settings=AnalysisSettings(fps=self.settings.fps)
             self._first_frame=None;self._suggested_roi=None;self._auto_roi=None
             if first is not None:
@@ -908,10 +914,7 @@ class Window(QMainWindow):
                QMessageBox.StandardButton.Yes|QMessageBox.StandardButton.No,
                QMessageBox.StandardButton.No)
             if approval!=QMessageBox.StandardButton.Yes:return
-            try:recover_export(parent)
-            except RecoveryRequired as exc:
-                QMessageBox.warning(self,'Manual recovery required',f'{exc}\nJournal/backup files remain in {parent}')
-                return
+            if not self._recover_export_folder(parent):return
         try:
             approval_snapshot=(snapshot_export(self.controller.project.source.path,destination,overwrite=True)
                                if self.json_enabled else snapshot_pdf(destination))
@@ -958,4 +961,5 @@ class Window(QMainWindow):
         self._stop_play()
         self.images.stop();self.page_model.set_project(None)
         self.preview.clear()
+        self.history.reset();self.controller.project=None
         super().closeEvent(event)

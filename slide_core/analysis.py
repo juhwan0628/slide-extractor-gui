@@ -103,10 +103,11 @@ def _analyze_project(source,settings:AnalysisSettings,cache_root,*,previous:Proj
         else:samples=()
     else:samples=()
     created_cache=None
+    cache_pins=[]
     if progress:progress('sampling',None,None)
     try:
         if not reused:
-            extra={'profile':profile,'decode_options':decode_options} if sampler is sample_stream else {}
+            extra={'profile':profile,'decode_options':decode_options,'cache_owner':cache_pins.append} if sampler is sample_stream else {}
             with measured(profile,'sampling'):
                 samples,created_cache=sampler(source,Path(cache_root),fps=Fraction(str(settings.fps)),
                                              cancelled=cancel_token,**extra)
@@ -142,6 +143,7 @@ def _analyze_project(source,settings:AnalysisSettings,cache_root,*,previous:Proj
             project=Project(source,complete_settings,tuple(samples),transitions,segments,pages,
                             revision=0,cache_generation=cache_generation,
                             analysis_generation=str(uuid4()))
+            project._cache_pin = getattr(previous, '_cache_pin', None) if reused else (cache_pins[0] if cache_pins else None)
             result=AnalysisResult(project.samples,project.transitions,project.segments,
                                   project.analysis_generation)
         if profile is not None:profile.metadata['page_count']=len(pages)
@@ -149,18 +151,11 @@ def _analyze_project(source,settings:AnalysisSettings,cache_root,*,previous:Proj
     except BaseException:
         # Never discard or alter caches still owned by the previous Project.
         # Only this invocation's newly created, verified owner can be cleaned.
+        for pin in cache_pins:
+            pin.close()
         if created_cache is not None:
-            from .cache import _safe_owned_dir
-            from shutil import rmtree
-            import uuid
-            candidate=Path(created_cache)
-            expected=str(uuid.UUID(candidate.name.removeprefix('session-')))
-            try:
-                _safe_owned_dir(Path(cache_root).resolve(),candidate,expected)
-            except (ValueError,OSError,RuntimeError):
-                pass  # Fail closed rather than delete an uncertain directory.
-            else:
-                rmtree(candidate)
+            from .cache import discard_cache
+            discard_cache(cache_root, created_cache)
         raise
 
 

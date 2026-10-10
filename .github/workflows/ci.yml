@@ -50,3 +50,9 @@ jobs:
           QT_QPA_PLATFORM: offscreen
           PYTHONUTF8: '1'
         run: python -m pytest -q tests/test_export_lock_cleanup.py tests/test_pdf_only_lock_cleanup.py
+      - name: Protect active cache sessions and reclaim unused cache on Windows
+        env:
+          PYTHONPATH: .
+          QT_QPA_PLATFORM: offscreen
+          PYTHONUTF8: '1'
+        run: python -m pytest -q tests/test_cache.py tests/test_cache_fast.py tests/test_cache_lifecycle.py -k "not sampling_cancel and not cached_reanalysis"

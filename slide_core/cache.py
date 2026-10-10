@@ -132,33 +132,70 @@ def _safe_owned_dir(root, directory, expected_id=None):
     return manifest
 
 
-def prune_cache(root, *, now=None):
-    """Remove verified, unlocked expired sessions; never remove an active lease."""
-    root = Path(root).resolve()
-    if not root.exists():
-        return ()
+def _remove_owned_locked(root, directory):
+    """Budget lock held: delete only validated files; release Windows handle last."""
+    with acquire_file_lease(directory / 'lease.lock'):
+        _safe_owned_dir(root, directory)
+        for item in directory.iterdir():
+            if item.name not in ('lease.lock', 'manifest.json'):
+                item.unlink()
+        (directory / 'manifest.json').unlink()
+    (directory / 'lease.lock').unlink()
+    directory.rmdir()
+
+
+def _prune_cache_locked(root, *, now=None, expired_only=True, exclude=()):
     clock = time.time() if now is None else now
     candidates = []
     for directory in root.iterdir():
-        if directory.is_symlink() or not directory.name.startswith('session-') or not directory.is_dir():
+        if directory in exclude or directory.is_symlink() or not directory.name.startswith('session-') or not directory.is_dir():
             continue
         try:
             manifest = _safe_owned_dir(root, directory)
-        except (UnsafeCache, ValueError):
-            continue  # Unowned/ambiguous directories must not be removed.
+        except (UnsafeCache, ValueError, OSError):
+            continue
         ttl = COMPLETE_TTL if manifest['complete'] else INCOMPLETE_TTL
-        if clock - manifest['updated_at'] >= ttl:
+        if not expired_only or clock - manifest['updated_at'] >= ttl:
             candidates.append((manifest['updated_at'], directory))
     removed = []
     for _, directory in sorted(candidates):
         try:
-            with acquire_file_lease(directory / 'lease.lock'):
-                _safe_owned_dir(root, directory)
-                shutil.rmtree(directory)
-                removed.append(directory)
-        except (LeaseBusy, UnsafeCache, OSError):
+            _remove_owned_locked(root, directory)
+            removed.append(directory)
+        except (LeaseBusy, UnsafeCache, OSError, ValueError):
             continue
     return tuple(removed)
+
+
+def prune_cache(root, *, now=None):
+    """Remove verified expired sessions; live project and writer pins survive."""
+    root = Path(root).resolve()
+    if not root.exists():
+        return ()
+    with _budget_lock(root):
+        return _prune_cache_locked(root, now=now)
+
+
+def discard_cache(root, directory):
+    """Best-effort cleanup of one closed owned session, never another writer."""
+    root, directory = Path(root).resolve(), Path(directory)
+    try:
+        with _budget_lock(root):
+            _safe_owned_dir(root, directory)
+            _remove_owned_locked(root, directory)
+        return True
+    except (LeaseBusy, UnsafeCache, OSError, ValueError):
+        return False
+
+
+class CachePin:
+    """Shared Project lifetime owns the original writer lock without a gap."""
+    def __init__(self, lease):
+        import weakref
+        self._finalizer = weakref.finalize(self, lease.__exit__, None, None, None)
+
+    def close(self):
+        self._finalizer()
 
 
 # Quotas are reserved in chunks by cooperating writers. The ledger is only
@@ -243,9 +280,15 @@ def _root_usage(root):
 class CacheSession:
     """One owner retains a lock for the lifetime of a generation."""
     def __init__(self, root, *, min_free_bytes=FREE_RESERVE,
-                 session_limit=SESSION_BUDGET, root_limit=ROOT_BUDGET):
+                 session_limit=SESSION_BUDGET, root_limit=ROOT_BUDGET,
+                 auto_prune=False, discard_on_error=False):
         self.root = Path(root).resolve()
         self.root.mkdir(parents=True, exist_ok=True)
+        self.auto_prune = auto_prune
+        self.discard_on_error = discard_on_error
+        self._pin = None
+        if auto_prune:
+            prune_cache(self.root)
         self.owner_uuid = str(uuid.uuid4())
         self.directory = self.root / ('session-' + self.owner_uuid)
         self.directory.mkdir(mode=0o700)
@@ -270,10 +313,19 @@ class CacheSession:
         state = {'owner_uuid': self.owner_uuid, 'complete': complete,
                  'updated_at': time.time(), 'bytes': self._bytes}
         temp = self.directory / 'manifest.tmp'
-        with temp.open('x', encoding='utf-8') as f:
-            json.dump(state, f, sort_keys=True)
-            f.flush()
-        os.replace(temp, self.directory / 'manifest.json')
+        created = False
+        try:
+            with temp.open('x', encoding='utf-8') as f:
+                created = True
+                json.dump(state, f, sort_keys=True)
+                f.flush()
+            os.replace(temp, self.directory / 'manifest.json')
+        finally:
+            if created:
+                try:
+                    temp.unlink(missing_ok=True)
+                except OSError:
+                    pass  # Preserve the original publication error.
         self._manifest_count = 0
         self._manifest_time = time.monotonic()
 
@@ -286,9 +338,14 @@ class CacheSession:
         path = self.directory / name
         if path.exists() or path.is_symlink():
             raise UnsafeCache('Sample already exists')
-        if (self._bytes + len(content) > self.session_limit or
-                shutil.disk_usage(self.root).free - len(content) < self.min_free_bytes):
-            raise CacheBudgetExceeded('Insufficient cache budget or free disk reserve')
+        if self._bytes + len(content) > self.session_limit:
+            raise CacheBudgetExceeded('Insufficient session cache budget')
+        if shutil.disk_usage(self.root).free - len(content) < self.min_free_bytes:
+            if self.auto_prune:
+                with _budget_lock(self.root):
+                    _prune_cache_locked(self.root, expired_only=False, exclude=(self.directory,))
+            if shutil.disk_usage(self.root).free - len(content) < self.min_free_bytes:
+                raise CacheBudgetExceeded('Insufficient free disk reserve; close unused projects or free disk space')
         self._reserve(len(content))
         temp = self.directory / f'{index:08d}.tmp'
         fd = os.open(temp, os.O_WRONLY | os.O_CREAT | os.O_EXCL |
@@ -321,8 +378,17 @@ class CacheSession:
                             shutil.disk_usage(self.root).free - self.min_free_bytes - outstanding) - 256 * owners
             ceiling = records.get(self.owner_uuid, self._bytes)
             needed = self._bytes + size - ceiling
+            if available < needed and self.auto_prune:
+                _prune_cache_locked(self.root, expired_only=False, exclude=(self.directory,))
+                _reclaim_reservations(self.root, records, self.owner_uuid)
+                usage, jpeg_bytes = _root_usage(self.root)
+                outstanding = sum(max(0, limit - jpeg_bytes.get('session-' + owner, 0))
+                                  for owner, limit in records.items())
+                owners = len(records) + (self.owner_uuid not in records)
+                available = min(self.root_limit - usage - outstanding,
+                                shutil.disk_usage(self.root).free - self.min_free_bytes - outstanding) - 256 * owners
             if available < needed:
-                raise CacheBudgetExceeded('Insufficient root cache reservation')
+                raise CacheBudgetExceeded('Insufficient root cache reservation; close unused projects or free disk space')
             grant = min(max(RESERVATION_CHUNK, needed), available,
                         self.session_limit - ceiling)
             records[self.owner_uuid] = ceiling + grant
@@ -335,6 +401,13 @@ class CacheSession:
         _safe_owned_dir(self.root, self.directory, self.owner_uuid)
         self._write_manifest(True)
 
+    def retain(self):
+        if self.closed:
+            raise RuntimeError('Closed cache')
+        if self._pin is None:
+            self._pin = CachePin(self._lease)
+        return self._pin
+
     def close(self):
         if not self.closed:
             try:
@@ -343,11 +416,20 @@ class CacheSession:
                     records.pop(self.owner_uuid, None)
                     _write_reservations(self.root, records)
             finally:
-                self._lease.__exit__(None, None, None)
+                if self._pin is None:
+                    self._lease.__exit__(None, None, None)
                 self.closed = True
 
     def __enter__(self):
         return self
 
-    def __exit__(self, *_):
-        self.close()
+    def __exit__(self, exc_type, *_):
+        try:
+            self.close()
+        except (LeaseBusy, UnsafeCache, OSError, ValueError):
+            if exc_type is None:
+                raise
+        if exc_type is not None and self.discard_on_error:
+            if self._pin is not None:
+                self._pin.close()
+            discard_cache(self.root, self.directory)

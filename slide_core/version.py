@@ -1,5 +1,5 @@
 """Single release identity for runtime and native packaging."""
-VERSION = "0.4.10rc1"
+VERSION = "0.4.10rc2"
 BUNDLE_VERSION = "0.4.10"
 
 if __name__ == "__main__":
