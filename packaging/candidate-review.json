@@ -1,8 +1,8 @@
 {
-  "version": "0.4.10rc2",
-  "candidate_run_id": "38050474664",
-  "candidate_commit": "ddf7ba086a45dfe79fa0da61dfe48f97af5358c2",
-  "source_ci_run_id": "38050474696",
+  "version": "0.4.11rc1",
+  "candidate_run_id": "38152594453",
+  "candidate_commit": "a08c0c57e81ed8d006dc9115c8c6aae74f8ce93a",
+  "source_ci_run_id": "38152594538",
   "native_inventory_reviewed": true,
   "reviewed_native_inventory_sha256": {
     "macOS-ARM64": "46c10541090c1c0ba7120c563b48548722e47d7e8d5669dbbaf5babc67a80186",
