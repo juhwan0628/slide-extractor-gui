@@ -5,6 +5,10 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/native-build-template.yml'
+      - 'gui/**'
+      - 'slide_core/**'
+      - 'packaging/review_candidate.py'
+      - 'packaging/third-party/**'
       - 'packaging/native_inputs.py'
       - 'packaging/candidate_inventory.py'
       - 'packaging/desktop_entry.py'
@@ -82,7 +86,7 @@ jobs:
           from pathlib import Path
           subprocess.run([sys.executable,'-m','pip','install','pytest'],check=True)
           os.environ['PATH']=str(Path('vendor/approved').resolve())+os.pathsep+os.environ['PATH']
-          subprocess.run([sys.executable,'-m','pytest','-q','tests/test_decode_stall_timeout.py','tests/test_background_samples.py','tests/test_preparation_lifecycle.py','tests/test_m4_settings_flow.py'],check=True)
+          subprocess.run([sys.executable,'-m','pytest','-q','tests/test_decode_stall_timeout.py','tests/test_background_samples.py','tests/test_preparation_lifecycle.py','tests/test_m4_settings_flow.py','tests/test_m1_export_safety.py','tests/test_m2_edit_preview.py','tests/test_gui_images.py','tests/test_m3_preparation_cache.py','tests/test_m4_audit_cleanup.py'],check=True)
       - name: Build candidate and record inputs
         run: |
           python -m pip check

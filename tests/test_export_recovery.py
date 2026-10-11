@@ -29,8 +29,10 @@ def test_prepared_recovers_original_pair(tmp_path,old):
     tx=ExportTransaction(src,snapshot_export(src,pdf,overwrite=True))
     tx.prepare(b"new-pdf",b"new-json")
     assert pair(pdf)==old
+    tx.close()  # Abandon the prepared job, like process exit releasing its lease.
     assert recover_export(tmp_path)[0][1]=="rolled_back"
     assert pair(pdf)==old
+    tx.close()  # Abandon the prepared job, like process exit releasing its lease.
     assert recover_export(tmp_path)==()
     assert not list(tmp_path.glob(".slide-export-*"))
 
@@ -115,6 +117,7 @@ def test_recovery_is_fail_closed_for_changed_target(tmp_path):
     tx.journal_path.write_text(json.dumps(journal))
     pdf.write_bytes(b"external-content")
     before=pair(pdf)
+    tx.close()
     with pytest.raises(RecoveryRequired):
         recover_export(tmp_path)
     assert pair(pdf)==before
@@ -127,6 +130,7 @@ def test_corrupt_journal_does_not_remove_unknown_files(tmp_path):
     tx.prepare(b"new-pdf",b"new-json")
     tx.journal_path.write_bytes(b"not-json")
     other=tx.stage/"unknown.txt";other.write_bytes(b"do-not-delete")
+    tx.close()
     with pytest.raises(RecoveryRequired):
         recover_export(tmp_path)
     assert other.read_bytes()==b"do-not-delete"
@@ -140,6 +144,7 @@ def test_recovery_rejects_symlink_stage_and_path_traversal(tmp_path):
     record=json.loads(tx.journal_path.read_text())
     record["targets"]=["../../unsafe.pdf","out.json"]
     tx.journal_path.write_text(json.dumps(record))
+    tx.close()
     with pytest.raises(RecoveryRequired):recover_export(tmp_path)
     assert pair(pdf)==(b"old-pdf",b"old-json")
 

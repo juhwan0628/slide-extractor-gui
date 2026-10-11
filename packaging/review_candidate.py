@@ -4,6 +4,32 @@ from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
 
+def openssl_license_evidence(root):
+    # Select an exact component path and compare to reviewed repository originals.
+    # A Python/NumPy Apache document cannot stand in for OpenSSL.
+    import hashlib
+    root=Path(root).absolute()
+    result={}
+    # Audit receives the outer .app/install directory. Datas use these exact
+    # PyInstaller layouts; don't select arbitrary matching files via rglob.
+    candidates=[root/path for path in ('licenses','_internal/licenses','Contents/Resources/licenses')
+                if (root/path).exists() or (root/path).is_symlink()]
+    if len(candidates)!=1:
+        raise ValueError('OpenSSL license directory missing or ambiguous')
+    licenses=candidates[0]
+    if not licenses.is_dir() or any(p.is_symlink() for p in (licenses,*licenses.parents) if p==root or root in p.parents):
+        raise ValueError('OpenSSL license directory unsafe')
+    for name,key in (('OpenSSL-LICENSE.txt','installed_license'),('RUNTIME-NOTICES.md','installed_notices')):
+        installed=licenses/name
+        original=ROOT/'packaging/third-party'/name
+        if (installed.is_symlink() or not installed.is_file() or
+                installed.read_bytes()!=original.read_bytes()):
+            raise ValueError('OpenSSL dedicated license/notice missing or changed: '+name)
+        result[key]=installed.relative_to(root).as_posix()
+        result[key+'_sha256']=hashlib.sha256(installed.read_bytes()).hexdigest()
+    result['license_basis']='Repository original OpenSSL-LICENSE.txt and RUNTIME-NOTICES.md; OpenSSL 3.x runtime version verified separately'
+    return result
+
 def review(root,inputs,candidate,config,platform,output):
     assert config['native_inventory_reviewed'] is True
     audit_module=runpy.run_path(str(ROOT/'packaging/audit_release.py'))
@@ -63,8 +89,7 @@ def review(root,inputs,candidate,config,platform,output):
         library.OpenSSL_version.argtypes=[ctypes.c_int];library.OpenSSL_version.restype=ctypes.c_char_p
         ssl_version=library.OpenSSL_version(0).decode()
         assert ssl_version.startswith('OpenSSL 3.'),ssl_version
-        apache=next(p for p in files if 'licenses' in p.relative_to(root).parts and p.stat().st_size<2_000_000 and 'Apache License' in p.read_text(errors='replace') and 'Version 2.0' in p.read_text(errors='replace'))
-        data['openssl']={'version':ssl_version,'path':crypto.relative_to(root).as_posix(),'sha256':digest(crypto),'license':'Apache-2.0','installed_license':apache.relative_to(root).as_posix()}
+        data['openssl']={'version':ssl_version,'path':crypto.relative_to(root).as_posix(),'sha256':digest(crypto),'license':'Apache-2.0',**openssl_license_evidence(root)}
         print('OPENSSL_NATIVE_RUNTIME',json.dumps(data['openssl']))
     data['status']='APPROVED'
     data['review_scope']='Exact candidate and installed native inventory; LGPL replacement smoke; corresponding sources and original notices. Not a legal compliance certificate.'

@@ -1,11 +1,13 @@
 """Silent preparation; one producer is shared by early and late Analyze clicks."""
 from threading import Event,Thread,Lock
+from time import perf_counter
 from slide_core.preparation import prepare_samples,compact_samples
 from slide_core.models import CancelToken,CancelledError
 from slide_core.cache import CacheCleanupError
 
 class BackgroundSamples:
-    def __init__(self,source,cache_root,*,fps=.5,predecessor=None,release_readers=None):
+    def __init__(self,source,cache_root,*,fps=.5,predecessor=None,release_readers=None,profile_path=None):
+        self.started_at=perf_counter();self.finished_at=None;self.profile_path=profile_path
         self.source=source;self.fps=fps
         self.token=CancelToken();self.ready=Event();self.done=Event();self._dispose=Event()
         self.result=None;self.error=None;self.adopted=False
@@ -46,7 +48,18 @@ class BackgroundSamples:
                 try:self._incoming.discard()
                 except BaseException as cleanup:self.cleanup_error=cleanup
             self._incoming=None
-        finally:self.ready.set()
+        finally:
+            self.finished_at=perf_counter()
+            if self.profile_path is not None:
+                from slide_core.profiling import AnalysisProfile
+                profile=AnalysisProfile()
+                profile.seconds['preparation_total']=self.finished_at-self.started_at
+                profile.metadata.update(status='failed' if self.error is not None else 'success',
+                    sample_fps=self.fps,timing_scope='Background preparation including predecessor drain; overlaps GUI idle time')
+                if self.error is not None:profile.metadata['error_type']=type(self.error).__name__
+                try:profile.save(self.profile_path)
+                except OSError as exc:print('Could not save preparation profile:',type(exc).__name__,flush=True)
+            self.ready.set()
         # Retain the writer lease until the GUI adopts or discards this cache.
         self._dispose.wait()
         try:

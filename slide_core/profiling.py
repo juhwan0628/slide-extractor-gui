@@ -18,8 +18,11 @@ class AnalysisProfile:
         values=dict(self.seconds)
         if 'detection' in values:
             values['detector_exclusive']=max(0,values['detection']-values.get('cache_prepare',0))
+        note=('total includes all stages; sampling includes decode_wait/JPEG/cache work; detection includes cache_prepare. '
+              if 'click_to_result_total' not in values else
+              'GUI total includes detector pipeline stages; preparation_wait and click_to_result_total record click latency. preparation_total overlaps background/UI time and is not additive. ')
         return {'schema_version':1,**self.metadata,'seconds':values,
-                'timing_note':'total includes all stages; sampling includes decode_wait/JPEG/cache work; detection includes cache_prepare. decode_wait is consumer wait for FFmpeg/pipe data, not isolated decoder CPU time.'}
+                'timing_note':note+'decode_wait is consumer wait for FFmpeg/pipe data, not isolated decoder CPU time.'}
     def save(self,path):
         path=Path(path);path.parent.mkdir(parents=True,exist_ok=True)
         temp=path.with_suffix('.tmp');temp.write_text(json.dumps(self.report(),indent=2)+'\n');temp.replace(path)

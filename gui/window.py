@@ -5,6 +5,7 @@ from pathlib import Path
 from tempfile import gettempdir
 from uuid import uuid4
 import subprocess,sys
+from time import perf_counter
 from PySide6.QtCore import Qt,QTimer,QSignalBlocker,QSize,QSettings,QItemSelectionModel
 from PySide6.QtGui import QPixmap,QImage,QKeySequence,QShortcut,QIcon
 from PySide6.QtWidgets import (QApplication,QMainWindow,QWidget,QVBoxLayout,QHBoxLayout,
@@ -16,7 +17,7 @@ from slide_core.analysis import analyze_project,requires_reanalysis
 from slide_core.profiling import profile_directory
 from slide_core.media import probe_source
 from slide_core.models import Rect,CancelledError
-from slide_core.export import recover_export,RecoveryRequired,OutputOverwriteRequired,snapshot_export,snapshot_pdf
+from slide_core.export import recover_export,RecoveryRequired,OutputOverwriteRequired,snapshot_export,snapshot_pdf,ExportPublishedError
 from slide_core.export_v3 import export_project
 from slide_core.pdf_only_export import export_pdf_only
 from slide_core.editing import add_page,delete_page,replace_page,merge_pages,delete_pages
@@ -411,9 +412,10 @@ class Window(QMainWindow):
         ready=self.controller.actions()['edit'] and project is not None and bool(project.samples)
         sample=project.samples[self.current_index] if ready else None
         exists=bool(sample and any(p.representative_sample_id==sample.sample_id for p in project.pages))
-        focused=next((p for p in project.pages if p.page_id==self.controller.focus_page_id),None) if ready else None
+        selected=self.selected_page_ids()
+        target=next((p for p in project.pages if len(selected)==1 and p.page_id==selected[0]),None) if ready else None
         self.add_button.setEnabled(ready and not exists)
-        self.replace_button.setEnabled(ready and focused is not None and len(self.selected_page_ids())==1 and not exists)
+        self.replace_button.setEnabled(ready and self.stage=='review' and target is not None and not exists)
 
     def _stop_play(self):
         self.tick_timer.stop()
@@ -527,20 +529,46 @@ class Window(QMainWindow):
         if self.controller.source is not None and self.controller.state in {State.REVIEW_READY,State.REVIEW_DIRTY}:
             self.controller.state=State.SOURCE_READY
         self._sample_preparation=BackgroundSamples(self.controller.source,
-            Path(gettempdir())/'slide-gui-cache',fps=self.settings.fps,predecessor=old,release_readers=self.images.wait_idle)
+            Path(gettempdir())/'slide-gui-cache',fps=self.settings.fps,predecessor=old,release_readers=self.images.wait_idle,
+            profile_path=profile_directory(Path(__file__).resolve().parents[1])/f'preparation-{uuid4()}.json')
         if self.stage=='preparation':self._show_preparation()
         self._refresh_actions()
 
     @staticmethod
     def _analyze_prepared(source,settings,cache_root,*,preparation,previous=None,
-                          cancel_token=None,progress=None,profile_path=None):
-        if progress:progress('sampling',None,None)
-        prepared=preparation.wait(cancel_token)
-        return analyze_project(source,settings,cache_root,previous=previous,prepared=prepared,
-            cancel_token=cancel_token,progress=progress,profile_path=profile_path)
+                          cancel_token=None,progress=None,profile_path=None,clicked_at=None):
+        from time import perf_counter
+        from slide_core.profiling import AnalysisProfile,measured
+        profile=AnalysisProfile() if profile_path is not None else None
+        clicked=perf_counter() if clicked_at is None else clicked_at
+        try:
+            if progress:progress('sampling',None,None)
+            with measured(profile,'preparation_wait'):
+                prepared=preparation.wait(cancel_token)
+            return analyze_project(source,settings,cache_root,previous=previous,prepared=prepared,
+                cancel_token=cancel_token,progress=progress,profile=profile)
+        except BaseException as exc:
+            if profile is not None:profile.metadata.update(status='failed',error_type=type(exc).__name__)
+            raise
+        finally:
+            if profile is not None:
+                profile.seconds['click_to_result_total']=perf_counter()-clicked
+                started=getattr(preparation,'started_at',None)
+                finished=getattr(preparation,'finished_at',None)
+                if started is not None:
+                    profile.seconds['preparation_total' if finished is not None else 'preparation_elapsed']=(
+                        (finished if finished is not None else perf_counter())-started)
+                    profile.metadata['preparation_status']=(
+                        'failed' if preparation.error is not None else 'success') if finished is not None else 'running'
+                if getattr(preparation,'profile_path',None) is not None:
+                    profile.metadata['preparation_profile_id']=Path(preparation.profile_path).stem
+                profile.metadata['timing_scope']='GUI analysis: total is detector pipeline; click_to_result_total includes remaining preparation wait; preparation_total overlaps prior UI time and is not additive.'
+                try:profile.save(profile_path)
+                except OSError as exc:print('Could not save analysis profile:',type(exc).__name__,flush=True)
 
     def analyze(self):
         if not self.controller.actions()['analyze']:return
+        clicked_at=perf_counter()
         old=self.controller.project
         if old and old.pages and (old.revision or requires_reanalysis(old,self.settings)):
             answer=QMessageBox.question(self,'Replace edited pages?',
@@ -549,13 +577,13 @@ class Window(QMainWindow):
                 QMessageBox.StandardButton.No)
             if answer!=QMessageBox.StandardButton.Yes:return
         task=self._sample_preparation
-        if task is None or task.source!=self.controller.source or task.fps!=self.settings.fps or task.token.cancelled:
+        if task is None or task.source!=self.controller.source or task.fps!=self.settings.fps or task.token.cancelled or (task.ready.is_set() and task.error is not None):
             self._start_sample_preparation()
         old=self.controller.project
         self._stop_play();self._job_type='analysis'
         self._job_id=self.jobs.start(self._analyze_prepared,self.controller.source,self.settings,
                                     Path(gettempdir())/'slide-gui-cache',previous=old,preparation=self._sample_preparation,_progress_enabled=True,
-                                    profile_path=profile_directory(Path(__file__).resolve().parents[1])/f'analysis-{uuid4()}.json')
+                                    profile_path=profile_directory(Path(__file__).resolve().parents[1])/f'analysis-{uuid4()}.json',clicked_at=clicked_at)
         self.controller.begin_analysis(self._job_id)
         self._set_stage('analyzing')
         self.analysis_title.setText('Preparing video analysis…')
@@ -592,7 +620,11 @@ class Window(QMainWindow):
 
     def _job_finished(self,job_id,result,error):
         if job_id!=self._job_id:return
-        if error is not None:
+        if isinstance(error,ExportPublishedError) and self._job_type=='export':
+            self.controller.finish_export(job_id)
+            self.info.setText(str(error))
+            QMessageBox.warning(self,'Export saved with warning',str(error))
+        elif error is not None:
             was_cancelling=self.controller.state==State.CANCELLING
             if self._job_type=='probe':self.controller.fail_probe()
             else:self.controller.fail_job(job_id)
@@ -667,7 +699,7 @@ class Window(QMainWindow):
                 self._render_frame(self.current_index)
                 self._prefetch_thumbs()
                 self._pump_all_thumbs()
-        self.progress.setRange(0,1);self.progress.setValue(1 if error is None else 0)
+        self.progress.setRange(0,1);self.progress.setValue(1 if error is None or isinstance(error,ExportPublishedError) else 0)
         if error is not None or self.controller.state==State.CANCELLING:
             self._set_stage('review' if self.controller.project is not None else
                             'preparation' if self.controller.source is not None else 'empty')
@@ -730,7 +762,9 @@ class Window(QMainWindow):
         if len(key)>=3 and key[2]=='thumb':
             icon=QIcon(QPixmap.fromImage(image))
             self.page_model.set_thumbnail(key[1],icon)
-            self._pump_all_thumbs()
+        # A visible request may displace a thumbnail from the bounded queue.
+        # Retry the thumbnail cursor after every delivery, including previews.
+        self._pump_all_thumbs()
 
     def resizeEvent(self,event):
         super().resizeEvent(event)
@@ -748,9 +782,11 @@ class Window(QMainWindow):
         self.current_index=max(0,min(index,len(project.samples)-1))
         sample=project.samples[self.current_index]
         key=self._image_key(self.current_index)
-        image=self.images.request(key,sample.cache_path,crop=self._cache_roi(project,sample))
+        image=self.images.request(key,sample.cache_path,crop=self._cache_roi(project,sample),priority=True)
         if image is not None:self._paint(image)
-        else:self.preview.clear()
+        else:
+            self._current_image=None
+            self.preview.clear()
         for i in [self.current_index-1,*range(self.current_index+1,self.current_index+4)]:
             if 0<=i<len(project.samples):
                 other=project.samples[i]
@@ -948,10 +984,13 @@ class Window(QMainWindow):
 
     def replace_page(self):
         project=self.controller.project
-        if not project or not self.controller.focus_page_id:return
+        selected=self.selected_page_ids()
+        if (self.stage!='review' or not self.controller.actions()['edit'] or
+                not project or len(selected)!=1 or
+                not any(p.page_id==selected[0] for p in project.pages)):return
         old=[p.page_id for p in project.pages]
         before=self._snapshot()
-        result=replace_page(project,self.controller.focus_page_id,project.samples[self.current_index].actual_time)
+        result=replace_page(project,selected[0],project.samples[self.current_index].actual_time)
         self._update_after_edit(result,old)
         if result.status=='changed':
             self._select_page_ids((result.focus_page_id,),result.focus_page_id)

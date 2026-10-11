@@ -1,6 +1,6 @@
 """Single release identity for runtime and native packaging."""
-VERSION = "0.4.11rc1"
-BUNDLE_VERSION = "0.4.11"
+VERSION = "0.4.12rc1"
+BUNDLE_VERSION = "0.4.12"
 
 if __name__ == "__main__":
     import sys

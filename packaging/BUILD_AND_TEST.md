@@ -1,35 +1,50 @@
-# 0.4.9rc1 빌드
+# 빌드와 검증
 
-## 개인용 macOS arm64
+사용자는 GitHub Releases에서 macOS Apple Silicon DMG 또는 Windows x64 설치
+EXE를 받습니다. 일반 사용자에게 Python 설치나 직접 빌드를 요구하지 않습니다.
 
-`bash scripts/build-macos-personal.command`를 실행합니다. Python 3.12, 로컬 FFmpeg/FFprobe, 네트워크가 필요합니다.
-`requirements-macos-arm64.lock`은 이전 Mac 빌드에서 확인한 버전에 기반하며, 이번 변경의 Mac 네이티브 검증은 아직 필요합니다.
-필요한 QtCore/Gui/Widgets/Test만 포함하는 PySide6-Essentials를 사용합니다.
+## 공통 개발·테스트
 
-개인용 spec은 공통 spec을 선택합니다. 빌드는 입력 바이너리를 복사하고 SHA-256, -version 출력, Python/플랫폼/전체 패키지 목록을 manifest로 기록합니다. 번들 smoke와 codesign 검증이 성공한 뒤 새 임시 staging에서 버전이 붙은 DMG를 생성합니다. 개인용 manifest는 공개 배포 승인으로 표시되지 않습니다.
+저장소를 checkout하고 Python 3.12 가상환경에서 requirements-dev.txt를
+설치한 뒤 QT_QPA_PLATFORM=offscreen python -m pytest -q를 실행합니다.
+Linux 검증 lock과 macOS/Windows 빌드 lock은 구분합니다.
 
-## 공용 후보 CI
+## 네이티브 후보와 출고
 
-`.github/workflows/native-build-template.yml`은 수동 실행 전용입니다. 같은 저장소의 실행 ID에서 플랫폼별 `approved-native-inputs-macOS-ARM64` / `approved-native-inputs-Windows-X64` artifact를 공급해야 합니다. 각 artifact는 ffmpeg/ffprobe, binary-manifest.json, 실제 라이선스 사본, SBOM, 정확한 소스 아카이브와 교체 안내를 포함해야 합니다.
+.github/workflows/native-build-template.yml은 main의 지정 빌드 입력 변경 또는
+workflow_dispatch로 실행됩니다. 두 OS의 고정 runtime lock, 원본 소스와 패치,
+이미지 전용 OpenCV, 공급 FFmpeg 해시·설정, 라이선스·SBOM을 검사합니다.
+현재 FFmpeg 입력 복원은 workflow에 명시한 기존 run을 사용하므로, 보관 만료 시
+검증된 공급 입력을 다시 준비해야 합니다.
 
-소스 아카이브 경로는 CI 작업 디렉터리에서 접근 가능하게 manifest에 적습니다. macOS는 arm64, Windows는 x64 빌드 입력이 필요합니다. Windows lock과 설치 스크립트는 실기기 검증 전 상태입니다.
+번들·설치 DMG/EXE·빈 PATH·QtCore 교체 검사를 통과한 동일 후보를
+candidate-license-audit.yml에서 다시 검사합니다. 승인 자료는 그 버전·커밋·run·
+설치 파일 해시에만 적용합니다. 재빌드하면 다시 검사해야 합니다.
+출고와 소스·라이선스 에셋 구성은 [RELEASING](../RELEASING.md)을 따릅니다.
 
-CI는 고정 lock을 설치하고 공통 진입점을 빌드해 번들 smoke, 설치 후보 생성, 실제 audit_release를 수행합니다. 실패해도 사설 artifact에 후보와 진단 자료를 보존합니다. audit 통과는 예비 검증이며 공개 업로드나 라이선스 검토 완료를 뜻하지 않습니다.
+합의한 베타 정책은 macOS ad-hoc 서명·공증 없음, Windows unsigned입니다.
+Developer ID·유료 Windows 코드 서명은 이번 베타의 필수 조건이 아닙니다.
+사용자 보안 경고와 우회 안내는 운영체제별 설치 문서를 확인하세요.
+호스팅 runner의 성공은 모든 실기기의 보안 정책 통과를 보장하지 않습니다.
 
-공개 Mac 배포에는 Developer ID 서명, notarization/stapling 및 깨끗한 Mac 설치 검증이 필요합니다. 현재 자격 증명·승인된 공급 바이너리가 없어 적용하지 않았습니다. 개인용 ad hoc 검증과 구분합니다.
+## 유지하는 개인 평가 경로
 
-## 검증
+scripts/build-macos-personal.command와 BUILD-WINDOWS.bat는 개발자의 개인
+검증용입니다. 검토된 공식 설치 파일을 대신하는 공개 출고 경로가 아닙니다.
+python packaging/build_source_zip.py OUTPUT.zip으로 소스 평가 ZIP을 만들고,
+--include-tests를 추가하면 개발 테스트도 포함합니다. Windows 전용 평가
+빌드킷은 python packaging/build_windows_kit.py OUTPUT.zip입니다.
+두 ZIP은 LICENSE와 공통 spec의 필수 소스 자료를 포함하며, 네이티브 FFmpeg·Qt
+바이너리를 이미 승인한 완성 설치 파일로 표현하지 않습니다.
+사용자에게 배포하는 기본 다운로드는 DMG/EXE입니다.
 
-Linux 검증용 lock은 macOS 빌드 lock과 구분합니다. 개발용 ZIP에서 `requirements-dev.txt`를 설치해 전체 테스트를 실행합니다. 사용자용 ZIP은 테스트를 넣지 않습니다. ZIP은 `python packaging/build_source_zip.py OUTPUT.zip`, 개발용은 `--include-tests`로 생성합니다.
+## 프로파일
 
-## 공급 입력과 완성 후보의 해시
-
-Artifact 전송이 실행 권한을 보존하지 않으므로 CI는 FFmpeg/FFprobe의 공급 SHA-256을 먼저 검증한 뒤 실행 권한을 복원합니다. manifest의 각 도구 `sha256`은 공급 파일의 값이고 `bundle_sha256`은 검토한 **완성 후보 파일**의 값입니다. Mach-O 경로 수정/서명으로 두 값은 달라질 수 있습니다.
-
-첫 빌드의 `candidate-inventory.json`과 번들에 포함된 `build-manifest.json`은 관측값이며 승인이 아닙니다. 검토자는 실제 자료·설치·서명 상태와 동일 후보를 확인한 뒤 후보 버전, build_manifest_sha256, 두 도구의 bundle_sha256을 검토 manifest에 기록합니다. 공급 입력 해시는 build manifest에 연결되어 있습니다.
-
-승인한 해시는 **보존한 동일 후보**를 대상으로 audit_release에 적용해야 합니다. 새 빌드/새 서명으로 바이트가 달라지면 새 검토가 필요합니다. CI 재빌드가 이전 승인의 해시와 다르면 gate가 실패하는 것이 정상입니다. 첫 빌드도 사설 후보와 실제 해시를 보존하되 공개 승인으로 만들지 않습니다.
-
-공용 모드는 실제 licenses, SBOM.json, SOURCE_AND_REPLACEMENT.md, build-manifest.json을 요구합니다. gate는 자료의 존재·내용·예상 구성 요소와 해시/후보 연결을 확인하지만, 내용의 법적 충분성은 검토자가 확인해야 합니다.
-
-Mac 사설 후보 검토는 보존된 DMG를 마운트해서 그 안의 앱을 대상으로 수행하세요. DMG는 앱의 실행 권한·심볼릭 링크를 보존합니다. GitHub artifact에 따로 올라간 원시 .app 디렉터리를 설치본으로 취급하지 않습니다.
+영상 선택 후 준비 작업은 preparation-UUID.json, Analyze 작업은
+analysis-UUID.json에 기록합니다. 준비 전체 시간은 이미 UI 설정 시간과
+겹치므로 Analyze 대기와 합산하지 않습니다. seconds.total은 검출 파이프라인,
+preparation_wait는 Analyze 후 남은 준비 대기, click_to_result_total은 버튼
+클릭부터 결과 생성까지입니다. GUI 렌더링·보고서 디스크 기록은 결과 생성
+이후이므로 후자의 범위에 포함하지 않습니다.
+실패·취소는 상태와 예외 종류로 기록하며 영상 경로와 예외 전문은 넣지 않습니다.
+프로파일은 로컬 진단 파일이며 업로드하지 않습니다.

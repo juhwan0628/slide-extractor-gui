@@ -1,20 +1,19 @@
 """Verified PDF-only publishing, isolated from existing JSON files.
 
-The paired PDF+JSON transaction remains unchanged for advanced exports.
+Both export modes coordinate on the same canonical PDF resource lock.
 """
 from __future__ import annotations
 import os
 import tempfile
 import shutil
 import uuid
-import hashlib
 from pathlib import Path
 from PIL import Image,UnidentifiedImageError
 from .models import make_export_snapshot,SlideImage
 from .media import source_matches,MediaError
 from .pts import extract_selected
 from .pdf import write_slides_pdf,validate_slides_pdf
-from .export import OutputCollision,OutputOverwriteRequired,RecoveryRequired,_state,sync_directory,export_file_lease
+from .export import OutputCollision,OutputOverwriteRequired,RecoveryRequired,_state,sync_directory,export_file_lease,output_lock_path,ExportPublishedError
 
 def export_pdf_only(project,destination,*,overwrite=False,cancel_token=None,progress=None,snapshot=None):
     project.validate()
@@ -45,7 +44,7 @@ def export_pdf_only(project,destination,*,overwrite=False,cancel_token=None,prog
                 image.verify()
         except (OSError,ValueError,UnidentifiedImageError) as exc:
             raise MediaError('CacheUnavailable',code='CacheUnavailable') from exc
-    lock=destination.parent/('.'+hashlib.sha256(str(destination).encode()).hexdigest()+'.lock')
+    lock=output_lock_path(destination)
     temp=Path(tempfile.mkdtemp(prefix='.slide-pdf-',dir=destination.parent))
     try:
         frames=extract_selected(snap.source,selections,temp,cancelled=cancel_token,roi=snap.settings.effective_roi,progress=progress)
@@ -59,17 +58,25 @@ def export_pdf_only(project,destination,*,overwrite=False,cancel_token=None,prog
         if progress:progress('verifying',None,None)
         validate_slides_pdf(pdf,images,export_id=export_id)
         if progress:progress('publishing',None,None)
-        with export_file_lease(lock):
-            if cancel_token is not None:cancel_token.raise_if_cancelled()
-            if not source_matches(snap.source):raise MediaError('SourceChanged',code='SourceChanged')
-            if project.revision!=snap.revision or project.analysis_generation!=snap.analysis_generation:
-                raise RuntimeError('Project changed during PDF export')
-            if destination.is_symlink() or _state(destination)!=initial_state:
-                raise OutputOverwriteRequired('PDF changed while exporting')
-            os.replace(pdf,destination)
-            sync_directory(destination.parent)
-        validate_slides_pdf(destination,images,export_id=export_id)
-        if cancel_token is not None:cancel_token.mark_committed()
+        published=False
+        try:
+            with export_file_lease(lock):
+                if cancel_token is not None:cancel_token.raise_if_cancelled()
+                if not source_matches(snap.source):raise MediaError('SourceChanged',code='SourceChanged')
+                if project.revision!=snap.revision or project.analysis_generation!=snap.analysis_generation:
+                    raise RuntimeError('Project changed during PDF export')
+                if destination.is_symlink() or _state(destination)!=initial_state:
+                    raise OutputOverwriteRequired('PDF changed while exporting')
+                os.replace(pdf,destination)
+                published=True
+                # Publication is irrevocable here; cancellation must not disguise it.
+                if cancel_token is not None:cancel_token.mark_committed()
+                validate_slides_pdf(destination,images,export_id=export_id)
+                sync_directory(destination.parent)
+        except Exception as exc:
+            if published:
+                raise ExportPublishedError((destination,), exc) from exc
+            raise
         return (destination,)
     finally:
         shutil.rmtree(temp,ignore_errors=True)

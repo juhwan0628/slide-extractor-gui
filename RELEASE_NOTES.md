@@ -1,4 +1,4 @@
-# Slide Extractor 0.4.11rc1 베타
+# Slide Extractor 0.4.12rc1 베타
 
 강의 영상에서 슬라이드 전환을 분석하고, 타임라인에서 페이지를 편집해 PDF로 저장합니다.
 
@@ -6,8 +6,8 @@
 
 | 기기 | 다운로드 |
 |---|---|
-| Apple Silicon Mac | **[Mac DMG 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.11rc1/SlideExtractor-v0.4.11rc1-macOS-arm64.dmg)** |
-| Windows x64 | **[Windows 설치 EXE 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.11rc1/SlideExtractor-v0.4.11rc1-Setup-Windows-x64.exe)** |
+| Apple Silicon Mac | **[Mac DMG 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.12rc1/SlideExtractor-v0.4.12rc1-macOS-arm64.dmg)** |
+| Windows x64 | **[Windows 설치 EXE 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.12rc1/SlideExtractor-v0.4.12rc1-Setup-Windows-x64.exe)** |
 
 **자기 기기에 맞는 설치 파일 하나만 받으면 됩니다.**
 
@@ -16,6 +16,12 @@
 - Python과 FFmpeg는 포함되어 있습니다. 직접 설치하거나 빌드할 필요가 없습니다.
 
 ## 이번 버전의 수정
+
+- PDF 단독·PDF+JSON 저장과 복구가 같은 출력 잠금을 사용하며, 진행 중인 저장을 복구 작업이 건드리지 않습니다.
+- 빠른 프리뷰 이동의 대기 요청 수를 제한하고 현재 화면 요청을 우선합니다. 실제 선택 페이지를 기준으로 교체합니다.
+- 실패한 영상 준비의 재시도와 중단된 캐시 정리를 강화합니다.
+- 준비·분석·분석 클릭 후 대기 시간을 별도 프로파일로 기록합니다.
+- 설치본의 OpenSSL 원본 라이선스와 런타임 안내를 함께 검증합니다.
 
 - 영상 선택 시 샘플 프레임을 백그라운드에서 준비합니다. Analyze를 누르면 진행 중인 준비를 이어받거나 완료된 프레임을 재사용합니다.
 - 긴 영상의 정상 디코딩을 총 실행 시간으로 중단하지 않고, 진행이 멈춘 시간을 기준으로 타임아웃을 판단합니다.
@@ -49,7 +55,7 @@
 
 ## 개발·라이선스 자료
 
-[대응 소스·라이선스·검증 자료 ZIP](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.11rc1/SlideExtractor-v0.4.11rc1-Sources-Licenses.zip) · [SHA-256 해시](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.11rc1/SHA256SUMS.txt)
+[대응 소스·라이선스·검증 자료 ZIP](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.12rc1/SlideExtractor-v0.4.12rc1-Sources-Licenses.zip) · [SHA-256 해시](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.12rc1/SHA256SUMS.txt)
 
 자료 ZIP은 일반 설치에 필요하지 않습니다. Qt·FFmpeg 등 정확한 원본 소스, OpenCV 수정 패치, 두 OS의 라이선스·빌드·출고 검사 기록과 FFmpeg 빌드 입력을 모았습니다. 내부 README와 docs/SOURCE_AND_REPLACEMENT.md에서 구성과 라이브러리 교체 방법을 확인할 수 있습니다. 원래 자료의 바이트와 해시는 보존됩니다.
 

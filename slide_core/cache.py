@@ -1,12 +1,18 @@
 """Small stdlib advisory file lease shared by cache and export code."""
 import contextlib
+import errno
 import os
 import stat
+import re
 from pathlib import Path
 
 
 class LeaseBusy(RuntimeError):
-    """Another process currently owns this lease or the lock path is unsafe."""
+    """Lease is contended or unavailable; subclasses preserve existing guards."""
+
+
+class LeaseUnavailable(LeaseBusy):
+    """Unsafe lock path or inability to open/validate it, not live ownership."""
 
 
 @contextlib.contextmanager
@@ -22,7 +28,7 @@ def acquire_file_lease(path):
             created = True
         except FileExistsError:
             if path.is_symlink():
-                raise LeaseBusy(f"Unsafe symlink lock: {path}")
+                raise LeaseUnavailable(f"Unsafe symlink lock: {path}")
             fd = os.open(path, flags)
         try:
             current = os.fstat(fd)
@@ -30,12 +36,12 @@ def acquire_file_lease(path):
             if (not stat.S_ISREG(current.st_mode) or current.st_nlink != 1 or
                     (current.st_dev, current.st_ino) !=
                     (observed.st_dev, observed.st_ino)):
-                raise LeaseBusy(f"Unsafe lock inode: {path}")
+                raise LeaseUnavailable(f"Unsafe lock inode: {path}")
         except BaseException:
             os.close(fd)
             raise
     except OSError as exc:
-        raise LeaseBusy(f"Unable to acquire lock: {path}") from exc
+        raise LeaseUnavailable(f"Unable to acquire lock: {path}") from exc
     handle = os.fdopen(fd, "r+b", buffering=0)
     locked = False
     try:
@@ -47,18 +53,22 @@ def acquire_file_lease(path):
                 handle.flush()
                 os.fsync(handle.fileno())
             elif current.st_size == 0:
-                raise LeaseBusy(f"Unrecognized empty Windows lock file: {path}")
+                raise LeaseUnavailable(f"Unrecognized empty Windows lock file: {path}")
             handle.seek(0)
             try:
                 msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
             except OSError as exc:
-                raise LeaseBusy(str(path)) from exc
+                failure=(LeaseBusy if exc.errno in (errno.EACCES,errno.EAGAIN,errno.EDEADLK)
+                         else LeaseUnavailable)
+                raise failure(str(path)) from exc
         else:
             import fcntl
             try:
                 fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
             except OSError as exc:
-                raise LeaseBusy(str(path)) from exc
+                failure=(LeaseBusy if exc.errno in (errno.EACCES,errno.EAGAIN,errno.EDEADLK)
+                         else LeaseUnavailable)
+                raise failure(str(path)) from exc
         locked = True
         yield handle
     finally:
@@ -129,9 +139,14 @@ def _safe_owned_dir(root, directory, expected_id=None):
             manifest['owner_uuid'] != expected_id):
         raise UnsafeCache('Session directory/owner mismatch')
     for item in directory.iterdir():
-        if item.is_symlink() or (item.name != 'manifest.json' and
-                                item.name != 'lease.lock' and
-                                not (item.is_file() and item.name.endswith('.jpg'))):
+        # These are the exact publication temporaries created by write_jpeg
+        # and _write_manifest/compact_samples, inside a verified owner session.
+        temporary=(item.name=='manifest.tmp' or
+                   re.fullmatch(r'[0-9]{8,}\.tmp',item.name) is not None)
+        if (item.is_symlink() or not item.is_file() or
+                (item.name not in ('manifest.json','lease.lock') and
+                 not item.name.endswith('.jpg') and not temporary) or
+                (temporary and item.stat().st_nlink!=1)):
             raise UnsafeCache('Unexpected content in session')
     return manifest
 
@@ -143,8 +158,10 @@ def _remove_owned_locked(root, directory):
         for item in directory.iterdir():
             if item.name not in ('lease.lock', 'manifest.json'):
                 item.unlink()
-        (directory / 'manifest.json').unlink()
+    # Windows requires releasing the lock handle before unlink. Keep the
+    # ownership manifest until that unlink succeeds, so a denial is retryable.
     (directory / 'lease.lock').unlink()
+    (directory / 'manifest.json').unlink()
     directory.rmdir()
 
 

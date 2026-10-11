@@ -88,6 +88,7 @@ def test_existing_incomplete_export_requires_explicit_recovery(project,tmp_path)
     from slide_core.export import recover_export
     with pytest.raises(RecoveryRequired):engine.export_project(project,output,overwrite=True)
     assert output.read_bytes()==b"old"
+    pending.close()  # Recovery is for an abandoned job, not its live preparation.
     recover_export(tmp_path)
     engine.export_project(project,output,overwrite=True)
     obj=json.loads(output.with_suffix(".json").read_text())

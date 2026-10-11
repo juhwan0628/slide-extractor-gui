@@ -40,13 +40,28 @@ class ImageLoader(QObject):
             self.preview.clear();self.thumbs.clear()
             self._cv.notify_all()
 
-    def request(self,key,path,kind='preview',size=None,crop=None):
+    def request(self,key,path,kind='preview',size=None,crop=None,*,priority=False):
         with self._cv:
             lru=self.thumbs if kind=='thumb' else self.preview
             image=lru.get(key)
             if image is not None:return image
-            if self._closed or len(self._pending)>=16 or key in self._pending_keys:return None
-            self._pending.append((key,Path(path),kind,size,crop,self._generation));self._pending_keys.add(key)
+            if self._closed:return None
+            if priority:
+                # Promote a prefetched frame, or reserve room for the newest
+                # visible frame. Background work remains bounded and retryable.
+                if key in self._pending_keys:
+                    item=next(item for item in self._pending if item[0]==key)
+                    self._pending.remove(item)
+                else:
+                    if len(self._pending)>=16:
+                        dropped=self._pending.pop()
+                        self._pending_keys.discard(dropped[0])
+                    item=(key,Path(path),kind,size,crop,self._generation)
+                self._pending.appendleft(item)
+            else:
+                if len(self._pending)>=16 or key in self._pending_keys:return None
+                self._pending.append((key,Path(path),kind,size,crop,self._generation))
+            self._pending_keys.add(key)
             self._cv.notify();return None
 
     def cached(self,key,kind='preview'):

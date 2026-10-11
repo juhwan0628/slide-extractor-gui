@@ -76,6 +76,9 @@ def input_manifest(root,sources,output,extension=None):
 def collect(root):
     root=Path(root);sources=json.loads((ROOT/'packaging/native-sources.lock.json').read_text())
     source_dir=root/'sources';source_dir.mkdir(parents=True,exist_ok=True)
+    (root/'licenses').mkdir(parents=True,exist_ok=True)
+    for name in ('OpenSSL-LICENSE.txt','RUNTIME-NOTICES.md'):
+        shutil.copyfile(ROOT/'packaging/third-party'/name,root/'licenses'/name)
     for name,item in sources.items():
         archive=download_verified(item['url'],item['sha256'],source_dir/PurePosixPath(item['url']).name)
         source_licenses(archive,root/'licenses',name)

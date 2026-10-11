@@ -29,7 +29,7 @@ _app은 내부 파일 폴더이므로 그대로 두시면 됩니다.
 """
 def build(output):
     output=Path(output);output.parent.mkdir(parents=True,exist_ok=True)
-    files=['app.py','requirements.txt','LICENSE_AUDIT.md','THIRD_PARTY_NOTICES.md','INSTALL-WINDOWS.md',
+    files=['app.py','requirements.txt','LICENSE','LICENSE_AUDIT.md','THIRD_PARTY_NOTICES.md','INSTALL-WINDOWS.md',
            'packaging/SlideExtractor.spec','packaging/build_manifest.py','packaging/build_windows_personal.py',
            'packaging/windows_media.py','packaging/desktop_entry.py','packaging/requirements-windows-x64.lock',
            'scripts/validate-windows-portable.bat']

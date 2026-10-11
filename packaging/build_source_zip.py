@@ -4,7 +4,7 @@ import hashlib,zipfile
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
-BASE=('app.py','requirements.txt','README.md',
+BASE=('app.py','requirements.txt','README.md','LICENSE',
       'BUILD-WINDOWS.bat','INSTALL-WINDOWS.md','packaging/build_windows_personal.py','packaging/windows_media.py','packaging/build_windows_kit.py',
       'scripts/validate-windows-portable.bat',
       'LICENSE_AUDIT.md','THIRD_PARTY_NOTICES.md',

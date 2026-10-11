@@ -1,12 +1,26 @@
 # Slide Extractor GUI — 배포 라이선스 사전 감사
 
-## 최신 상태 — 2026-10-09
+## 최신 상태 — 2026-10-12 안정화 작업
 
-앱 소스에 MIT License를 적용했습니다. 실제 0.4.9rc2 macOS OpenCV wheel의 avcodec_license()가 GPL version 3 or later를 반환했고, --enable-gpl 및 x264/x265 링크를 확인했습니다. 따라서 rc2 초안은 공개 배포 대상으로 사용하지 않습니다. 이전의 ‘wheel FFmpeg는 LGPL’ 설명은 실제 이 바이너리에 적용되지 않습니다.
+앱 소스는 MIT입니다. 현재 공개 승인 버전과 실제 설치본의 해시·실행 기록은
+packaging/release-approval.json과 RELEASING.md를 확인하세요.
+macOS ad-hoc 서명·공증 없음, Windows unsigned가 합의한 베타 정책입니다.
 
-0.4.9rc3에서는 고정 원본 소스로 OpenCV를 이미지 처리 구성으로 빌드하며 videoio/FFmpeg/x264/x265를 제외합니다. 원본 소스, 최소 구성에 필요한 패키징 패치, 설정 및 해시를 함께 제공합니다. Qt 라이브러리 교체 후 런타임 버전 변경과 분석·PDF 저장을 확인하고, 설치본 인벤토리·대응 소스·라이선스 원문을 매칭한 뒤 출고 검사를 수행합니다. 빌드와 감사가 완료되기 전에는 공개 승인 상태로 바꾸지 않습니다.
+초기 OpenCV wheel의 GPL 코덱 발견 이후 현재 배포 빌드는 고정 원본 소스의
+이미지 전용 OpenCV를 사용합니다. FFmpeg·Qt 대응 소스, 원문 고지·SBOM과
+설치본·Qt 교체 검사는 출고 절차에 포함되어 있습니다.
 
-아래 내용은 당시의 기록입니다. 초기의 ‘설치 파일 없음’ 및 개발 의존성 설명은 날짜에 따른 이력이며 현재 설치본 검증 결과와 구분하세요.
+이번 전수 점검에서 이전 감사의 OpenSSL installed_license 연결이 NumPy 또는
+Python의 일반 Apache 문서를 가리키는 결함을 확인했습니다. M4는 전용
+OpenSSL-LICENSE.txt와 RUNTIME-NOTICES.md를 후보에 포함하고, 동일 원문
+바이트·해시 및 실제 OpenSSL 3.x 런타임 버전·바이너리 해시를 연결하도록
+수정합니다. 누락·변경된 원문은 자동 승인하지 않습니다. 수정된 설치본의
+검증과 새 승인은 M5에서 수행하며, 기존 승인 자료를 새 코드의 증거로 쓰지 않습니다.
+
+아래 표와 RELEASE HOLD 문구는 **2026-10-08/09의 역사적 기록**입니다.
+당시 미완료 항목이나 개발 의존성을 현재 설치본 구성으로 읽지 마세요.
+
+## 초기 설계 감사 이력
 
 검토일: 2026-10-08. 목적: 비상업적 GitHub Releases (Windows x64 onedir+Inno Setup; macOS arm64 .app/.dmg). 범위는 현재 소스·requirements 및 Oracle 개발환경에 설치된 바이너리. **아직 Windows/macOS 실제 릴리스 아티팩트가 없으므로 최종 바이너리 구성품 감사는 미완료. 이 문서는 법률 자문이 아니다.**
 

@@ -10,7 +10,7 @@ from .media import source_matches,MediaError
 from .pts import extract_selected
 from .pdf import write_slides_pdf,validate_slides_pdf
 from .timeline_json import dumps,loads
-from .export import snapshot_export,ExportTransaction,recover_export,OutputOverwriteRequired,RecoveryRequired
+from .export import snapshot_export,ExportTransaction,_recover_one,OutputOverwriteRequired,RecoveryRequired,ExportPublishedError
 from .config import DetectorConfig
 
 def _r(r):return dict(x=r.x,y=r.y,width=r.width,height=r.height)
@@ -115,6 +115,7 @@ def export_project(project,destination,*,overwrite=False,sidecar_format='detaile
     tx=ExportTransaction(snap.source.path,paths)
     temp=Path(tempfile.mkdtemp(prefix='.pts-render-',dir=destination.parent))
     try:
+        tx.check_filesystem()
         requested={s.sample_id:s for s in snap.samples}
         selections=[requested[p.representative_sample_id] for p in snap.pages]
         roi=project.settings.effective_roi
@@ -152,10 +153,24 @@ def export_project(project,destination,*,overwrite=False,sidecar_format='detaile
         if progress:progress('publishing',None,None)
         tx.prepare(raw,sidecar)
         tx.commit()
-        recover_export(destination.parent,validator=validate_pair)
         if cancel_token is not None:cancel_token.mark_committed()
+        # Only this transaction uses this validator; never scan other jobs here.
+        _recover_one(tx.journal_path,tx.paths[0].parent,validator=validate_pair)
         return paths.paths
+    except Exception as exc:
+        if tx._committed:
+            if cancel_token is not None:cancel_token.mark_committed()
+            raise ExportPublishedError(paths.paths,exc) from exc
+        raise
     finally:
+        try:
+            tx.discard_unpublished()
+            tx.close()
+        except Exception as exc:
+            if tx._committed:
+                if cancel_token is not None:cancel_token.mark_committed()
+                raise ExportPublishedError(paths.paths,exc) from exc
+            raise
         if not tx._prepared and not tx.journal_path.exists():
             tx._remove_stage()
         shutil.rmtree(temp,ignore_errors=True)

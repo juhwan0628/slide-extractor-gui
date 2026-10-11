@@ -56,3 +56,60 @@ def test_inflight_qimage_queue_never_exceeds_eight(tmp_path):
         assert loader._awaiting_delivery<=8
         # Shutdown must break the delivery wait without the main loop spinning.
     finally:loader.stop()
+
+
+def test_visible_request_promotes_prefetch_and_survives_full_queue(tmp_path,monkeypatch):
+    from threading import Event
+    from gui import images
+    from tests.test_gui_smoke import spin
+    qt=app();real=images.QImage;entered=Event();release=Event()
+    def delayed(*args,**kwargs):
+        if args and isinstance(args[0],str):
+            entered.set();assert release.wait(5)
+        return real(*args,**kwargs)
+    delayed.Format=real.Format
+    monkeypatch.setattr(images,'QImage',delayed)
+    path=tmp_path/'frame.png';Image.new('RGB',(16,12),'blue').save(path)
+    loader=ImageLoader();results=[]
+    loader.ready.connect(lambda key,image,error:(results.append(key),loader.ack()))
+    try:
+        loader.switch('g');loader.request('reading',path)
+        assert entered.wait(2)
+        for i in range(16):loader.request(i,path)
+        loader.request(10,path,priority=True)
+        with loader._cv:
+            assert len(loader._pending)==16
+            assert loader._pending[0][0]==10
+            assert sum(item[0]==10 for item in loader._pending)==1
+        loader.request('latest',path,priority=True)
+        with loader._cv:
+            assert len(loader._pending)==16
+            assert loader._pending[0][0]=='latest'
+            assert loader._pending_keys=={item[0] for item in loader._pending}
+        release.set()
+        spin(qt,lambda:len(results)==17)
+        assert results[:3]==['reading','latest',10]
+    finally:release.set();loader.stop()
+
+def test_switch_discards_inflight_visible_request(tmp_path,monkeypatch):
+    from threading import Event
+    from gui import images
+    from tests.test_gui_smoke import spin
+    qt=app();real=images.QImage;entered=Event();release=Event()
+    def delayed(*args,**kwargs):
+        if args and isinstance(args[0],str):
+            entered.set();assert release.wait(5)
+        return real(*args,**kwargs)
+    delayed.Format=real.Format
+    monkeypatch.setattr(images,'QImage',delayed)
+    path=tmp_path/'frame.png';Image.new('RGB',(16,12),'blue').save(path)
+    loader=ImageLoader();results=[]
+    loader.ready.connect(lambda key,image,error:(results.append(key),loader.ack()))
+    try:
+        loader.switch('old');loader.request('old-visible',path,priority=True)
+        assert entered.wait(2)
+        loader.switch('new');loader.request('new-visible',path,priority=True)
+        release.set();spin(qt,lambda:bool(results))
+        assert results==['new-visible']
+        assert loader.cached('old-visible') is None
+    finally:release.set();loader.stop()

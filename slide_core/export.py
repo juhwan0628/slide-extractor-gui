@@ -7,11 +7,13 @@ import shutil
 import uuid
 import tempfile
 import time
+import sys
+import unicodedata
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 
-from .cache import acquire_file_lease, LeaseBusy
+from .cache import acquire_file_lease, LeaseBusy, LeaseUnavailable
 
 
 @contextmanager
@@ -22,7 +24,7 @@ def _export_lock_coordinator():
     root = Path(tempfile.gettempdir()) / ('slide-extractor-export-locks-' + suffix)
     root.mkdir(mode=0o700, exist_ok=True)
     if root.is_symlink() or not root.is_dir():
-        raise LeaseBusy('Unsafe export lock coordinator directory')
+        raise LeaseUnavailable('Unsafe export lock coordinator directory')
     deadline = time.monotonic() + 5
     while True:
         lease = acquire_file_lease(root / 'coordinator.lock')
@@ -68,6 +70,36 @@ def export_file_lease(path):
             # Also release ownership if coordinator acquisition failed.
             if not handle.closed:
                 lease.__exit__(None, None, None)
+
+
+def output_lock_path(path):
+    """One canonical PDF resource lock shared by both export modes."""
+    path = Path(path)
+    key = os.path.normcase(str(path.resolve()))
+    if sys.platform == "darwin":
+        # Default macOS volumes alias case and Unicode normalization.
+        # Conservative extra serialization is safe on case-sensitive volumes.
+        key = unicodedata.normalize("NFC", key).casefold()
+    return path.parent.resolve() / ("." + hashlib.sha256(key.encode()).hexdigest() + ".lock")
+
+
+def activity_lock_path(journal_path):
+    return Path(journal_path).with_suffix(".active.lock")
+
+
+class ExportPublishedError(RuntimeError):
+    """The output was published; a subsequent confirmation failed."""
+    committed = True
+
+    def __init__(self, outputs, detail):
+        self.outputs = tuple(Path(path) for path in outputs)
+        super().__init__("PDF saved: " + ", ".join(map(str, self.outputs)) +
+                         ". Final confirmation failed: " + str(detail) +
+                         ". Check the saved file before replacing it again.")
+
+
+class UnsupportedExportFilesystem(ValueError):
+    """Paired export cannot preserve its exclusive publication guarantee."""
 
 
 class OutputCollision(ValueError):
@@ -197,14 +229,57 @@ class ExportTransaction:
         stage_stat = self.stage.stat(follow_symlinks=False)
         self._stage_identity = (stage_stat.st_dev, stage_stat.st_ino)
         self.journal_path = parent / f".slide-export-{self.export_id}.journal.json"
-        self.lock_path = parent / ("." + hashlib.sha256(
-            "\0".join(map(str, self.paths)).encode()).hexdigest() + ".lock")
+        self.lock_path = output_lock_path(self.paths[0])
+        self.activity_path = activity_lock_path(self.journal_path)
+        self._activity_lease = None
+        self._filesystem_checked = False
         self._source_state = _state(self.source)
         self._prepared = False
         self._committed = False
+        self._publication_started = False
         self._directory_sync_supported = True
         self._journal_identity = None
         self._last_journal = None
+
+    def _begin_activity(self):
+        if self._activity_lease is None:
+            lease = export_file_lease(self.activity_path)
+            lease.__enter__()
+            self._activity_lease = lease
+
+    def _end_activity(self):
+        lease, self._activity_lease = self._activity_lease, None
+        if lease is not None:
+            lease.__exit__(None, None, None)
+
+    def check_filesystem(self):
+        """Reject unsupported paired publication before changing user outputs."""
+        if self._filesystem_checked:
+            return
+        if not self._stage_owned():
+            raise OutputCollision("Transaction staging directory changed")
+        fd, name = tempfile.mkstemp(prefix=".hardlink-probe-", dir=self.stage)
+        os.close(fd)
+        probe = Path(name)
+        linked = probe.with_suffix(".link")
+        try:
+            try:
+                os.link(probe, linked, follow_symlinks=False)
+            except OSError as exc:
+                unsupported = {errno.EPERM, errno.EINVAL, errno.ENOSYS}
+                unsupported.update(getattr(errno, name) for name in
+                                   ("ENOTSUP", "EOPNOTSUPP") if hasattr(errno, name))
+                if exc.errno in unsupported or getattr(exc, "winerror", None) in (1, 50):
+                    raise UnsupportedExportFilesystem(
+                        "This folder does not support safe PDF+JSON publication. "
+                        "Use PDF-only export or choose a local folder that supports hard links.") from exc
+                raise
+            self._filesystem_checked = True
+        finally:
+            # The linked name is random and removed only when it aliases our probe.
+            if linked.exists() and not linked.is_symlink() and linked.samefile(probe):
+                linked.unlink()
+            probe.unlink()
 
     def _stage_owned(self):
         try:
@@ -286,6 +361,8 @@ class ExportTransaction:
     def prepare(self, pdf_bytes, json_bytes, *, fail_after=None):
         self.new_hashes = [hashlib.sha256(data).hexdigest() for data in (pdf_bytes, json_bytes)]
         try:
+            self._begin_activity()
+            self.check_filesystem()
             for index, data in enumerate((pdf_bytes, json_bytes)):
                 staged = self._owned_path(self.stage / f"{index}.new")
                 fd = os.open(staged, os.O_WRONLY | os.O_CREAT | os.O_EXCL |
@@ -301,9 +378,16 @@ class ExportTransaction:
             self._prepared = True
         except BaseException:
             self._remove_stage()
+            self._end_activity()
             raise
 
     def commit(self):
+        try:
+            return self._commit()
+        finally:
+            self._end_activity()
+
+    def _commit(self):
         if not self._prepared:
             raise RuntimeError("prepare must complete before commit")
         with export_file_lease(self.lock_path):
@@ -314,6 +398,7 @@ class ExportTransaction:
             moved = []
             published = set()
             try:
+                self._publication_started = True
                 self._journal("COMMITTING")
                 for i, target in enumerate(self.paths):
                     if _state(target) != self.snapshot.states[i]:
@@ -376,9 +461,39 @@ class ExportTransaction:
                 self._sync_dir(self.paths[0].parent)
                 raise
 
-    def close(self):
-        if self._committed:
+    def discard_unpublished(self):
+        """Remove only this prepared job when publication never began."""
+        if self._committed or self._publication_started or not self._prepared:
+            return
+        self._begin_activity()
+        try:
+            if not self._stage_owned() or self.journal_path.is_symlink():
+                return
+            try:
+                stat = self.journal_path.stat()
+                record = json.loads(self.journal_path.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                return
+            if ((stat.st_dev, stat.st_ino) != self._journal_identity or
+                    record != self._last_journal or record["phase"] != "PREPARED"):
+                return
+            for item in self.stage.iterdir():
+                if (item.name not in {"0.new", "1.new"} or item.is_symlink() or
+                        not item.is_file() or
+                        hashlib.sha256(item.read_bytes()).hexdigest() !=
+                        self.new_hashes[int(item.name[0])]):
+                    return
             self._remove_stage()
+            if self.stage.exists():
+                return
+            self.journal_path.unlink()
+            self._prepared = False
+        finally:
+            self._end_activity()
+
+    def close(self):
+        """Release ownership only; verified recovery owns stage/journal cleanup."""
+        self._end_activity()
 
 # T008 — conservative, idempotent recovery after a process crash.
 class RecoveryRequired(RuntimeError):
@@ -449,9 +564,26 @@ def _recovery_file_hash(path: Path, *, allow_absent=True):
 
 
 def _recover_one(journal_path: Path, parent: Path, *, validator=None):
+    # A live PREPARED transaction is not an interrupted transaction.
+    # Acquire ownership before reading: writers update journals atomically.
+    lease = export_file_lease(activity_lock_path(journal_path))
+    try:
+        lease.__enter__()
+    except LeaseUnavailable as exc:
+        raise RecoveryRequired('Unable to inspect export activity lease; check lock path and permissions') from exc
+    except LeaseBusy:
+        return None
+    try:
+        if not journal_path.exists() and not journal_path.is_symlink():
+            return None  # Another recovery already completed.
+        return _recover_one_locked(journal_path, parent, validator=validator)
+    finally:
+        lease.__exit__(None, None, None)
+
+
+def _recover_one_locked(journal_path: Path, parent: Path, *, validator=None):
     record, stage, paths = _read_journal(journal_path, parent)
-    lock_name = "." + hashlib.sha256("\0".join(map(str, paths)).encode()).hexdigest() + ".lock"
-    with export_file_lease(parent / lock_name):
+    with export_file_lease(output_lock_path(paths[0])):
         # Read again after the lock: do not use stale data from a racing writer.
         reread, checked_stage, checked_paths = _read_journal(journal_path, parent)
         if reread != record or checked_stage != stage or checked_paths != paths:
@@ -545,7 +677,8 @@ def recover_export(directory: Path, *, validator=None):
     """Recover only a named parent directory; never scan unrelated user files.
 
     Returns tuple of (export_id, status) for each journal.
-    Raises RecoveryRequired and leaves uncertain files intact.
+    Live transactions are skipped. Raises RecoveryRequired for ambiguous
+    interrupted state and leaves uncertain files intact.
     """
     parent = Path(directory).resolve()
     if parent.is_file():
@@ -554,5 +687,7 @@ def recover_export(directory: Path, *, validator=None):
         raise RecoveryRequired(f"Recovery parent unavailable: {parent}")
     reports = []
     for journal in sorted(parent.glob(".slide-export-*.journal.json")):
-        reports.append(_recover_one(journal, parent, validator=validator))
+        result = _recover_one(journal, parent, validator=validator)
+        if result is not None:
+            reports.append(result)
     return tuple(reports)
