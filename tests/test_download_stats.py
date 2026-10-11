@@ -4,6 +4,7 @@ from pathlib import Path
 import tempfile
 import unittest
 import json
+import xml.etree.ElementTree as ET
 
 spec = importlib.util.spec_from_file_location("download_stats", Path(__file__).parents[1] / "scripts/download_stats.py")
 module = importlib.util.module_from_spec(spec)
@@ -33,6 +34,12 @@ class DownloadStatsTests(unittest.TestCase):
                 data = json.loads((Path(temp) / f"{key}.json").read_text())
                 self.assertEqual(data["schemaVersion"], 1)
                 self.assertEqual(data["message"], str(count))
+                svg = ET.fromstring((Path(temp) / f"{key}.svg").read_text())
+                self.assertEqual(svg.attrib["aria-label"], f'{data["label"]}: {count}')
+
+    def test_badge_escapes_xml_text_and_accessible_label(self):
+        svg = ET.fromstring(module.badge_svg("A&B", "<7>"))
+        self.assertEqual(svg.attrib["aria-label"], "A&B: <7>")
 
 if __name__ == "__main__":
     unittest.main()
