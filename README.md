@@ -5,7 +5,7 @@
 **강의 영상에서 슬라이드를 찾고, 필요한 페이지만 PDF로.**
 
 [![Common source tests](https://github.com/juhwan0628/slide-extractor-gui/actions/workflows/ci.yml/badge.svg)](https://github.com/juhwan0628/slide-extractor-gui/actions/workflows/ci.yml)
-[![Installer downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fjuhwan0628%2Fslide-extractor-gui%2Fmain%2Fdocs%2Fdownloads%2Ftotal.json)](https://github.com/juhwan0628/slide-extractor-gui/releases)
+[![Installer downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fjuhwan.ing%2Fslide-extractor-downloads%2Ftotal.json)](https://github.com/juhwan0628/slide-extractor-gui/releases)
 ![Beta](https://img.shields.io/badge/beta-0.4.10rc2-6556d9)
 ![macOS](https://img.shields.io/badge/macOS-Apple%20Silicon-20242a)
 ![Windows](https://img.shields.io/badge/Windows-x64-20242a)
@@ -34,10 +34,10 @@
 
 | 기기 | 설치 파일 | 누적 다운로드 | 설치 안내 |
 |---|---|---|---|
-| Apple Silicon Mac | [DMG 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.10rc2/SlideExtractor-v0.4.10rc2-macOS-arm64.dmg) | ![Mac downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fjuhwan0628%2Fslide-extractor-gui%2Fmain%2Fdocs%2Fdownloads%2Fmacos.json) | [Mac 설치](INSTALL-MAC.md) |
-| Windows x64 | [설치 EXE 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.10rc2/SlideExtractor-v0.4.10rc2-Setup-Windows-x64.exe) | ![Windows downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fjuhwan0628%2Fslide-extractor-gui%2Fmain%2Fdocs%2Fdownloads%2Fwindows.json) | [Windows 설치](INSTALL-WINDOWS.md) |
+| Apple Silicon Mac | [DMG 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.10rc2/SlideExtractor-v0.4.10rc2-macOS-arm64.dmg) | ![Mac downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fjuhwan.ing%2Fslide-extractor-downloads%2Fmacos.json) | [Mac 설치](INSTALL-MAC.md) |
+| Windows x64 | [설치 EXE 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.10rc2/SlideExtractor-v0.4.10rc2-Setup-Windows-x64.exe) | ![Windows downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fjuhwan.ing%2Fslide-extractor-downloads%2Fwindows.json) | [Windows 설치](INSTALL-WINDOWS.md) |
 
-다운로드 수는 공개된 모든 버전의 설치 DMG·EXE 누적 다운로드 횟수입니다. 재다운로드를 포함하며 사용자 수나 설치 횟수를 뜻하지 않습니다. 소스·라이선스 ZIP은 제외하고 약 1시간마다 자동 갱신합니다.
+다운로드 수는 공개된 모든 버전의 설치 DMG·EXE 누적 다운로드 횟수입니다. 재다운로드를 포함하며 사용자 수나 설치 횟수를 뜻하지 않습니다. 소스·라이선스 ZIP은 제외하고 서버에서 매시간 17분에 갱신하며 배지 캐시로 표시가 추가 지연될 수 있습니다. [최근 집계 시각](https://juhwan.ing/slide-extractor-downloads/status.json) · [집계 운영 방식](docs/downloads/OPERATIONS.md)
 
 일반 사용자는 위 설치 파일 하나만 받으면 됩니다. [대응 소스·라이선스·검증 자료 ZIP](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.10rc2/SlideExtractor-v0.4.10rc2-Sources-Licenses.zip)은 개발·라이선스 확인용이며 설치에 필요하지 않습니다.
 

@@ -1,0 +1,22 @@
+# Installer download badges
+README Shields endpoints read https://juhwan.ing/slide-extractor-downloads/{total,macos,windows}.json.
+An Ubuntu server cron runs at minute 17 of every hour, independent of GitHub Actions scheduling.
+The existing Actions workflow retains repository JSON snapshots as a backup, but README does not depend on their refresh time.
+
+Deployment scripts are tracked in scripts/download_stats.py and scripts/refresh_download_badges.py.
+Deploy these together to /home/ubuntu/workspace/01_lecture/slide-extractor-download-stats/.
+Public generated output goes to /var/www/html/slide-extractor-downloads/ (served by existing nginx).
+Private observation history: /home/ubuntu/workspace/01_lecture/slide-extractor-download-stats/history.jsonl.
+Private execution log: /home/ubuntu/workspace/01_lecture/slide-extractor-download-stats/refresh.log.
+
+Cron:
+```cron
+17 * * * * /usr/bin/flock -n /home/ubuntu/workspace/01_lecture/slide-extractor-download-stats/refresh.lock /usr/bin/python3 /home/ubuntu/workspace/01_lecture/slide-extractor-download-stats/refresh_download_badges.py --output /var/www/html/slide-extractor-downloads --history /home/ubuntu/workspace/01_lecture/slide-extractor-download-stats/history.jsonl >> /home/ubuntu/workspace/01_lecture/slide-extractor-download-stats/refresh.log 2>&1
+```
+
+No GitHub write token is needed; the server reads public release metadata. Count only published DMG and EXE assets, including prereleases and repeat downloads. ZIPs and drafts are excluded.
+API failures retry three times; final failure preserves previous published values. Each JSON file is replaced atomically.
+status.json exposes the last successful observation timestamp in UTC. The history records cumulative counts at observation times, not individual download event timestamps.
+Server/network availability and Shields/GitHub image caches can still delay visible updates; this is not a hard real-time guarantee.
+
+Verified on 2026-10-11: unauthenticated live API query, public HTTPS JSON, rendered Shields SVG showing 14, filtering, transient retry, failed-query preservation, and history append.

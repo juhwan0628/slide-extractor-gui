@@ -24,7 +24,7 @@ def fetch_releases(repository, token):
         request = Request(
             f"https://api.github.com/repos/{repository}/releases?per_page=100&page={page}",
             headers={"Accept": "application/vnd.github+json",
-                     "Authorization": f"Bearer {token}",
+                     **({"Authorization": f"Bearer {token}"} if token else {}),
                      "X-GitHub-Api-Version": "2022-11-28"},
         )
         with urlopen(request, timeout=30) as response:
