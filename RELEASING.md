@@ -2,6 +2,14 @@
 
 공통 소스와 `slide_core/version.py`에서 버전을 관리합니다. 사용자는 Mac Apple Silicon DMG 또는 Windows x64 설치 EXE를 받습니다. Python·Qt·FFmpeg·FFprobe가 포함됩니다.
 
+## 0.4.11rc1 긴 영상·백그라운드 준비 검증 기록
+
+- 후보 소스 `a08c0c57e81ed8d006dc9115c8c6aae74f8ce93a`: M1–M4 통합, 서버 655 passed 및 독립 코드 리뷰 통과.
+- [공통 소스 CI 38152594538](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/38152594538): Linux 649 passed, 6 skipped; Windows 출력 잠금 7 passed, 1 skipped / 캐시 21 passed, 1 skipped, 2 deselected.
+- [네이티브 설치본 38152594453](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/38152594453): 두 OS 성공. 각 OS 새 준비·FPS·캐시·설정 회귀 35개와 원본 번들·DMG/EXE 설치 앱·QtCore 교체 앱 검증을 통과했습니다.
+- [별도 출고 감사 38153343552](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/38153343552): 두 OS PASSED, errors 없음. 원본 설치본 해시를 release-approval.json에 고정합니다. 유료 서명·공증은 적용하지 않습니다.
+- 긴 실영상 성능·캐시 측정과 검사 범위는 [QA_STATUS](packaging/QA_STATUS.md)를 확인하세요. Hosted runner 성공을 모든 사용자 기기의 OS 보안 정책 통과로 표현하지 않습니다.
+
 ## 0.4.10rc2 안정성 검증 기록
 
 - 공통 소스: `ddf7ba086a45dfe79fa0da61dfe48f97af5358c2`. 서버 전체 **619 passed in 50.75s**. [같은 소스 CI 38050474696](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/38050474696): Linux **613 passed, 6 skipped**; Windows 캐시 **21 passed, 1 skipped, 2 deselected**, 출력 잠금 **7 passed, 1 skipped**.
