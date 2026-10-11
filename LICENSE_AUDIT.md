@@ -1,10 +1,10 @@
 # Slide Extractor GUI — 배포 라이선스 사전 감사
 
-## 최신 상태 — 2026-10-12 안정화 작업
+## 최신 상태 — 2026-10-11 · 0.4.12rc1 안정화
 
 앱 소스는 MIT입니다. 현재 공개 승인 버전과 실제 설치본의 해시·실행 기록은
 packaging/release-approval.json과 RELEASING.md를 확인하세요.
-macOS ad-hoc 서명·공증 없음, Windows unsigned가 합의한 베타 정책입니다.
+macOS ad-hoc 서명(유료 서명·공증 없음), Windows unsigned가 합의한 베타 정책입니다.
 
 초기 OpenCV wheel의 GPL 코덱 발견 이후 현재 배포 빌드는 고정 원본 소스의
 이미지 전용 OpenCV를 사용합니다. FFmpeg·Qt 대응 소스, 원문 고지·SBOM과
@@ -14,8 +14,10 @@ macOS ad-hoc 서명·공증 없음, Windows unsigned가 합의한 베타 정책�
 Python의 일반 Apache 문서를 가리키는 결함을 확인했습니다. M4는 전용
 OpenSSL-LICENSE.txt와 RUNTIME-NOTICES.md를 후보에 포함하고, 동일 원문
 바이트·해시 및 실제 OpenSSL 3.x 런타임 버전·바이너리 해시를 연결하도록
-수정합니다. 누락·변경된 원문은 자동 승인하지 않습니다. 수정된 설치본의
-검증과 새 승인은 M5에서 수행하며, 기존 승인 자료를 새 코드의 증거로 쓰지 않습니다.
+수정했습니다. 누락·변경된 원문은 자동 승인하지 않습니다. M5에서 새 Mac·Windows
+설치본의 원문 고지·실제 라이브러리·대응 소스 연결을 검사했고, 별도 감사
+38163506514가 양 OS PASSED로 완료됐습니다. 새 설치본 및 감사 manifest 해시는
+release-approval.json에 고정하며 기존 승인 자료를 재사용하지 않습니다.
 
 아래 표와 RELEASE HOLD 문구는 **2026-10-08/09의 역사적 기록**입니다.
 당시 미완료 항목이나 개발 의존성을 현재 설치본 구성으로 읽지 마세요.
