@@ -10,6 +10,7 @@
 - 서버 전체 소스 회귀: **655 passed in 69.22s**, 종료 코드 0. 독립 M1–M4 및 설치본 smoke 코드 리뷰 승인, workflow actionlint·diff 공백 검사 통과.
 - 후보 소스: `a08c0c57e81ed8d006dc9115c8c6aae74f8ce93a`. 동일 커밋 GitHub CI `38152594538`: Linux **649 passed, 6 skipped**; Windows 출력 잠금 **7 passed, 1 skipped**, 캐시 **21 passed, 1 skipped, 2 deselected**.
 - 네이티브 실행 `38152594453`: Mac·Windows 모두 성공. 원본 번들·DMG/EXE 설치본·QtCore 교체 설치본에서 백그라운드 준비, 저장 옵션, Start over 캐시 정리, 수동 편집·PDF/JSON·출력 잠금 정리를 검증했습니다. 두 OS의 네이티브 파일 목록 해시는 기존 승인본과 동일합니다. 실제 사용자 PC의 긴 영상과 OS 보안 정책은 hosted runner 검사와 구분합니다.
+- 별도 출고 감사 `38153343552` (감사 커밋 `183585d06898a9e09e5fb2eb411cb227a1371592`): 두 OS 모두 **PASSED**, errors 없음. 원본 설치본·대응 소스·라이선스·Qt 교체 자료를 검사하고 설치 파일 및 감사 manifest 해시를 승인 자료에 고정했습니다.
 
 ## 2026-10-10 — 0.4.10rc2 공개 전 안정성 수정
 

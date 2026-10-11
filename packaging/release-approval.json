@@ -1,43 +1,43 @@
 {
   "status": "APPROVED",
   "public_release_approved": true,
-  "version": "0.4.10rc2",
-  "commit": "ddf7ba086a45dfe79fa0da61dfe48f97af5358c2",
-  "run_id": "38050474664",
-  "source_ci_run_id": "38050474696",
-  "license_audit_run_id": "38051180933",
-  "audit_commit": "7964a00371fb18f2270a50695956445da64109da",
+  "version": "0.4.11rc1",
+  "commit": "a08c0c57e81ed8d006dc9115c8c6aae74f8ce93a",
+  "run_id": "38152594453",
+  "source_ci_run_id": "38152594538",
+  "license_audit_run_id": "38153343552",
+  "audit_commit": "183585d06898a9e09e5fb2eb411cb227a1371592",
   "assets": {
     "macos-arm64": {
-      "path": "macOS-ARM64/dist/SlideExtractor-v0.4.10rc2-macOS-arm64-approved.dmg",
-      "sha256": "e34c62df973007ecb8437b4036e9ab45eff44b8a46423adae097c2e8345ba22e"
+      "path": "macOS-ARM64/dist/SlideExtractor-v0.4.11rc1-macOS-arm64-approved.dmg",
+      "sha256": "e3b7a22f5e941295d07df58198564b3e857a11d74800fcff1a0c7a7c7532ee5c"
     },
     "windows-x64": {
-      "path": "Windows-X64/dist/SlideExtractor-v0.4.10rc2-Setup-Windows-x64.exe",
-      "sha256": "3b27bb4cad3a3040eba74466e29860b7b2c406e97a62e013cf81c1046d7890bd"
+      "path": "Windows-X64/dist/SlideExtractor-v0.4.11rc1-Setup-Windows-x64.exe",
+      "sha256": "f4688af1f3021c22fd2e4aa8a5317e953f9f6a4af8810a23382b57dcc9d97713"
     }
   },
   "audits": {
     "macos-arm64": {
       "status": "PASSED",
       "errors": [],
-      "version": "0.4.10rc2",
-      "commit": "ddf7ba086a45dfe79fa0da61dfe48f97af5358c2",
-      "run_id": "38050474664",
+      "version": "0.4.11rc1",
+      "commit": "a08c0c57e81ed8d006dc9115c8c6aae74f8ce93a",
+      "run_id": "38152594453",
       "platform": "macOS-ARM64",
-      "installer_sha256": "e34c62df973007ecb8437b4036e9ab45eff44b8a46423adae097c2e8345ba22e",
-      "manifest_sha256": "cfed68a754ce405532f25207c2cd1ad071a14746804bbacf49660852790e3270"
+      "installer_sha256": "e3b7a22f5e941295d07df58198564b3e857a11d74800fcff1a0c7a7c7532ee5c",
+      "manifest_sha256": "7e606925b34e98c4dd3674f691de08cdb84a35baa37c89f054a3895eba276487"
     },
     "windows-x64": {
       "status": "PASSED",
       "errors": [],
-      "version": "0.4.10rc2",
-      "commit": "ddf7ba086a45dfe79fa0da61dfe48f97af5358c2",
-      "run_id": "38050474664",
+      "version": "0.4.11rc1",
+      "commit": "a08c0c57e81ed8d006dc9115c8c6aae74f8ce93a",
+      "run_id": "38152594453",
       "platform": "Windows-X64",
-      "installer_sha256": "3b27bb4cad3a3040eba74466e29860b7b2c406e97a62e013cf81c1046d7890bd",
-      "manifest_sha256": "2ce02af1a916fd6f634de4520be21feaab4ee08983c58f7d95c65de35edc5aa4"
+      "installer_sha256": "f4688af1f3021c22fd2e4aa8a5317e953f9f6a4af8810a23382b57dcc9d97713",
+      "manifest_sha256": "143604907e5bf70d7e0b717a3271b0c147691e96f2db11035ad50cf02659c550"
     }
   },
-  "review_scope": "Three authorized public-beta stability fixes; full source regressions, independent code review, real Windows cache/lease tests, same-commit two-platform native installation and original-byte/source/license audit, unchanged reviewed native inventory and Qt replacement smoke. Technical review, not legal certification."
+  "review_scope": "M1-M4 integration: stalled-progress timeouts, silent background sampling, FPS/cache lifecycle, separate analysis/save settings and Start over. Full source regressions and independent reviews; same-commit native OS regressions and original/bundled/installed/Qt-replacement workflow smoke; exact installer hashes, unchanged native library inventories and independent installed-byte/source/license audit. User chose unsigned beta; hosted runners do not validate every physical PC/security policy."
 }

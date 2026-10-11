@@ -58,4 +58,4 @@ GitHub가 자동으로 제공하는 **Source code ZIP / tar.gz**는 앱 저장�
 
 ## 검증 기록
 
-새 버전은 소스 회귀 검사와 macOS arm64·Windows x64 설치본 검사를 진행합니다. 설치된 앱에서 백그라운드 준비, 저장 옵션 변경, Start over의 캐시 정리와 기존 PDF/JSON·수동 편집 기능을 확인합니다. 공개 전에 결과와 출고 감사 기록을 확정합니다. [검증 상세](https://github.com/juhwan0628/slide-extractor-gui/blob/main/RELEASING.md).
+서버 소스 검사 655개 통과. 동일 소스 GitHub Linux 검사 649개 통과·6개 플랫폼 전용 제외, Windows 캐시 21개와 출력 잠금 7개 통과. Mac·Windows 새 디코딩/캐시/설정 검사 각 35개 통과. 두 OS의 번들·DMG/EXE 설치본·QtCore 교체 설치본에서 백그라운드 준비, 저장 옵션 변경, 캐시 정리, 수동 편집과 PDF/JSON 저장을 검증했습니다. 별도 원본 설치본 출고 감사도 두 OS 모두 통과했습니다. [검증 상세](https://github.com/juhwan0628/slide-extractor-gui/blob/main/packaging/QA_STATUS.md).
