@@ -70,6 +70,61 @@ def verify_manual_editing(app,project,temp):
         window.close();app.processEvents()
 
 
+def verify_background_workflow(app,video):
+    """Run the new user flow with bundled tools in each installed candidate."""
+    import time
+    from PySide6.QtCore import QTimer
+    from PySide6.QtWidgets import QCheckBox,QComboBox,QMessageBox
+    from gui.window import Window
+    from gui.state import State
+    def wait(predicate):
+        deadline=time.monotonic()+60
+        while time.monotonic()<deadline:
+            app.processEvents()
+            if predicate():return
+            time.sleep(.005)
+        raise RuntimeError('Installed background workflow timed out')
+    window=Window();window.show()
+    try:
+        window.open_source(video);wait(lambda:window.controller.state==State.SOURCE_READY)
+        task=window._sample_preparation
+        assert task is not None and window.stage=='preparation'
+        assert window.analyze_button.isEnabled() and not window.analysis_progress.isVisible()
+        window.analyze();wait(lambda:window.controller.state==State.REVIEW_READY)
+        project=window.controller.project
+        assert window._sample_preparation is task
+        assert project.cache_generation==task.result.cache_generation
+        assert not window.advanced_button.isVisible() and window.save_options_button.isVisible()
+        assert len(project.samples)==2
+        directory=task.result.directory;settings=window.settings
+        errors=[]
+        def accept_options():
+            dialog=app.activeModalWidget()
+            try:
+                assert dialog.windowTitle()=='Save options'
+                boxes=dialog.findChildren(QCheckBox);combos=dialog.findChildren(QComboBox)
+                assert len(boxes)==1 and len(combos)==1
+                boxes[0].setChecked(True);combos[0].setCurrentIndex(1)
+                dialog.accept()
+            except Exception as exc:
+                errors.append(exc)
+                if dialog is not None:dialog.reject()
+        QTimer.singleShot(0,accept_options);window.open_save_options()
+        if errors:raise errors[0]
+        assert window.json_enabled and window.json_format=='detailed'
+        assert window.controller.project is project and window.settings==settings
+        assert window._sample_preparation is task and window.export_button.isEnabled()
+        def confirm_reset():
+            dialog=app.activeModalWidget()
+            dialog.button(QMessageBox.StandardButton.Yes).click()
+        QTimer.singleShot(0,confirm_reset);window.back_to_preparation.click()
+        assert window.stage=='empty' and window.controller.source is None
+        assert window.controller.project is None and window.page_model.rowCount()==0
+        wait(task.done.is_set);assert not directory.exists()
+    finally:
+        window.close();wait(lambda:not window.isVisible())
+
+
 def smoke(target):
     os.environ.setdefault('QT_QPA_PLATFORM','offscreen')
     from PySide6.QtCore import qVersion
@@ -112,6 +167,8 @@ def smoke(target):
                 assert not list(temp.glob('*.lock')), 'PDF-only export left output lock'
             assert profile.report()['decoder_backend']=='cpu-metadata'
             verify_manual_editing(app,project,temp)
+            verify_background_workflow(app,video)
+            result.update(background_preparation_checked=True,save_options_checked=True,start_over_cache_cleanup_checked=True)
             result.update(manual_editing_checked=True,keyboard_editing_checked=True,edited_export_checked=True)
             result.update(status='success',qt_runtime_version=qVersion(),sample_count=len(project.samples),page_count=len(project.pages),
                           decoder_backend='cpu-metadata',bundled_tools_checked=result['frozen'],

@@ -1,4 +1,4 @@
-# Slide Extractor 0.4.10rc2 베타
+# Slide Extractor 0.4.11rc1 베타
 
 강의 영상에서 슬라이드 전환을 분석하고, 타임라인에서 페이지를 편집해 PDF로 저장합니다.
 
@@ -6,8 +6,8 @@
 
 | 기기 | 다운로드 |
 |---|---|
-| Apple Silicon Mac | **[Mac DMG 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.10rc2/SlideExtractor-v0.4.10rc2-macOS-arm64.dmg)** |
-| Windows x64 | **[Windows 설치 EXE 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.10rc2/SlideExtractor-v0.4.10rc2-Setup-Windows-x64.exe)** |
+| Apple Silicon Mac | **[Mac DMG 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.11rc1/SlideExtractor-v0.4.11rc1-macOS-arm64.dmg)** |
+| Windows x64 | **[Windows 설치 EXE 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.11rc1/SlideExtractor-v0.4.11rc1-Setup-Windows-x64.exe)** |
 
 **자기 기기에 맞는 설치 파일 하나만 받으면 됩니다.**
 
@@ -17,10 +17,11 @@
 
 ## 이번 버전의 수정
 
-- 반복 분석으로 쌓인 미사용 캐시를 자동 정리합니다. 현재 프로젝트·재분석·다른 앱 인스턴스의 사용 중인 캐시는 보호합니다.
-- 분석 취소·실패 시 부분 캐시를 정리하고, 디스크 여유 공간이 부족하면 미사용 캐시 회수를 먼저 시도합니다.
-- 새 영상 열기 실패·취소 시 기존 프로젝트의 Undo/Redo와 ROI 준비 상태를 유지합니다.
-- 중단된 PDF 출력 복구가 잠금·권한 오류로 막히면 안내를 표시하고 복구 자료를 보존합니다.
+- 영상 선택 시 샘플 프레임을 백그라운드에서 준비합니다. Analyze를 누르면 진행 중인 준비를 이어받거나 완료된 프레임을 재사용합니다.
+- 긴 영상의 정상 디코딩을 총 실행 시간으로 중단하지 않고, 진행이 멈춘 시간을 기준으로 타임아웃을 판단합니다.
+- 기본 분석 간격을 0.5 FPS로 설정합니다. 1 FPS로 올릴 때는 기존 준비를 취소·정리하고 다시 준비하며, 완료된 1 FPS 캐시를 0.5 FPS로 낮출 때는 재디코딩 없이 불필요한 프레임을 정리합니다.
+- 분석 설정과 저장 옵션을 분리합니다. 결과 화면의 Save options…에서 JSON 설정을 바꿔도 편집 내용은 유지됩니다.
+- Start over로 현재 작업과 임시 캐시를 정리하고 영상 선택 화면으로 돌아갑니다. 이미 저장한 출력 파일은 유지합니다.
 
 ## 기존 주요 기능
 
@@ -42,13 +43,13 @@
 ## 베타 제한
 
 유료 코드 서명·macOS 공증을 적용하지 않은 후보입니다. OS 보안 설정에 따라 경고 또는 실행 차단이 발생할 수 있으며 관리자 실행으로 해결된다고 보장하지 않습니다.
-분석은 기본 1 FPS이므로 짧은 전환이나 특이한 화면 구성은 직접 검토가 필요합니다.
+분석은 기본 0.5 FPS이므로 짧은 전환이나 특이한 화면 구성은 직접 검토가 필요합니다.
 지원 대상은 macOS arm64와 Windows x64이며 Intel Mac과 Windows ARM은 이번 후보 대상이 아닙니다.
 
 
 ## 개발·라이선스 자료
 
-[대응 소스·라이선스·검증 자료 ZIP](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.10rc2/SlideExtractor-v0.4.10rc2-Sources-Licenses.zip) · [SHA-256 해시](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.10rc2/SHA256SUMS.txt)
+[대응 소스·라이선스·검증 자료 ZIP](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.11rc1/SlideExtractor-v0.4.11rc1-Sources-Licenses.zip) · [SHA-256 해시](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.11rc1/SHA256SUMS.txt)
 
 자료 ZIP은 일반 설치에 필요하지 않습니다. Qt·FFmpeg 등 정확한 원본 소스, OpenCV 수정 패치, 두 OS의 라이선스·빌드·출고 검사 기록과 FFmpeg 빌드 입력을 모았습니다. 내부 README와 docs/SOURCE_AND_REPLACEMENT.md에서 구성과 라이브러리 교체 방법을 확인할 수 있습니다. 원래 자료의 바이트와 해시는 보존됩니다.
 
@@ -57,4 +58,4 @@ GitHub가 자동으로 제공하는 **Source code ZIP / tar.gz**는 앱 저장�
 
 ## 검증 기록
 
-서버 전체 소스 검사 619개 통과. GitHub Linux 검사 613개 통과·6개 플랫폼 전용 제외, 실제 Windows 캐시 검사 21개와 출력 잠금 검사 7개 통과. 같은 소스의 GitHub CI 및 macOS arm64·Windows x64 설치본 검사와 별도 출고 감사를 통과했습니다. 설치된 앱에서 수동 편집·키보드 입력·실행 취소 후 Shift 선택과 편집 후 PDF/JSON 저장을 검증했습니다. [검증 상세](https://github.com/juhwan0628/slide-extractor-gui/blob/main/RELEASING.md).
+새 버전은 소스 회귀 검사와 macOS arm64·Windows x64 설치본 검사를 진행합니다. 설치된 앱에서 백그라운드 준비, 저장 옵션 변경, Start over의 캐시 정리와 기존 PDF/JSON·수동 편집 기능을 확인합니다. 공개 전에 결과와 출고 감사 기록을 확정합니다. [검증 상세](https://github.com/juhwan0628/slide-extractor-gui/blob/main/RELEASING.md).

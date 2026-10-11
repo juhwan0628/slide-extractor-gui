@@ -78,7 +78,7 @@ def _settings_key(settings):
 
 
 def _analyze_project(source,settings:AnalysisSettings,cache_root,*,previous:Project|None=None,
-                    cancel_token=None,sampler=sample_stream,progress=None,profile=None,decode_options=None):
+                    cancel_token=None,sampler=sample_stream,progress=None,profile=None,decode_options=None,prepared=None):
     """Return a new validated project without modifying previous on error/cancel.
 
     Reuses immutable cached Samples when fps/source are unchanged. Stale source or
@@ -88,6 +88,7 @@ def _analyze_project(source,settings:AnalysisSettings,cache_root,*,previous:Proj
     if cancel_token is not None:cancel_token.raise_if_cancelled()
     source=probe_source(Path(source),cancel_token=cancel_token) if not hasattr(source,'fingerprint') else source
     if not source_matches(source):raise MediaError('SourceChanged',code='SourceChanged')
+    prepared_cache=prepared
     cache_generation=str(uuid4())
     reused=False
     if previous is not None and previous.source!=source:
@@ -102,6 +103,11 @@ def _analyze_project(source,settings:AnalysisSettings,cache_root,*,previous:Proj
             reused=True
         else:samples=()
     else:samples=()
+    if prepared is not None:
+        if prepared.source!=source:raise MediaError('SourceChanged: prepared source mismatch',code='SourceChanged')
+        if prepared.fps!=settings.fps:raise ValueError('Prepared fps does not match analysis fps')
+        if not prepared.samples:raise MediaError('CacheUnavailable',code='CacheUnavailable')
+        samples=prepared.samples;cache_generation=prepared.cache_generation;reused=True
     created_cache=None
     cache_pins=[]
     if progress:progress('sampling',None,None)
@@ -143,7 +149,7 @@ def _analyze_project(source,settings:AnalysisSettings,cache_root,*,previous:Proj
             project=Project(source,complete_settings,tuple(samples),transitions,segments,pages,
                             revision=0,cache_generation=cache_generation,
                             analysis_generation=str(uuid4()))
-            project._cache_pin = getattr(previous, '_cache_pin', None) if reused else (cache_pins[0] if cache_pins else None)
+            project._cache_pin = prepared_cache.cache_pin if prepared_cache is not None else (getattr(previous, '_cache_pin', None) if reused else (cache_pins[0] if cache_pins else None))
             result=AnalysisResult(project.samples,project.transitions,project.segments,
                                   project.analysis_generation)
         if profile is not None:profile.metadata['page_count']=len(pages)
@@ -164,7 +170,7 @@ def requires_reanalysis(project:Project,settings:AnalysisSettings):
 
 
 def analyze_project(source,settings,cache_root,*,previous=None,cancel_token=None,
-                    sampler=sample_stream,progress=None,profile=None,profile_path=None,decode_options=None):
+                    sampler=sample_stream,progress=None,profile=None,profile_path=None,decode_options=None,prepared=None):
     decode_options={'backend':'cpu-metadata','threads':0} if decode_options is None else decode_options
     profile=profile if profile is not None else (AnalysisProfile() if profile_path else None)
     if profile is not None:
@@ -173,7 +179,7 @@ def analyze_project(source,settings,cache_root,*,previous=None,cancel_token=None
     try:
         with measured(profile,'total'):
             outcome=_analyze_project(source,settings,cache_root,previous=previous,
-                cancel_token=cancel_token,sampler=sampler,progress=progress,profile=profile,decode_options=decode_options)
+                cancel_token=cancel_token,sampler=sampler,progress=progress,profile=profile,decode_options=decode_options,prepared=prepared)
         if profile is not None:profile.metadata['status']='success'
         return outcome
     except BaseException as exc:

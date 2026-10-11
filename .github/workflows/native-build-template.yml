@@ -72,6 +72,17 @@ jobs:
           path: vendor/approved/
           retention-days: 14
           compression-level: 0
+      - name: Verify background decoding, cache lifecycle and settings on native OS
+        env:
+          QT_QPA_PLATFORM: offscreen
+          PYTHONPATH: .
+        shell: python
+        run: |
+          import os,subprocess,sys
+          from pathlib import Path
+          subprocess.run([sys.executable,'-m','pip','install','pytest'],check=True)
+          os.environ['PATH']=str(Path('vendor/approved').resolve())+os.pathsep+os.environ['PATH']
+          subprocess.run([sys.executable,'-m','pytest','-q','tests/test_decode_stall_timeout.py','tests/test_background_samples.py','tests/test_preparation_lifecycle.py','tests/test_m4_settings_flow.py'],check=True)
       - name: Build candidate and record inputs
         run: |
           python -m pip check
@@ -147,6 +158,7 @@ jobs:
           for name in ('installed-smoke.json','installer-smoke.json'):
               report=json.loads((Path('build')/name).read_text())
               assert report['pdf_only_checked'] and report['output_lock_cleanup_checked'],report
+              assert report['background_preparation_checked'] and report['save_options_checked'] and report['start_over_cache_cleanup_checked'],report
               assert report['manual_editing_checked'] and report['keyboard_editing_checked'] and report['edited_export_checked'],report
               assert report['status']=='success' and report['frozen'] and report['bundled_tools_checked'] and report['version']==runpy.run_path('slide_core/version.py')['VERSION'],report
       - name: Record final bundle inventory and pending release review

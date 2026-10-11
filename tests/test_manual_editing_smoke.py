@@ -41,3 +41,12 @@ def test_failed_smoke_releases_cache_pin_before_temp_cleanup(tmp_path,monkeypatc
     entry['smoke'].__globals__['verify_manual_editing']=failed
     with pytest.raises(ValueError,match='original smoke failure'):
         entry['smoke'](tmp_path/'smoke.json')
+
+
+def test_installed_smoke_verifies_background_settings_and_reset(tmp_path):
+    entry=runpy.run_path(str(Path(__file__).parents[1]/'packaging/desktop_entry.py'))
+    target=tmp_path/'smoke.json'
+    assert entry['smoke'](target)==0
+    report=json.loads(target.read_text())
+    for name in ('background_preparation_checked','save_options_checked','start_over_cache_cleanup_checked'):
+        assert report.get(name) is True,name

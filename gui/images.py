@@ -29,6 +29,7 @@ class ImageLoader(QObject):
         self.preview=ByteLRU(64*1024*1024);self.thumbs=ByteLRU(16*1024*1024)
         self._pending=deque();self._pending_keys=set();self._cv=Condition();self._closed=False
         self._generation=None
+        self._reading=False
         self._awaiting_delivery=0  # cap queued detached QImages at eight
         self._thread=Thread(target=self._run,name='slide-image-reader',daemon=False)
         self._thread.start()
@@ -58,6 +59,7 @@ class ImageLoader(QObject):
                 if self._closed:return
                 key,path,kind,size,crop,generation=self._pending.popleft()
                 self._pending_keys.discard(key)
+                self._reading=True
             try:
                 if path.is_symlink() or not path.is_file():raise ImageUnavailable(f'Missing sample image: {path}')
                 img=QImage(str(path))
@@ -73,7 +75,8 @@ class ImageLoader(QObject):
                 error=None
             except Exception as exc:img=QImage();error=str(exc)
             with self._cv:
-                while self._awaiting_delivery >= 8 and not self._closed:
+                self._reading=False;self._cv.notify_all()
+                while generation==self._generation and self._awaiting_delivery >= 8 and not self._closed:
                     self._cv.wait(timeout=.1)
                 if self._closed or generation!=self._generation:continue
                 if error is None:
@@ -81,6 +84,11 @@ class ImageLoader(QObject):
                     (self.thumbs if kind=='thumb' else self.preview).put(key,img,bytes_used)
                 self._awaiting_delivery+=1
                 self.ready.emit(key,img,error)
+
+    def wait_idle(self):
+        """Called off the UI thread after switch(None), before deleting JPEGs."""
+        with self._cv:
+            while self._reading:self._cv.wait()
 
     def ack(self):
         """Main-thread consumer acknowledges a delivered QImage."""

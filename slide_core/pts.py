@@ -127,12 +127,22 @@ def _kill(proc):
     proc.wait(timeout=5)
 
 
-def _decode_stream(source, vf, width, height, *, timeout=120, cancelled=None, seek=None, frame_limit=None, decode_options=None):
-    """Return ordered (PTS, RGB bytes) using bounded queues and stdout drains."""
+def _decode_stream(source, vf, width, height, *, timeout=120, stall_timeout=None, cancelled=None, seek=None, frame_limit=None, decode_options=None):
+    """Return audited frames; total deadline and inactivity budget are separate."""
     cmd=_ffmpeg(source,vf,seek=seek,frame_limit=frame_limit,decode_options=decode_options)
     proc=subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,
                           start_new_session=os.name!='nt',bufsize=0,
                           creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0) if os.name=='nt' else 0)
+    started=time.monotonic()
+    last_progress=[started]
+    def check_wait():
+        if cancelled is not None and cancelled.cancelled:
+            raise MediaError('Cancelled',code='Cancelled')
+        if errors:raise MediaError(errors[0],code=errors[0].split(':')[0])
+        now=time.monotonic()
+        if ((timeout is not None and now-started>=timeout) or
+                (stall_timeout is not None and now-last_progress[0]>=stall_timeout)):
+            raise MediaError('Timeout: decoder made no progress' if timeout is None else 'Timeout',code='Timeout')
     frame_bytes=width*height*3
     pixels=Queue(maxsize=8)
     pts_meta=Queue(maxsize=16)
@@ -160,6 +170,7 @@ def _decode_stream(source, vf, width, height, *, timeout=120, cancelled=None, se
                         errors.append('UnsupportedDisplayTransform: dynamic/interlaced stream');break
                     audits['previous']=value
                     audits['frames']+=1
+                    last_progress[0]=time.monotonic()
                 elif match:=_SELECTED.search(line):
                     n,pts=int(match[1]),match[2]
                     if pts=='N/A' or n!=audits['selected']:
@@ -191,16 +202,12 @@ def _decode_stream(source, vf, width, height, *, timeout=120, cancelled=None, se
     a=Thread(target=stderr_reader,daemon=True)
     b=Thread(target=stdout_reader,daemon=True)
     a.start();b.start()
-    started=time.monotonic()
     try:
-        pixels_done=pts_done=False
+        pts_done=False
         emitted=0
         # This is a generator: each decoded frame is consumed before the next.
         while True:
-            if cancelled is not None and cancelled.cancelled:
-                raise MediaError('Cancelled',code='Cancelled')
-            if errors:raise MediaError(errors[0],code=errors[0].split(':')[0])
-            if time.monotonic()-started>=timeout:raise MediaError('Timeout',code='Timeout')
+            check_wait()
             if not pts_done:
                 try:
                     item=pts_meta.get(timeout=.05)
@@ -211,16 +218,16 @@ def _decode_stream(source, vf, width, height, *, timeout=120, cancelled=None, se
                         except Empty:
                             # Metadata can lead pixels; try on following iterations.
                             while True:
-                                if errors:raise MediaError(errors[0],code=errors[0].split(':')[0])
-                                if time.monotonic()-started>=timeout:raise MediaError('Timeout',code='Timeout')
-                                if cancelled is not None and cancelled.cancelled:
-                                    raise MediaError('Cancelled',code='Cancelled')
+                                check_wait()
                                 try:payload=pixels.get(timeout=.05);break
                                 except Empty:continue
                         if payload is _STOP:
                             raise MediaError('DecodeFailed: frame count mismatch',code='DecodeFailed')
                         emitted+=1
                         yield item,payload
+                        # The generator was suspended for JPEG/cache consumer work.
+                        # Exclude that interval (and its bounded-queue backpressure).
+                        last_progress[0]=time.monotonic()
                 except Empty:pass
             if pts_done:
                 # The raw decoder must have exactly the same ordinal count.
@@ -233,7 +240,11 @@ def _decode_stream(source, vf, width, height, *, timeout=120, cancelled=None, se
                     raise MediaError('DecodeFailed: unexpected extra raw frame',code='DecodeFailed')
                 break
         if errors:raise MediaError(errors[0],code=errors[0].split(':')[0])
-        proc.wait(timeout=max(1,timeout-(time.monotonic()-started)))
+        # EOF is not proof of exit: retain cancellation and stall monitoring.
+        while proc.poll() is None:
+            check_wait()
+            try:proc.wait(timeout=.05)
+            except subprocess.TimeoutExpired:pass
         if proc.returncode!=0:
             raise MediaError('DecodeFailed: FFmpeg process error '+str(list(recent)),code='DecodeFailed')
         if emitted!=audits['selected'] or audits['frames']<emitted:
@@ -249,7 +260,7 @@ def _decode_stream(source, vf, width, height, *, timeout=120, cancelled=None, se
 
 def sample_stream(source:SourceRef,cache_root:Path,*,fps:Fraction=Fraction(1),
                   cancelled=None,timeout=120,progress=None,profile=None,decode_options=None,cache_owner=None):
-    """Select bucket-first frames, 1 or 0.5 fps, preserving source PTS."""
+    """Select bucket-first frames; timeout limits inactivity, not total duration."""
     fps=Fraction(fps)
     if fps not in (Fraction(1),Fraction(1,2)):
         raise ValueError('sampling rate must be 1 or 0.5 fps')
@@ -276,7 +287,7 @@ def sample_stream(source:SourceRef,cache_root:Path,*,fps:Fraction=Fraction(1),
     with CacheSession(cache_root, auto_prune=True, discard_on_error=True) as session:
         prior=-1
         decoded=_decode_stream(source,vf,pipe.cache_width,pipe.cache_height,
-                               timeout=timeout,cancelled=cancelled,decode_options=decode_options)
+                               timeout=None,stall_timeout=timeout,cancelled=cancelled,decode_options=decode_options)
         def observed():
             try:
                 while True:

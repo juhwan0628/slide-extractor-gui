@@ -92,6 +92,10 @@ class CacheBudgetExceeded(RuntimeError):
     pass
 
 
+class CacheCleanupError(OSError):
+    """Owned cache remains on disk; another producer must not start."""
+
+
 class UnsafeCache(RuntimeError):
     pass
 
@@ -423,7 +427,7 @@ class CacheSession:
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type, *_):
+    def __exit__(self, exc_type, original, traceback):
         try:
             self.close()
         except (LeaseBusy, UnsafeCache, OSError, ValueError):
@@ -432,4 +436,8 @@ class CacheSession:
         if exc_type is not None and self.discard_on_error:
             if self._pin is not None:
                 self._pin.close()
-            discard_cache(self.root, self.directory)
+            if not discard_cache(self.root, self.directory) and self.directory.exists():
+                # Preserve the original failure for existing callers while
+                # exposing the cleanup barrier to background successors.
+                error = CacheCleanupError(f'Unable to remove sample cache: {self.directory}')
+                original.cache_cleanup_error = error

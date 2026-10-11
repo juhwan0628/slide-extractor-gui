@@ -1,7 +1,7 @@
 """M14 review screen is single-timeline and fixed-edit-control only."""
 from pathlib import Path
 import time
-from PySide6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication,QMessageBox
 from gui.window import Window
 from gui.state import State
 
@@ -14,7 +14,7 @@ def wait(app,fn,timeout=15):
         time.sleep(.005)
     raise AssertionError('Timeout')
 
-def test_review_layout_is_stable_when_scrubbing():
+def test_review_layout_is_stable_when_scrubbing(monkeypatch):
     if not VIDEO.exists():return
     app=QApplication.instance() or QApplication([])
     w=Window();w.show()
@@ -36,8 +36,9 @@ def test_review_layout_is_stable_when_scrubbing():
             w.seek_index(index);app.processEvents()
             assert w.add_button.isVisible() and w.replace_button.isVisible()
             assert heights==(w.add_button.geometry().y(),w.replace_button.geometry().y())
+        monkeypatch.setattr(QMessageBox,'question',lambda *a,**kw:QMessageBox.StandardButton.Yes)
         w.return_to_preparation()
-        assert w.stage=='preparation'
+        assert w.stage=='empty' and w.controller.source is None
         assert w.analyze_button.isVisible()
         assert not w.timeline.isVisible()
     finally:
