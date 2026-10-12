@@ -1,5 +1,7 @@
 # Windows 설치
 
+0.5.0b1 검증 후보를 테스트한다면 [후보 설치 EXE ZIP](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/38286090517/artifacts/11763976703)을 GitHub 로그인 후 다운로드하고 압축을 풀어 주세요. Python·FFmpeg 준비 없이 설치할 수 있습니다. 아래 공개 다운로드는 기존0.4.12rc1입니다. [후보 검증 기록](docs/milestones/Keyframe-M5-results.md)
+
 지원 대상: Windows x64. Windows ARM은 현재 검증 대상이 아닙니다.
 
 1. [베타 설치 파일](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.12rc1/SlideExtractor-v0.4.12rc1-Setup-Windows-x64.exe)을 다운로드합니다.

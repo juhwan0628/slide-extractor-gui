@@ -1,5 +1,7 @@
 # Mac 설치
 
+0.5.0b1 검증 후보를 테스트한다면 [후보 DMG ZIP](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/38286090517/artifacts/11763099370)을 GitHub 로그인 후 다운로드하고 압축을 풀어 주세요. Python·FFmpeg 준비 없이 설치할 수 있습니다. 아래 공개 다운로드는 기존0.4.12rc1입니다. [후보 검증 기록](docs/milestones/Keyframe-M5-results.md)
+
 지원 대상: Apple Silicon Mac (arm64). Intel Mac은 현재 지원하지 않습니다.
 
 1. [베타 설치 파일](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.12rc1/SlideExtractor-v0.4.12rc1-macOS-arm64.dmg)을 다운로드합니다.
