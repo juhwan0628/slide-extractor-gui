@@ -33,7 +33,7 @@ def bundle_name(version):
 
 def compact_assets(root,output,version,documentation=None):
     root,output=Path(root),Path(output)
-    if not re.fullmatch(r"0\.[0-9]+\.[0-9]+(?:rc[0-9]+)?",version):
+    if not re.fullmatch(r"0\.[0-9]+\.[0-9]+(?:(?:rc|b)[0-9]+)?",version):
         raise ValueError("Invalid version")
     entries=checksum_entries((root/"SHA256SUMS.txt").read_text())
     paths={p.name:p for p in root.iterdir()}

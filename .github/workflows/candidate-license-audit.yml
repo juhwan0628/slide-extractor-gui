@@ -1,7 +1,7 @@
 name: Audit reviewed installed candidates
 on:
   push:
-    branches: [main]
+    branches: [main, release/keyframe-0.5-m5]
     paths: ['packaging/candidate-review.json', '.github/workflows/candidate-license-audit.yml', 'packaging/review_candidate.py']
   workflow_dispatch:
 permissions:

@@ -1,7 +1,13 @@
 {
   "version": "0.5.0b1",
-  "status": "PENDING",
+  "status": "REVIEWED_CANDIDATE",
   "public_release_approved": false,
-  "native_inventory_reviewed": false,
-  "reviewed_native_inventory_sha256": {}
+  "native_inventory_reviewed": true,
+  "reviewed_native_inventory_sha256": {
+    "macOS-ARM64": "46c10541090c1c0ba7120c563b48548722e47d7e8d5669dbbaf5babc67a80186",
+    "Windows-X64": "c58cec3224d220df987c0396dc3b162dd3d1decf6e3c3eeab839be7744fcf112"
+  },
+  "candidate_run_id": "38286090517",
+  "candidate_commit": "04849e137c198f619f851606014a667a814d4d40",
+  "source_ci_run_id": "38286090268"
 }

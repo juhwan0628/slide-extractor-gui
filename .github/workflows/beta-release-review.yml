@@ -37,7 +37,7 @@ jobs:
           approval=json.loads(Path('packaging/release-approval.json').read_text())
           assert c['public_release_approved'] is True and approval['public_release_approved'] is True and approval['status']=='APPROVED'
           assert approval['version']==c['version'] and approval['commit']==c['candidate_commit'] and str(approval['run_id'])==str(c['candidate_run_id'])
-          assert re.fullmatch(r'0\.[0-9]+\.[0-9]+rc[0-9]+',c['version'])
+          assert re.fullmatch(r'0\.[0-9]+\.[0-9]+(?:rc|b)[0-9]+',c['version'])
           assert re.fullmatch(r'[0-9a-f]{40}',c['candidate_commit'])
           for field,path in [('candidate_run_id','.github/workflows/native-build-template.yml'),('source_ci_run_id','.github/workflows/ci.yml')]:
               assert str(c[field]).isdigit()
@@ -49,7 +49,7 @@ jobs:
           assert audit['path']=='.github/workflows/candidate-license-audit.yml' and audit['conclusion']=='success' and audit['head_sha']==c['audit_commit']
           source=subprocess.check_output(['git','show',c['candidate_commit']+':slide_core/version.py'],text=True)
           assert f'VERSION = "{c["version"]}"' in source or f"VERSION = '{c['version']}'" in source
-          allowed={'.github/workflows/candidate-license-audit.yml','.github/workflows/beta-release-review.yml','packaging/review_candidate.py','packaging/candidate-review.json','packaging/beta-review.json','packaging/third-party/OpenSSL-LICENSE.txt','packaging/third-party/RUNTIME-NOTICES.md','RELEASE_NOTES.md','README.md','INSTALL-MAC.md','INSTALL-WINDOWS.md','RELEASING.md','packaging/QA_STATUS.md','packaging/release-approval.json','packaging/rc2-superseded.md','packaging/compact_release.py','packaging/compact-release.json','.github/workflows/compact-release.yml','tests/test_compact_release.py'}
+          allowed={'.github/workflows/candidate-license-audit.yml','.github/workflows/beta-release-review.yml','packaging/review_candidate.py','packaging/candidate-review.json','packaging/beta-review.json','packaging/third-party/OpenSSL-LICENSE.txt','packaging/third-party/RUNTIME-NOTICES.md','RELEASE_NOTES.md','README.md','INSTALL-MAC.md','INSTALL-WINDOWS.md','RELEASING.md','packaging/QA_STATUS.md','packaging/release-approval.json','packaging/rc2-superseded.md','packaging/compact_release.py','packaging/compact-release.json','.github/workflows/compact-release.yml','tests/test_compact_release.py','docs/milestones/Keyframe-M5-plan.md','docs/milestones/Keyframe-M5-results.md','docs/milestones/Keyframe-0.5-design.md','tests/test_beta_review_docs.py'}
           changed=set(subprocess.check_output(['git','diff','--name-only',c['candidate_commit'],os.environ['GITHUB_SHA']],text=True).splitlines())
           assert changed<=allowed, 'Application/build inputs changed after candidate: '+str(changed-allowed)
           with open(os.environ['GITHUB_ENV'],'a') as f:
