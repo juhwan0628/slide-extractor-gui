@@ -113,3 +113,13 @@ def test_developer_source_zip_and_benchmarks_use_current_product(tmp_path,monkey
  assert bench['main']()==0
  report=json.loads(next((tmp_path/'profiles').glob('benchmark-*.json')).read_text())
  assert report['runs'][0]['profile']['sampling_algorithm']=='decoder-keyframes-v1'
+
+def test_core_benchmark_runs_without_posix_resource(tmp_path,monkeypatch):
+ import sys
+ source=video(tmp_path/'source.mkv')
+ monkeypatch.setitem(sys.modules,'resource',None)
+ core=runpy.run_path(str(ROOT/'scripts/benchmark_core.py'))
+ report=core['run'](source.path,tmp_path/'core',rounds=1)
+ assert report['runs'][0]['pdf_bytes']>0
+ assert report['runs'][0]['parent_maxrss_kib'] is None
+ assert report['runs'][0]['child_maxrss_kib'] is None

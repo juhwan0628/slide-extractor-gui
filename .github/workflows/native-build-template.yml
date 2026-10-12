@@ -22,6 +22,9 @@ on:
       - 'packaging/SlideExtractor.spec'
       - 'THIRD_PARTY_NOTICES.md'
       - 'LICENSE'
+      - 'tests/test_keyframe*.py'
+      - 'tests/test_product_keyframes.py'
+      - 'tests/test_manual_editing_smoke.py'
 permissions:
   contents: read
   actions: read

@@ -1,21 +1,18 @@
 """Known-truth GOP validation; limitations are not repaired with FPS fallback."""
 import subprocess
-from pathlib import Path
 import pytest
-from PIL import Image,ImageStat
 from slide_core.media import probe_source
 from slide_core.analysis import analyze_project
 from slide_core.config import AnalysisSettings
 
 def lecture(path,gop):
  # A 0..5, short B 5..7, A 7..15, final C 15..22 seconds.
- for name,color in [('a','red'),('b','lime'),('c','blue')]:
-  Image.new('RGB',(160,90),color).save(path.parent/(name+'.png'))
+ # lavfi keeps the fixture independent of optional image input decoders.
  subprocess.run(['ffmpeg','-hide_banner','-loglevel','error','-y',
-  '-loop','1','-t','5','-i',str(path.parent/'a.png'),
-  '-loop','1','-t','2','-i',str(path.parent/'b.png'),
-  '-loop','1','-t','8','-i',str(path.parent/'a.png'),
-  '-loop','1','-t','7','-i',str(path.parent/'c.png'),
+  '-f','lavfi','-i','color=c=red:s=160x90:r=5:d=5',
+  '-f','lavfi','-i','color=c=lime:s=160x90:r=5:d=2',
+  '-f','lavfi','-i','color=c=red:s=160x90:r=5:d=8',
+  '-f','lavfi','-i','color=c=blue:s=160x90:r=5:d=7',
   '-filter_complex','[0:v][1:v][2:v][3:v]concat=n=4:v=1:a=0,fps=5,format=yuv420p[v]',
   '-map','[v]','-c:v','mpeg4','-g',str(gop),'-keyint_min',str(gop),'-sc_threshold','1000000000',str(path)],check=True,timeout=30)
  return probe_source(path)
