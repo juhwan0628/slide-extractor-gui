@@ -7,7 +7,7 @@ from slide_core.transitions import streaming_detect
 
 def fixture(states,times=None):
     times=times or list(range(len(states)))
-    samples=[Sample(str(uuid4()),int(t),int(t),Fraction(1),Fraction(t),str(t),80,48) for t in times]
+    samples=[Sample(str(uuid4()),i,int(t),Fraction(1),str(t),80,48) for i,t in enumerate(times)]
     frames=(np.full((48,80),int(v),np.uint8) for v in states)
     return samples,frames
 

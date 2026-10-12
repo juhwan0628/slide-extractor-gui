@@ -18,8 +18,8 @@ def source():
 
 
 def fixture_project():
-    samples = (Sample('s000000', 0, 0, Fraction(1), Fraction(0), '0.jpg', 10, 10),
-               Sample('s000001', 1, 10, Fraction(1, 10), Fraction(1), '1.jpg', 10, 10))
+    samples = (Sample('s000000', 0, 0, Fraction(1,10), '0.jpg', 10, 10),
+               Sample('s000001', 1, 10, Fraction(1, 10), '1.jpg', 10, 10))
     segments = (DetectedSegment('g000000', Fraction(0), Fraction(2),
                                 's000000', 's000001', 's000001'),)
     page = Page(str(uuid.uuid4()), 's000001', 'auto', 'g000000', None, 'create')
@@ -55,14 +55,13 @@ def test_rejects_duplicate_ids_unknown_references_and_bad_geometry():
 
 def test_rejects_non_finite_or_non_monotonic_sample_times():
     with pytest.raises(ValueError):
-        Sample('s000000', 0, 0, Fraction(1), math.nan, 'x.jpg', 10, 10)
+        Sample('s000000', math.nan, 0, Fraction(1), 'x.jpg', 10, 10)
     with pytest.raises(ValueError):
-        Sample('s000001', 1, 1, Fraction(0), Fraction(0), 'x.jpg', 10, 10)
+        Sample('s000001', 1, 1, Fraction(0), 'x.jpg', 10, 10)
 
 
 def test_sample_keeps_integer_pts_and_subtracts_source_origin():
-    sample = Sample('s000000', 0, 90000, Fraction(1, 90000), Fraction(0),
-                    'x.jpg', 10, 10, pts_origin=90000)
+    sample = Sample('s000000', 0, 90000, Fraction(1, 90000), 'x.jpg', 10, 10, pts_origin=90000)
     assert sample.source_pts == 90000
     assert sample.actual_time == 0
 
@@ -79,13 +78,13 @@ def test_analysis_settings_and_snapshot_generation_are_independent():
 def test_pts_are_signed_integers_and_actual_time_is_nonnegative():
     for pts in (-1, 1.5, math.nan, math.inf):
         with pytest.raises(ValueError):
-            Sample('s', 0, pts, Fraction(1), Fraction(0), 'x', 1, 1)
+            Sample('s', 0, pts, Fraction(1), 'x', 1, 1)
     with pytest.raises(ValueError):
-        Sample('s', 0, 1, Fraction(1), Fraction(0), 'x', 1, 1, pts_origin=math.nan)
-    sample = Sample('s', 0, -2, Fraction(1, 2), Fraction(0), 'x', 1, 1, pts_origin=-4)
+        Sample('s', 0, 1, Fraction(1), 'x', 1, 1, pts_origin=math.nan)
+    sample = Sample('s', 0, -2, Fraction(1, 2), 'x', 1, 1, pts_origin=-4)
     assert sample.actual_time == 1
     with pytest.raises(ValueError):
-        Sample('s', 0, -4, Fraction(1), Fraction(0), 'x', 1, 1, pts_origin=-2)
+        Sample('s', 0, -4, Fraction(1), 'x', 1, 1, pts_origin=-2)
 
 
 def test_settings_are_deeply_frozen_and_direct_snapshot_copies_collections():
@@ -99,7 +98,7 @@ def test_settings_are_deeply_frozen_and_direct_snapshot_copies_collections():
     request = AnalysisRequest(source(), {'masks': [1, 2]})
     assert request.settings == (('masks', (1, 2)),)
     from slide_core.config import AnalysisSettings
-    assert AnalysisRequest(source(), AnalysisSettings()).settings.fps == 1.0
+    assert AnalysisRequest(source(), AnalysisSettings()).settings.roi_mode == "auto"
     with pytest.raises(ValueError):
         AnalysisRequest(source(), SimpleNamespace(masks=[1, 2]))
     valid_project = fixture_project()
@@ -138,7 +137,7 @@ def test_frozen_settings_dataclasses_keep_their_public_types_and_attributes():
     snapshot = make_export_snapshot(Project(source(), settings=settings))
     assert isinstance(request.settings, AnalysisSettings)
     assert isinstance(request.settings.detector, DetectorConfig)
-    assert request.settings.fps == 1.0
+    assert request.settings.roi_mode == "auto"
     assert snapshot.settings.masks[0].width == 2
 
 
@@ -149,8 +148,8 @@ def test_source_and_sample_dimensions_must_be_positive_integers(field, value):
     args[field] = value
     with pytest.raises(ValueError):
         SourceRef(**args)
-    sample_args = dict(sample_id='s', grid_index=0, source_pts=0, time_base=Fraction(1),
-                       nominal_time=Fraction(0), cache_path='x', width=10, height=10)
+    sample_args = dict(sample_id='s', ordinal=0, source_pts=0, time_base=Fraction(1),
+                       cache_path='x', width=10, height=10)
     sample_args[field] = value
     with pytest.raises(ValueError):
         Sample(**sample_args)

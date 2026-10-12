@@ -9,14 +9,14 @@ import pytest
 from slide_core import analysis, export, media, pdf_only_export, pts
 from slide_core.config import AnalysisSettings
 from slide_core.models import CancelToken, CancelledError
-from tests.test_sampling import make_video
+from tests.media_fixtures import make_video
 
 
 def test_tagged_media_first_frame_and_export_use_probe_transform(tmp_path):
     from gui.preparation import prepare_first_frame
     path=tmp_path/'tagged.mkv'
     subprocess.run(['ffmpeg','-hide_banner','-loglevel','error','-y','-f','lavfi',
-        '-i','color=c=0xC03020:size=80x48:rate=4:duration=1','-c:v','ffv1',
+        '-i','color=c=0xC03020:size=80x48:rate=4:duration=1','-c:v','libx264','-crf','0','-g','1',
         '-pix_fmt','yuv444p','-colorspace','bt709','-color_range','pc',
         '-color_trc','bt709',str(path)],check=True,capture_output=True,timeout=20)
     source=media.probe_source(path)
@@ -29,7 +29,7 @@ def test_tagged_media_first_frame_and_export_use_probe_transform(tmp_path):
     assert prepared==expected
     frames=pts.extract_selected(source,[meta['origin_pts']],tmp_path/'frames')
     with Image.open(frames[0]) as image: assert image.convert('RGB').tobytes()==expected
-    samples,_=pts.sample_stream(source,tmp_path/'cache')
+    samples,_=pts.keyframe_stream(source,tmp_path/'cache')
     with Image.open(samples[0].cache_path) as image:
         error=np.abs(np.asarray(image.convert('RGB')).astype(int)-np.frombuffer(expected,np.uint8).reshape(48,80,3))
         assert error.mean()<3
@@ -91,7 +91,7 @@ def test_first_frame_cancel_reaps_stalled_decoder(tmp_path,monkeypatch):
     decoder=tmp_path/'fake-ffmpeg'
     decoder.write_text('#!'+sys.executable+'\nimport time\nfrom pathlib import Path\nPath('+repr(str(marker))+').write_text("ready")\ntime.sleep(5)\n')
     decoder.chmod(0o755)
-    monkeypatch.setattr(preparation,'executable',lambda name:str(decoder))
+    monkeypatch.setattr(pts,'_ffmpeg',lambda *a,**kw:[str(decoder)])
     token=CancelToken()
     def cancel_when_started():
         until=time.monotonic()+3

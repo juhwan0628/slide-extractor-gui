@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from slide_core.analysis import analyze_project
 from slide_core.config import AnalysisSettings
-from tests.test_sampling import make_video
+from tests.media_fixtures import make_video
 
 def test_profile_preserves_output_and_reports_sampling_and_detection(tmp_path):
     from slide_core.profiling import AnalysisProfile

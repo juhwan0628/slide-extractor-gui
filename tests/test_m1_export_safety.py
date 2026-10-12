@@ -10,7 +10,7 @@ import threading
 import time
 
 import pytest
-from slide_core import export, export_v3, pdf_only_export
+from slide_core import export, keyframe_export, pdf_only_export
 from slide_core.cache import LeaseBusy
 from slide_core.models import CancelToken
 from tests.export_fixtures import make_project, extract_stub
@@ -19,7 +19,7 @@ from tests.export_fixtures import make_project, extract_stub
 def project_at(root, monkeypatch):
     root.mkdir(exist_ok=True)
     project = make_project(root)
-    monkeypatch.setattr(export_v3, "extract_selected", extract_stub(project))
+    monkeypatch.setattr(keyframe_export, "extract_selected", extract_stub(project))
     monkeypatch.setattr(pdf_only_export, "extract_selected", extract_stub(project))
     return project
 
@@ -30,7 +30,7 @@ def test_pair_publication_contends_with_pdf_only_lock(tmp_path, monkeypatch):
     lock = export.output_lock_path(destination)
     with export.export_file_lease(lock):
         with pytest.raises(LeaseBusy):
-            export_v3.export_project(project, destination)
+            keyframe_export.export_project(project, destination)
     assert not destination.exists()
     assert not destination.with_suffix(".json").exists()
 
@@ -57,13 +57,13 @@ def test_auto_cleanup_does_not_recover_another_live_export(tmp_path, monkeypatch
     release_a = threading.Event()
     b_prepared = threading.Event()
     release_b = threading.Event()
-    original_extract = export_v3.extract_selected
+    original_extract = keyframe_export.extract_selected
     def extract(source, selections, root, **kwargs):
         if threading.current_thread().name == "export-A":
             a_extracting.set()
             assert release_a.wait(10)
         return original_extract(source, selections, root, **kwargs)
-    monkeypatch.setattr(export_v3, "extract_selected", extract)
+    monkeypatch.setattr(keyframe_export, "extract_selected", extract)
     original_prepare = export.ExportTransaction.prepare
     def prepare(tx, *args, **kwargs):
         result = original_prepare(tx, *args, **kwargs)
@@ -75,7 +75,7 @@ def test_auto_cleanup_does_not_recover_another_live_export(tmp_path, monkeypatch
     outcomes = {}
     def run(name):
         try:
-            outcomes[name] = export_v3.export_project(project, tmp_path / (name + ".pdf"))
+            outcomes[name] = keyframe_export.export_project(project, tmp_path / (name + ".pdf"))
         except BaseException as exc:
             outcomes[name] = exc
     a = threading.Thread(target=run, args=("A",), name="export-A")
@@ -128,7 +128,7 @@ def test_unsupported_hardlinks_reject_cleanly_before_outputs_change(tmp_path, mo
         raise OSError(errno.EOPNOTSUPP, "hard links not supported")
     monkeypatch.setattr(export.os, "link", unsupported)
     with pytest.raises(Exception) as raised:
-        export_v3.export_project(project, target, overwrite=existing)
+        keyframe_export.export_project(project, target, overwrite=existing)
     assert "PDF-only" in str(raised.value)
     if existing:
         assert target.read_bytes() == b"old pdf"
@@ -145,12 +145,12 @@ def test_separate_processes_do_not_publish_over_same_pdf(tmp_path):
     program = r"""
 import json, os, sys, time
 from pathlib import Path
-from slide_core import export_v3, pdf_only_export
+from slide_core import keyframe_export, pdf_only_export
 from tests.export_fixtures import make_project, extract_stub
 root = Path(sys.argv[1]); mode = sys.argv[2]
 work = root / mode; work.mkdir()
 project = make_project(work)
-export_v3.extract_selected = extract_stub(project)
+keyframe_export.extract_selected = extract_stub(project)
 pdf_only_export.extract_selected = extract_stub(project)
 target = root / "slides.pdf"
 if mode == "first":
@@ -167,7 +167,7 @@ if mode == "first":
     pdf_only_export.export_pdf_only(project, target)
 else:
     try:
-        export_v3.export_project(project, target)
+        keyframe_export.export_project(project, target)
     except BaseException as exc:
         (root / "second-outcome").write_text(type(exc).__name__)
     else:
@@ -233,7 +233,7 @@ def test_pair_busy_does_not_leave_a_recovery_journal(tmp_path, monkeypatch):
     target = tmp_path / "slides.pdf"
     with export.export_file_lease(export.output_lock_path(target)):
         with pytest.raises(LeaseBusy):
-            export_v3.export_project(project, target)
+            keyframe_export.export_project(project, target)
         assert not list(tmp_path.glob(".slide-export-*"))
 
 
@@ -260,10 +260,10 @@ def test_pair_cleanup_failure_reports_published_pair(tmp_path, monkeypatch):
     target = tmp_path / "slides.pdf"
     def fail_cleanup(*args, **kwargs):
         raise OSError(errno.EIO, "injected pair cleanup failure")
-    monkeypatch.setattr(export_v3, "_recover_one", fail_cleanup)
+    monkeypatch.setattr(keyframe_export, "_recover_one", fail_cleanup)
     token = CancelToken()
     with pytest.raises(Exception) as raised:
-        export_v3.export_project(project, target, cancel_token=token)
+        keyframe_export.export_project(project, target, cancel_token=token)
     assert token.committed
     assert getattr(raised.value, "committed", False)
     assert raised.value.outputs == (target, target.with_suffix(".json"))
@@ -324,7 +324,7 @@ def test_rejected_committed_cleanup_retains_verified_backups(tmp_path, monkeypat
     target = tmp_path / "slides.pdf"
     target.write_bytes(b"old pdf")
     target.with_suffix(".json").write_bytes(b"old json")
-    real_cleanup = export_v3._recover_one
+    real_cleanup = keyframe_export._recover_one
     stages = []
     def interfere(journal, parent, **kwargs):
         record, stage, paths = export._read_journal(journal, parent)
@@ -335,10 +335,10 @@ def test_rejected_committed_cleanup_retains_verified_backups(tmp_path, monkeypat
         else:
             (stage / "unknown.txt").write_bytes(b"keep me")
         return real_cleanup(journal, parent, **kwargs)
-    monkeypatch.setattr(export_v3, "_recover_one", interfere)
+    monkeypatch.setattr(keyframe_export, "_recover_one", interfere)
     token = CancelToken()
     with pytest.raises(export.ExportPublishedError):
-        export_v3.export_project(project, target, overwrite=True, cancel_token=token)
+        keyframe_export.export_project(project, target, overwrite=True, cancel_token=token)
     assert token.committed
     assert len(stages) == 1
     assert (stages[0] / "0.old").read_bytes() == b"old pdf"

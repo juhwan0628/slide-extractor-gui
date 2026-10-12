@@ -1,9 +1,5 @@
 {
-  "version": "0.4.12rc1",
-  "candidate_run_id": "38162689003",
-  "candidate_commit": "c7bcc6cd06a13b3b07c97f47a888e3a72def6fe1",
-  "source_ci_run_id": "38162688931",
-  "public_release_approved": true,
-  "license_audit_run_id": "38163506514",
-  "audit_commit": "4dad953a3096e9f56b6762f3e686f0264d203200"
+  "version": "0.5.0b1",
+  "status": "PENDING",
+  "public_release_approved": false
 }

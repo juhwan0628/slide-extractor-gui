@@ -16,6 +16,8 @@ from .config import DetectorConfig
 def _r(r):return dict(x=r.x,y=r.y,width=r.width,height=r.height)
 
 def payload_v3(snap,pdf_path,pdf_sha,export_id):
+    if getattr(snap.settings,'sampling_mode','fps')!='fps':
+        raise ValueError('Keyframe JSON requires the irregular timeline format')
     src=snap.source;meta=dict(src.metadata);sett=snap.settings
     settings=dict(sett) if isinstance(sett,tuple) else sett
     roi=settings.effective_roi if hasattr(settings,'effective_roi') else settings['effective_roi']
@@ -81,6 +83,8 @@ def payload_v3(snap,pdf_path,pdf_sha,export_id):
 
 def export_project(project,destination,*,overwrite=False,sidecar_format='detailed',cancel_token=None,progress=None,snapshot=None):
     if sidecar_format not in ('detailed','simple'):raise ValueError('Unsupported JSON format')
+    if getattr(project.settings,'sampling_mode','fps')!='fps':
+        raise ValueError('Keyframe JSON requires the irregular timeline format')
     project.validate()
     if not project.pages:raise ValueError('Select at least one page')
     if not source_matches(project.source):raise MediaError('SourceChanged',code='SourceChanged')

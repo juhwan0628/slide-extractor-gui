@@ -42,7 +42,9 @@ def test_stages_auto_review_first_selection():
                          if s.sample_id==first.representative_sample_id)
         assert w.current_index==first_index
         key=w._image_key(first_index)
-        spin(app,lambda:w.images.cached(key) is not None)
+        # Worker cache insertion precedes queued delivery to the main Qt thread.
+        # Await both stages before asserting on the displayed image.
+        spin(app,lambda:w.images.cached(key) is not None and w._current_image is not None)
         expected=w._cache_roi(w.controller.project,w.controller.project.samples[first_index])
         img=w.images.cached(key)
         assert (img.width(),img.height())==expected[2:]

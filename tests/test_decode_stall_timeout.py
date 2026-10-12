@@ -17,7 +17,7 @@ def decoder(monkeypatch, tmp_path, body):
 
 
 def emit(n):
-    return f"sys.stderr.write('[showinfo@audit] n: {n} pts: {n} s:2x2 i:P\\n[showinfo@sample] n: {n} pts: {n}\\n');sys.stderr.flush();sys.stdout.buffer.write(b'x'*12);sys.stdout.flush()\n"
+    return f"sys.stderr.write('[showinfo@audit] n: {n} pts: {n} s:2x2 i:P iskey:1\\n[showinfo@sample] n: {n} pts: {n}\\n');sys.stderr.flush();sys.stdout.buffer.write(b'x'*12);sys.stdout.flush()\n"
 
 
 def test_progressing_decode_outlives_total_budget(monkeypatch,tmp_path):
@@ -37,10 +37,10 @@ def test_consumer_work_is_not_decoder_stall(monkeypatch,tmp_path):
 def test_unselected_audited_frames_are_progress(monkeypatch,tmp_path):
     body=''
     for n in range(8):
-        body+=f"sys.stderr.write('[showinfo@audit] n: {n} pts: {n} s:2x2 i:P\\n');sys.stderr.flush();time.sleep(.06)\n"
+        body+=f"sys.stderr.write('[showinfo@audit] n: {n} pts: {n} s:2x2 i:P iskey:1\\n');sys.stderr.flush();time.sleep(.06)\n"
     body+="sys.stderr.write('[showinfo@sample] n: 0 pts: 7\\n');sys.stderr.flush();sys.stdout.buffer.write(b'x'*12);sys.stdout.flush()\n"
     source=decoder(monkeypatch,tmp_path,body)
-    assert [pt for pt,_ in pts._decode_stream(source,'null',2,2,timeout=None,stall_timeout=.25)]==[7]
+    assert [pt for pt,_ in pts._decode_stream(source,"showinfo@audit,select='gte(pts,7)',showinfo@sample,null",2,2,timeout=None,stall_timeout=.25)]==[7]
 
 
 def test_log_noise_does_not_prevent_stall_and_child_is_reaped(monkeypatch,tmp_path):
@@ -80,7 +80,7 @@ def sampling_source(monkeypatch,source):
 
 def test_sampling_uses_stall_budget_not_total_budget(monkeypatch,tmp_path):
     source=sampling_source(monkeypatch,decoder(monkeypatch,tmp_path,''.join(emit(n)+'time.sleep(.06)\n' for n in range(8))))
-    samples,directory=pts.sample_stream(source,tmp_path/'cache',timeout=.25)
+    samples,directory=pts.keyframe_stream(source,tmp_path/'cache',timeout=.25)
     assert len(samples)==8
     assert len(list(directory.glob('*.jpg')))==8
 
@@ -92,7 +92,7 @@ def test_failed_sampling_discards_partial_jpegs(monkeypatch,tmp_path,cancel):
     def progress(*args):
         if cancel and args[0]=='sampling' and list((tmp_path/'cache').rglob('*.jpg')):token.cancel()
     with pytest.raises(MediaError) as error:
-        pts.sample_stream(source,tmp_path/'cache',timeout=.2,cancelled=token,progress=progress)
+        pts.keyframe_stream(source,tmp_path/'cache',timeout=.2,cancelled=token,progress=progress)
     assert error.value.code==('Cancelled' if cancel else 'Timeout')
     assert not list((tmp_path/'cache').rglob('*.jpg'))
 

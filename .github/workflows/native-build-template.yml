@@ -2,12 +2,13 @@ name: Native installer candidates (source-built, unsigned beta)
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, release/keyframe-0.5-m5]
     paths:
       - '.github/workflows/native-build-template.yml'
       - 'gui/**'
       - 'slide_core/**'
       - 'packaging/review_candidate.py'
+      - 'packaging/keyframe_release_contract.py'
       - 'packaging/third-party/**'
       - 'packaging/native_inputs.py'
       - 'packaging/candidate_inventory.py'
@@ -86,7 +87,7 @@ jobs:
           from pathlib import Path
           subprocess.run([sys.executable,'-m','pip','install','pytest'],check=True)
           os.environ['PATH']=str(Path('vendor/approved').resolve())+os.pathsep+os.environ['PATH']
-          subprocess.run([sys.executable,'-m','pytest','-q','tests/test_decode_stall_timeout.py','tests/test_background_samples.py','tests/test_preparation_lifecycle.py','tests/test_m4_settings_flow.py','tests/test_m1_export_safety.py','tests/test_m2_edit_preview.py','tests/test_gui_images.py','tests/test_m3_preparation_cache.py','tests/test_m4_audit_cleanup.py'],check=True)
+          subprocess.run([sys.executable,'-m','pytest','-q','tests/test_decode_stall_timeout.py','tests/test_product_keyframes.py','tests/test_keyframe_sampling.py','tests/test_keyframe_integration.py','tests/test_keyframe_model.py','tests/test_keyframe_json.py','tests/test_keyframe_export.py','tests/test_keyframe_gui_json.py','tests/test_m2_edit_preview.py','tests/test_gui_images.py','tests/test_cache.py','tests/test_cache_fast.py','tests/test_pdf_only_lock_cleanup.py','tests/test_keyframe_accuracy_limits.py','tests/test_keyframe_release_contract.py','tests/test_manual_editing_smoke.py'],check=True)
       - name: Build candidate and record inputs
         run: |
           python -m pip check
@@ -155,6 +156,10 @@ jobs:
           import json
           from pathlib import Path
           import runpy
+          validate=runpy.run_path('packaging/keyframe_release_contract.py')['validate_smoke']
+          version=runpy.run_path('slide_core/version.py')['VERSION']
+          for name in ('installed-smoke.json','installer-smoke.json','qt-replacement-smoke.json'):
+              validate(json.loads((Path('build')/name).read_text()),version)
           replacement=json.loads(Path('build/qt-replacement.json').read_text())
           modified=json.loads(Path('build/qt-replacement-smoke.json').read_text())
           assert modified['status']=='success' and modified['qt_runtime_version']==replacement['expected_runtime_version'],modified

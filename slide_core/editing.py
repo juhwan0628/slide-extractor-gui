@@ -34,7 +34,7 @@ def _publish(project,proposed,focus,changed_rows):
     # Validate an isolated provisional Project; publish only when valid.
     candidate=Project(project.source,project.settings,project.samples,project.transitions,
          project.segments,proposed,project.revision+1,project.cache_generation,
-         project.analysis_generation)
+         project.analysis_generation,project.sampling_algorithm)
     project.pages=candidate.pages
     project.revision=candidate.revision
     return EditResult('changed',focus,tuple(changed_rows))

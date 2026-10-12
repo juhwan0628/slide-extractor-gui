@@ -8,7 +8,7 @@ from gui.state import State
 from slide_core.models import CancelledError
 from slide_core.cache import LeaseBusy
 from slide_core.export import RecoveryRequired
-from tests.test_sampling import make_video
+from tests.media_fixtures import make_video
 
 def wait(app,done,timeout=15):
     start=time.monotonic()

@@ -24,9 +24,9 @@ def source():
 
 
 def samples():
-    # Actual times 0, 1, 2, 3; nominal times deliberately differ.
+    # Exact observation times 0, 1, 2, 3.
     return tuple(Sample(f's{i}', i, -90 + 30 * i, Fraction(1, 30),
-                        Fraction(2 * i), f'{i}.jpg', 16, 16, pts_origin=-90)
+                        f'{i}.jpg', 16, 16, pts_origin=-90)
                  for i in range(4))
 
 

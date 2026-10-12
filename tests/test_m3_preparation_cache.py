@@ -77,8 +77,8 @@ def test_analyze_retries_transient_preparation_failure(tmp_path,monkeypatch):
     from gui import window as wm,sample_preparation as bg
     from gui.state import State
     from slide_core.media import MediaError
-    from tests.test_sampling import make_video
-    from tests.test_gui_smoke import spin
+    from tests.media_fixtures import make_video
+    from tests.qt_fixtures import spin
     app=QApplication.instance() or QApplication([])
     monkeypatch.setattr(wm,'gettempdir',lambda:str(tmp_path))
     monkeypatch.setattr(QMessageBox,'warning',lambda *a,**kw:None)
@@ -115,8 +115,8 @@ def test_cancelled_preparation_retries_after_decoder_drains(tmp_path,monkeypatch
     from PySide6.QtWidgets import QApplication,QMessageBox
     from gui import window as wm,sample_preparation as bg
     from gui.state import State
-    from tests.test_sampling import make_video
-    from tests.test_gui_smoke import spin
+    from tests.media_fixtures import make_video
+    from tests.qt_fixtures import spin
     app=QApplication.instance() or QApplication([])
     monkeypatch.setattr(wm,'gettempdir',lambda:str(tmp_path))
     monkeypatch.setattr(QMessageBox,'warning',lambda *a,**kw:None)
@@ -152,8 +152,8 @@ def test_cleanup_failure_blocks_gui_retry_without_second_decoder(tmp_path,monkey
     from PySide6.QtWidgets import QApplication,QMessageBox
     from gui import window as wm,sample_preparation as bg
     from gui.state import State
-    from tests.test_sampling import make_video
-    from tests.test_gui_smoke import spin
+    from tests.media_fixtures import make_video
+    from tests.qt_fixtures import spin
     app=QApplication.instance() or QApplication([])
     monkeypatch.setattr(wm,'gettempdir',lambda:str(tmp_path))
     warnings=[]

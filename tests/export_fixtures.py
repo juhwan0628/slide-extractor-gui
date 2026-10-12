@@ -15,7 +15,7 @@ def make_project(root):
         metadata=(('codec','synthetic'),('time_base_num',1),('time_base_den',1),
                   ('origin_pts',0),('duration_s',2),('duration_kind','video_metadata')))
     image=root/'frame.png';Image.new('RGB',(80,48),'red').save(image)
-    sample=Sample('s0',0,0,Fraction(1),Fraction(0),str(image),80,48)
+    sample=Sample('s0',0,0,Fraction(1),str(image),80,48)
     page=Page(str(uuid4()),'s0','manual',None,'g0','insert')
     return Project(ref,AnalysisSettings(roi_mode='full',effective_roi=Rect(0,0,80,48)),
                    samples=(sample,),segments=(DetectedSegment('g0',0,2,'s0','s0','s0'),),pages=[page])

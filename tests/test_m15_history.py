@@ -2,6 +2,7 @@
 import time
 from pathlib import Path
 from PySide6.QtWidgets import QApplication
+from tests.media_fixtures import make_scene_video
 from gui.window import Window
 from gui.state import State
 from gui.history import EditHistory,Snapshot
@@ -14,12 +15,11 @@ def wait(app,condition,timeout=15):
         time.sleep(.005)
     raise AssertionError('timeout')
 def test_multistep_edit_history_and_redo(tmp_path):
-    if not VIDEO.exists():return
+    video=make_scene_video(tmp_path/'scene.mp4')
     app=QApplication.instance() or QApplication([])
     w=Window();w.show()
     try:
-        w.fps.setCurrentIndex(0)
-        w.open_source(VIDEO);wait(app,lambda:w.controller.state==State.SOURCE_READY)
+        w.open_source(video);wait(app,lambda:w.controller.state==State.SOURCE_READY)
         w.analyze();wait(app,lambda:w.controller.state==State.REVIEW_READY)
         project=w.controller.project
         originals=tuple(project.pages)
@@ -53,7 +53,7 @@ def test_multistep_edit_history_and_redo(tmp_path):
         from slide_core.pdf_only_export import export_pdf_only
         export_pdf_only(project,tmp_path/'history.pdf')
         assert len(w.history.undo_stack)==3
-        w.open_source(VIDEO);wait(app,lambda:w.controller.state==State.SOURCE_READY)
+        w.open_source(video);wait(app,lambda:w.controller.state==State.SOURCE_READY)
         assert not w.history.undo_stack and not w.history.redo_stack
     finally:
         w.close();wait(app,lambda:not w.isVisible())

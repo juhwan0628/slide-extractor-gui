@@ -15,9 +15,9 @@ def verify_manual_editing(app,project,temp):
     from gui.window import Window
     from gui.state import State
     from slide_core.editing import add_page
-    from slide_core.export_v3 import export_project
     from slide_core.pdf_only_export import export_pdf_only
-    from slide_core.timeline_json import loads
+    from slide_core.keyframe_export import export_project
+    from slide_core.keyframe_json import loads
     from pypdf import PdfReader
     for sample in project.samples:add_page(project,sample.actual_time)
     original=tuple(project.pages)
@@ -57,8 +57,8 @@ def verify_manual_editing(app,project,temp):
         key(Qt.Key.Key_Z,Qt.KeyboardModifier.ControlModifier)
         assert project.pages==[original[-1]]
         pdf,side=export_project(project,temp/'edited.pdf')
-        value=loads(side.read_bytes(),pdf_bytes=pdf.read_bytes())
-        assert len(PdfReader(pdf).pages)==1
+        value=loads(side.read_bytes(),pdf_bytes=pdf.read_bytes(),pdf_page_count=1)
+        assert len(PdfReader(pdf).pages)==1 and value['schema_version']==4
         assert value['pages'][0]['page_id']==original[-1].page_id
         assert value['pages'][0]['representative_timestamp_s']==float(project.sample_time(original[-1].representative_sample_id))
         export_pdf_only(project,temp/'edited-only.pdf')
@@ -95,7 +95,7 @@ def verify_background_workflow(app,video):
         assert window._sample_preparation is task
         assert project.cache_generation==task.result.cache_generation
         assert not window.advanced_button.isVisible() and window.save_options_button.isVisible()
-        assert len(project.samples)==2
+        assert len(project.samples)>=2
         directory=task.result.directory;settings=window.settings
         errors=[]
         def accept_options():
@@ -111,7 +111,7 @@ def verify_background_workflow(app,video):
                 if dialog is not None:dialog.reject()
         QTimer.singleShot(0,accept_options);window.open_save_options()
         if errors:raise errors[0]
-        assert window.json_enabled and window.json_format=='detailed'
+        assert window.json_enabled and window.json_format=="detailed"
         assert window.controller.project is project and window.settings==settings
         assert window._sample_preparation is task and window.export_button.isEnabled()
         def confirm_reset():
@@ -135,8 +135,9 @@ def smoke(target):
     from slide_core.analysis import analyze_project
     from slide_core.config import AnalysisSettings
     from slide_core.profiling import AnalysisProfile
-    from slide_core.export_v3 import export_project
     from slide_core.pdf_only_export import export_pdf_only
+    from slide_core.keyframe_export import export_project
+    from slide_core.keyframe_json import loads
     from pypdf import PdfReader
     from slide_core.version import VERSION
     result={'version':VERSION,'frozen':bool(getattr(sys,'frozen',False)),'status':'failed'}
@@ -150,13 +151,18 @@ def smoke(target):
         with tempfile.TemporaryDirectory(prefix='slide-installed-smoke-') as temp, ExitStack() as cleanup:
             temp=Path(temp);video=temp/'test.mp4'
             subprocess.run([tools['ffmpeg'],'-hide_banner','-loglevel','error','-y','-f','lavfi','-i',
-                'testsrc2=size=320x180:rate=4:duration=4','-c:v','mpeg4','-q:v','2',str(video)],check=True,timeout=60)
+                'testsrc2=size=320x180:rate=4:duration=4','-c:v','mpeg4','-g','4','-q:v','2',str(video)],check=True,timeout=60)
             profile=AnalysisProfile()
-            project,_=analyze_project(probe_source(video),AnalysisSettings(fps=0.5,roi_mode='full'),temp/'cache',profile=profile)
+            project,_=analyze_project(probe_source(video),AnalysisSettings(roi_mode='full'),temp/'cache',profile=profile)
             # The smoke owns this Project; end its pin before Windows temp deletion.
             cleanup.callback(project._cache_pin.close)
             pdf,side=export_project(project,temp/'test.pdf')
-            assert len(project.samples)==2
+            value=loads(side.read_bytes(),pdf_bytes=pdf.read_bytes(),pdf_page_count=len(project.pages))
+            assert value['schema_version']==4
+            simple_pdf,simple_side=export_project(project,temp/'simple.pdf',sidecar_format='simple')
+            from slide_core.simple_json import simple_timeline
+            assert json.loads(simple_side.read_bytes())==simple_timeline(project)
+            assert len(project.samples)>=2
             assert len(PdfReader(pdf).pages)==len(project.pages)>0
             assert not list(temp.glob('*.lock')), 'Paired export left output lock'
             pdf_only=temp/'PDF only 한글 경로.pdf'
@@ -165,14 +171,21 @@ def smoke(target):
                 assert len(PdfReader(pdf_only).pages)==len(project.pages)
                 assert not pdf_only.with_suffix('.json').exists()
                 assert not list(temp.glob('*.lock')), 'PDF-only export left output lock'
-            assert profile.report()['decoder_backend']=='cpu-metadata'
+            assert profile.report()['decoder_backend']=='cpu-keyframes'
             verify_manual_editing(app,project,temp)
             verify_background_workflow(app,video)
             result.update(background_preparation_checked=True,save_options_checked=True,start_over_cache_cleanup_checked=True)
             result.update(manual_editing_checked=True,keyboard_editing_checked=True,edited_export_checked=True)
+            from dataclasses import fields
+            assert not {'fps','sampling_mode'} & {field.name for field in fields(AnalysisSettings)}
+            assert profile.report()['sampling_algorithm']=='decoder-keyframes-v1'
+            forbidden=('legacy_fps','slide_core.export_v3','slide_core.timeline_json')
+            assert not any(name==prefix or name.startswith(prefix+'.') for name in sys.modules for prefix in forbidden)
+            result.update(keyframe_only_checked=True,legacy_modules_absent_checked=True)
             result.update(status='success',qt_runtime_version=qVersion(),sample_count=len(project.samples),page_count=len(project.pages),
-                          decoder_backend='cpu-metadata',bundled_tools_checked=result['frozen'],
-                          pdf_only_checked=True,output_lock_cleanup_checked=True)
+                          decoder_backend='cpu-keyframes',bundled_tools_checked=result['frozen'],
+                          pdf_only_checked=True,output_lock_cleanup_checked=True,
+                          keyframe_json_v4_checked=True,simple_json_checked=True)
     except Exception as exc:
         result['error']=type(exc).__name__+': '+str(exc)
         raise

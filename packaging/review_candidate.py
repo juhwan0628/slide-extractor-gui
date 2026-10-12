@@ -55,6 +55,7 @@ def review(root,inputs,candidate,config,platform,output):
     runpy.run_path(str(ROOT/'packaging/native_codec_policy.py'))['verify_no_extra_codecs'](root)
     for name in ('installed-smoke.json','installer-smoke.json','qt-replacement-smoke.json'):
         r=json.loads((candidate/'build'/name).read_text())
+        runpy.run_path(str(ROOT/'packaging/keyframe_release_contract.py'))['validate_smoke'](r,config['version'])
         assert r['status']=='success' and r['frozen'] and r['bundled_tools_checked']
         assert r['version']==config['version'] and r['pdf_only_checked'] and r['output_lock_cleanup_checked']
     replacement=json.loads((candidate/'build/qt-replacement.json').read_text())

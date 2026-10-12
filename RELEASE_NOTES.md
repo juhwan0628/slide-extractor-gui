@@ -1,67 +1,27 @@
-# Slide Extractor 0.4.12rc1 베타
+# Slide Extractor 0.5.0b1 베타 후보
 
-강의 영상에서 슬라이드 전환을 분석하고, 타임라인에서 페이지를 편집해 PDF로 저장합니다.
+강의 영상의 디코더 키프레임에서 슬라이드 변화를 찾아 필요한 페이지를 PDF로 저장합니다.
 
-## 다운로드
+## 후보 상태
 
-| 기기 | 다운로드 |
-|---|---|
-| Apple Silicon Mac | **[Mac DMG 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.12rc1/SlideExtractor-v0.4.12rc1-macOS-arm64.dmg)** |
-| Windows x64 | **[Windows 설치 EXE 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.12rc1/SlideExtractor-v0.4.12rc1-Setup-Windows-x64.exe)** |
+Mac Apple Silicon DMG와 Windows x64 설치 EXE를 같은 소스로 검증하는 중입니다. 아직 공개 릴리스가 아니며 기존 0.4 버전의 검증·승인 기록을 이 후보의 성공 근거로 쓰지 않습니다. 완료된 실행과 정확한 설치 파일 해시는 M5 검증 기록에 추가합니다.
 
-**자기 기기에 맞는 설치 파일 하나만 받으면 됩니다.**
+## 변경 사항
 
-- Apple Silicon Mac: `.dmg`를 열고 앱을 Applications로 복사합니다.
-- Windows x64: `Setup-Windows-x64.exe`를 실행합니다. 사용자 계정 폴더에 설치하며 관리자 권한을 요구하지 않습니다.
-- Python과 FFmpeg는 포함되어 있습니다. 직접 설치하거나 빌드할 필요가 없습니다.
+- 시간 간격(FPS) 샘플링을 제품에서 제거하고 키프레임 전용으로 통일했습니다. FPS 기준선은 별도 개발 검증 도구에만 남습니다.
+- 영상 선택 시 조용히 백그라운드에서 준비합니다. Analyze는 같은 준비 작업을 이어받거나 완료 캐시를 재사용합니다.
+- 타임라인 추가·교체·Merge는 관측된 키프레임을 사용합니다. Merge는 선택한 페이지 중 마지막 시점의 대표 페이지를 유지합니다.
+- 상세 JSON은 관측 순번·원본 정수 PTS·time_base와 전환 구간을 기록하는 v4 형식입니다. 기존 FPS/v3 형식과 호환되지 않습니다. 간단 JSON도 선택할 수 있습니다.
+- PDF는 선택한 키프레임을 원본 해상도에서 정확한 PTS로 추출합니다.
+- 기존 분석/저장 옵션 분리, Start over, Undo/Redo, 출력 잠금 정리와 Windows 콘솔 숨김을 유지합니다.
+- 설치본 검사에서 키프레임 전용 경로·새 JSON·편집·캐시·출력 검증이 누락되면 후보를 거부합니다.
 
-## 이번 버전의 수정
+## 실영상 검증과 제한
 
-- PDF 단독·PDF+JSON 저장과 복구가 같은 출력 잠금을 사용하며, 진행 중인 저장을 복구 작업이 건드리지 않습니다.
-- 빠른 프리뷰 이동의 대기 요청 수를 제한하고 현재 화면 요청을 우선합니다. 실제 선택 페이지를 기준으로 교체합니다.
-- 실패한 영상 준비의 재시도와 중단된 캐시 정리를 강화합니다.
-- 준비·분석·분석 클릭 후 대기 시간을 별도 프로파일로 기록합니다.
-- 설치본의 OpenSSL 원본 라이선스와 런타임 안내를 함께 검증합니다.
+서버 M4 검증은 실제 강의 비교36회와 792회 회귀 검사에 성공했습니다. 디코딩 null 대조에서 FFmpeg CPU 비용이 약64~79% 감소했지만 전체 준비·분석 시간 개선폭은 작고 환경에 따라 다릅니다. 프레임 수 증가로 캐시·변화 탐지 비용이 늘 수 있습니다. 이 값은 Mac/Windows 설치본 성능을 뜻하지 않습니다.
 
-- 영상 선택 시 샘플 프레임을 백그라운드에서 준비합니다. Analyze를 누르면 진행 중인 준비를 이어받거나 완료된 프레임을 재사용합니다.
-- 긴 영상의 정상 디코딩을 총 실행 시간으로 중단하지 않고, 진행이 멈춘 시간을 기준으로 타임아웃을 판단합니다.
-- 기본 분석 간격을 0.5 FPS로 설정합니다. 1 FPS로 올릴 때는 기존 준비를 취소·정리하고 다시 준비하며, 완료된 1 FPS 캐시를 0.5 FPS로 낮출 때는 재디코딩 없이 불필요한 프레임을 정리합니다.
-- 분석 설정과 저장 옵션을 분리합니다. 결과 화면의 Save options…에서 JSON 설정을 바꿔도 편집 내용은 유지됩니다.
-- Start over로 현재 작업과 임시 캐시를 정리하고 영상 선택 화면으로 돌아갑니다. 이미 저장한 출력 파일은 유지합니다.
+키프레임은 의미상 슬라이드 전환과 다릅니다. 키프레임 간격이 긴 영상의 짧은 장면이나 마지막 관측 이후 필기는 누락될 수 있습니다. 커서·애니메이션·누적 필기는 추가 페이지로 잡힐 수 있어 수동 Merge·삭제가 필요합니다. 페이지 수가 많은 원본 해상도 PDF는 저장 시간과 메모리를 많이 사용합니다.
 
-## 기존 주요 기능
+Mac은 ad-hoc 서명만 하고 Apple 공증은 적용하지 않습니다. Windows는 unsigned입니다. 실제 기기의 보안 경고·실행 정책은 hosted runner 성공으로 보장하지 않습니다. 지원 후보는 macOS ARM64와 Windows x64이며 Linux/Intel Mac/Windows ARM 배포는 이번 범위가 아닙니다.
 
-- Shift 범위 선택, Ctrl/Cmd 개별 선택, 전체 선택과 선택 개수 표시.
-- 우클릭 Merge는 선택 중 마지막 시점의 원본 페이지를 남기며 나머지 선택 페이지를 제거합니다. 선택하지 않은 페이지는 유지합니다.
-- 선택 페이지 일괄 삭제와 최대 100회 Undo/Redo. 페이지·선택·포커스·프리뷰 위치를 복원합니다.
-- 페이지 목록에서 Ctrl/Cmd+M, Delete/Backspace, Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z 지원. Windows는 Ctrl+Y도 지원합니다.
-- 자동 분석은 유지하며 필기·페이지 재방문의 자동 처리 개선은 향후 연구 과제로 남겨둡니다.
-
-- CPU 멀티스레드·프레임 메타데이터를 활용한 분석 및 PDF 추출 개선.
-- Windows 외부 도구 콘솔 깜빡임과 PDF 저장 오류 수정.
-- PDF 단독 저장 후 남던 `.lock` 수정. 정상 저장·반복 덮어쓰기·게시 실패·취소 시 출력 잠금을 정리합니다.
-- PDF+JSON 저장과 같은 안전한 잠금 정리 및 동시 저장 보호를 사용합니다.
-
-- 앱 소스에 MIT 라이선스 적용, 앱 내 About / Licenses 안내 추가.
-- macOS OpenCV wheel의 불필요한 GPL 코덱을 제거하고 두 OS 모두 이미지 전용 OpenCV 소스 빌드 사용.
-- 원본 라이선스, 대응 소스, 빌드 설정·패치·해시 및 Qt 라이브러리 교체 검사 기록 제공.
-
-## 베타 제한
-
-유료 코드 서명·macOS 공증을 적용하지 않은 후보입니다. OS 보안 설정에 따라 경고 또는 실행 차단이 발생할 수 있으며 관리자 실행으로 해결된다고 보장하지 않습니다.
-분석은 기본 0.5 FPS이므로 짧은 전환이나 특이한 화면 구성은 직접 검토가 필요합니다.
-지원 대상은 macOS arm64와 Windows x64이며 Intel Mac과 Windows ARM은 이번 후보 대상이 아닙니다.
-
-
-## 개발·라이선스 자료
-
-[대응 소스·라이선스·검증 자료 ZIP](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.12rc1/SlideExtractor-v0.4.12rc1-Sources-Licenses.zip) · [SHA-256 해시](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.12rc1/SHA256SUMS.txt)
-
-자료 ZIP은 일반 설치에 필요하지 않습니다. Qt·FFmpeg 등 정확한 원본 소스, OpenCV 수정 패치, 두 OS의 라이선스·빌드·출고 검사 기록과 FFmpeg 빌드 입력을 모았습니다. 내부 README와 docs/SOURCE_AND_REPLACEMENT.md에서 구성과 라이브러리 교체 방법을 확인할 수 있습니다. 원래 자료의 바이트와 해시는 보존됩니다.
-
-GitHub가 자동으로 제공하는 **Source code ZIP / tar.gz**는 앱 저장소 소스입니다. 외부 라이브러리의 대응 소스는 위 자료 ZIP에 있습니다.
-
-
-## 검증 기록
-
-서버 소스 검사 655개 통과. 동일 소스 GitHub Linux 검사 649개 통과·6개 플랫폼 전용 제외, Windows 캐시 21개와 출력 잠금 7개 통과. Mac·Windows 새 디코딩/캐시/설정 검사 각 35개 통과. 두 OS의 번들·DMG/EXE 설치본·QtCore 교체 설치본에서 백그라운드 준비, 저장 옵션 변경, 캐시 정리, 수동 편집과 PDF/JSON 저장을 검증했습니다. 별도 원본 설치본 출고 감사도 두 OS 모두 통과했습니다. [검증 상세](https://github.com/juhwan0628/slide-extractor-gui/blob/main/packaging/QA_STATUS.md).
+앱 코드는 MIT이며 제3자 라이선스는 별도로 적용됩니다. 정확한 대응 소스·라이선스·빌드·감사 자료는 검증 완료 후 설치본과 함께 정리합니다.

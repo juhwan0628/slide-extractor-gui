@@ -8,9 +8,9 @@ from PIL import Image
 import cv2
 import numpy as np
 
-from .config import AnalysisSettings,DetectorConfig
+from .config import AnalysisSettings,DetectorConfig,KEYFRAME_ALGORITHM
 from .media import probe_source,source_matches,MediaError
-from .pts import sample_stream
+from .pts import keyframe_stream
 from .roi import automatic_roi,build_detection_region
 from .models import Project,AnalysisResult,Page,Rect
 from .transitions import streaming_detect
@@ -72,19 +72,19 @@ def _resolve_roi(samples,settings,source,cancel_token=None):
 
 def _settings_key(settings):
     """Canonical identity independent of transient GUI settings revision."""
-    return (settings.fps,settings.roi_mode,
+    return (settings.roi_mode,
             settings.effective_roi if settings.roi_mode=='manual' else None,
             tuple(settings.masks),settings.detector or DetectorConfig())
 
 
 def _analyze_project(source,settings:AnalysisSettings,cache_root,*,previous:Project|None=None,
-                    cancel_token=None,sampler=sample_stream,progress=None,profile=None,decode_options=None,prepared=None):
+                    cancel_token=None,progress=None,profile=None,prepared=None):
     """Return a new validated project without modifying previous on error/cancel.
 
-    Reuses immutable cached Samples when fps/source are unchanged. Stale source or
+    Reuses immutable keyframe Samples when source is unchanged. Stale source or
     incomplete sample caches fail closed, never silently reuse previous results.
     """
-    from .models import CancelledError
+    if not isinstance(settings,AnalysisSettings):raise TypeError("Keyframe analysis settings required")
     if cancel_token is not None:cancel_token.raise_if_cancelled()
     source=probe_source(Path(source),cancel_token=cancel_token) if not hasattr(source,'fingerprint') else source
     if not source_matches(source):raise MediaError('SourceChanged',code='SourceChanged')
@@ -94,18 +94,17 @@ def _analyze_project(source,settings:AnalysisSettings,cache_root,*,previous:Proj
     if previous is not None and previous.source!=source:
         raise MediaError('SourceChanged: project source identity mismatch',code='SourceChanged')
     if previous is not None and previous.source==source and previous.settings is not None:
-        if previous.settings.fps==settings.fps:
-            samples=previous.samples
-            if not samples:raise MediaError('CacheUnavailable',code='CacheUnavailable')
-            # _prepared validates every JPEG while decoding it for detection.
-            # The result is adopted only after that iterator is fully consumed.
-            cache_generation=previous.cache_generation
-            reused=True
-        else:samples=()
+        if previous.sampling_algorithm!=KEYFRAME_ALGORITHM:raise ValueError('Previous sampling algorithm mismatch')
+        if not isinstance(previous.settings,AnalysisSettings):raise ValueError('Previous algorithm/settings mismatch')
+        samples=previous.samples
+        if not samples:raise MediaError('CacheUnavailable',code='CacheUnavailable')
+        cache_generation=previous.cache_generation
+        reused=True
     else:samples=()
     if prepared is not None:
         if prepared.source!=source:raise MediaError('SourceChanged: prepared source mismatch',code='SourceChanged')
-        if prepared.fps!=settings.fps:raise ValueError('Prepared fps does not match analysis fps')
+        if prepared.sampling_algorithm!=KEYFRAME_ALGORITHM:
+            raise ValueError('Prepared sampling algorithm does not match analysis')
         if not prepared.samples:raise MediaError('CacheUnavailable',code='CacheUnavailable')
         samples=prepared.samples;cache_generation=prepared.cache_generation;reused=True
     created_cache=None
@@ -113,15 +112,15 @@ def _analyze_project(source,settings:AnalysisSettings,cache_root,*,previous:Proj
     if progress:progress('sampling',None,None)
     try:
         if not reused:
-            extra={'profile':profile,'decode_options':decode_options,'cache_owner':cache_pins.append} if sampler is sample_stream else {}
             with measured(profile,'sampling'):
-                samples,created_cache=sampler(source,Path(cache_root),fps=Fraction(str(settings.fps)),
-                                             cancelled=cancel_token,**extra)
+                samples,created_cache=keyframe_stream(source,Path(cache_root),cancelled=cancel_token,
+                    profile=profile,cache_owner=cache_pins.append)
                 samples=tuple(samples)
         if not source_matches(source):raise MediaError('SourceChanged',code='SourceChanged')
         if progress:progress('detecting',0,len(samples))
         if profile is not None:
-            profile.metadata.update(cache_reused=reused,sample_count=len(samples),sample_fps=settings.fps,
+            profile.metadata.update(cache_reused=reused,sample_count=len(samples),
+                                    sampling_algorithm=KEYFRAME_ALGORITHM,
                                     width=source.width,height=source.height,duration_s=float(dict(source.metadata)['duration_s']))
         with measured(profile,'roi'):
             roi,region=_resolve_roi(samples,settings,source,cancel_token)
@@ -170,16 +169,14 @@ def requires_reanalysis(project:Project,settings:AnalysisSettings):
 
 
 def analyze_project(source,settings,cache_root,*,previous=None,cancel_token=None,
-                    sampler=sample_stream,progress=None,profile=None,profile_path=None,decode_options=None,prepared=None):
-    decode_options={'backend':'cpu-metadata','threads':0} if decode_options is None else decode_options
+                    progress=None,profile=None,profile_path=None,prepared=None):
     profile=profile if profile is not None else (AnalysisProfile() if profile_path else None)
     if profile is not None:
-        profile.metadata.update(decoder_backend=(decode_options or {}).get('backend','cpu'),
-                                decoder_threads=(decode_options or {}).get('threads',0))
+        profile.metadata.update(decoder_backend='cpu-keyframes',decoder_threads=0)
     try:
         with measured(profile,'total'):
             outcome=_analyze_project(source,settings,cache_root,previous=previous,
-                cancel_token=cancel_token,sampler=sampler,progress=progress,profile=profile,decode_options=decode_options,prepared=prepared)
+                cancel_token=cancel_token,progress=progress,profile=profile,prepared=prepared)
         if profile is not None:profile.metadata['status']='success'
         return outcome
     except BaseException as exc:

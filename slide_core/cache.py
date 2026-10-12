@@ -140,7 +140,7 @@ def _safe_owned_dir(root, directory, expected_id=None):
         raise UnsafeCache('Session directory/owner mismatch')
     for item in directory.iterdir():
         # These are the exact publication temporaries created by write_jpeg
-        # and _write_manifest/compact_samples, inside a verified owner session.
+        # and _write_manifest, inside a verified owner session.
         temporary=(item.name=='manifest.tmp' or
                    re.fullmatch(r'[0-9]{8,}\.tmp',item.name) is not None)
         if (item.is_symlink() or not item.is_file() or

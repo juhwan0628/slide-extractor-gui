@@ -6,7 +6,7 @@ from slide_core.editing import add_page,replace_page,delete_page,navigate,neares
 
 @pytest.fixture
 def project(tmp_path):
-    samples=tuple(Sample(str(uuid4()),i,i,Fraction(1),Fraction(i),str(i),80,60) for i in range(5))
+    samples=tuple(Sample(str(uuid4()),i,i,Fraction(1),str(i),80,60) for i in range(5))
     source=SourceRef(tmp_path/'input.mp4',5,1,0,80,60,DisplayTransform(80,60))
     pages=[Page(str(uuid4()),samples[0].sample_id,'auto',None,None,'auto'),
            Page(str(uuid4()),samples[3].sample_id,'auto',None,None,'auto')]
