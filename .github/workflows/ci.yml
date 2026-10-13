@@ -56,3 +56,22 @@ jobs:
           QT_QPA_PLATFORM: offscreen
           PYTHONUTF8: '1'
         run: python -m pytest -q tests/test_cache.py tests/test_cache_fast.py tests/test_cache_lifecycle.py -k "not sampling_cancel and not cached_reanalysis"
+
+  isolated-fps-baseline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: System dependencies
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg qpdf libegl1 libopengl0
+      - name: Fixed test tools
+        run: python -m pip install -r packaging/requirements-linux-aarch64-validation.lock pytest
+      - name: Frozen FPS source in a separate process
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: python legacy_fps/run_tests.py -q

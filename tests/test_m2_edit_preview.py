@@ -13,7 +13,7 @@ from gui.window import Window
 from gui.state import State
 from gui.playback import PlaybackClock
 from tests.export_fixtures import make_project
-from tests.test_gui_smoke import spin
+from tests.qt_fixtures import spin
 
 @pytest.fixture
 def editor(tmp_path):
@@ -23,8 +23,8 @@ def editor(tmp_path):
     for i in range(80):
         path=tmp_path/f'{i}.png'
         Image.new('RGB',(80,48),(i*3,20,30)).save(path)
-        samples.append(replace(project.samples[0],sample_id=f's{i}',source_pts=i,grid_index=i,
-                               nominal_time=Fraction(i),cache_path=str(path)))
+        samples.append(replace(project.samples[0],sample_id=f's{i}',source_pts=i,ordinal=i,
+                               cache_path=str(path)))
     project.samples=tuple(samples)
     project.pages=[replace(project.pages[0],page_id={0:P0,2:P2,4:P4}[i],representative_sample_id=f's{i}') for i in (0,2,4)]
     project.source=replace(project.source,metadata=tuple((k,80 if k=='duration_s' else v) for k,v in project.source.metadata))

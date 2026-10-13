@@ -8,9 +8,9 @@ from slide_core.analysis import analyze_project
 from slide_core.config import AnalysisSettings
 from slide_core.models import CancelToken
 from slide_core.media import MediaError
-from slide_core.pts import sample_stream
+from slide_core.pts import keyframe_stream
 from tests.test_cache import jpeg
-from tests.test_sampling import make_video
+from tests.media_fixtures import make_video
 
 def expire(session):
     path=session.directory/'manifest.json'
@@ -51,7 +51,7 @@ def test_sampling_cancel_discards_partial_cache(tmp_path,monkeypatch):
         result=original(self,index,data);token.cancel();return result
     monkeypatch.setattr(CacheSession,'write_jpeg',write_and_cancel)
     with pytest.raises(MediaError,match="Cancelled"):
-        sample_stream(source,tmp_path/'cache',cancelled=token,fps=Fraction(1))
+        keyframe_stream(source,tmp_path/'cache',cancelled=token)
     assert not list((tmp_path/'cache').glob('session-*'))
 
 def test_cached_reanalysis_shares_project_lifetime_protection(tmp_path):

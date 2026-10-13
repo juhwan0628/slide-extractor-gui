@@ -46,7 +46,7 @@ def test_repeated_exact_frame_extraction_with_denied_group_signal(tmp_path,monke
     video=tmp_path/'synthetic.mp4'
     subprocess.run(['ffmpeg','-hide_banner','-loglevel','error','-y','-f','lavfi','-i','testsrc2=size=96x64:rate=4:duration=4','-c:v','mpeg4',str(video)],check=True)
     source=probe_source(video)
-    samples,_=pts.sample_stream(source,tmp_path/'cache')
+    samples,_=pts.keyframe_stream(source,tmp_path/'cache')
     def denied(*args):raise PermissionError(errno.EPERM,'Operation not permitted')
     monkeypatch.setattr(pts.os,'killpg',denied)
     for run in range(3):

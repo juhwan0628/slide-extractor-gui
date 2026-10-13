@@ -215,11 +215,12 @@ def validate_export_snapshot(source: Path, snapshot: ExportSnapshot) -> None:
 class ExportTransaction:
     """Prepare and publish a PDF/JSON pair with a durable local journal."""
 
-    def __init__(self, source, snapshot, validator=None):
+    def __init__(self, source, snapshot, validator=None, *, publication_guard=None):
         self.source = Path(source).resolve()
         self.snapshot = snapshot
         self.paths = snapshot.paths
         self.validator = validator
+        self.publication_guard = publication_guard
         self.export_id = str(uuid.uuid4())
         parent = self.paths[0].parent.resolve()
         if self.paths[1].parent.resolve() != parent:
@@ -394,6 +395,10 @@ class ExportTransaction:
             validate_export_snapshot(self.source, self.snapshot)
             if _state(self.source) != self._source_state:
                 raise OutputOverwriteRequired("Source changed during export")
+            # Atomic publication begins only after protected, potentially slow
+            # path/source checks. Callers may reject a changed project or cancel
+            # here; after this point complete the durable commit/rollback.
+            if self.publication_guard is not None:self.publication_guard()
             backups = [self.stage / f"{i}.old" for i in range(2)]
             moved = []
             published = set()

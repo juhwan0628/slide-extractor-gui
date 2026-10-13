@@ -61,24 +61,3 @@ def test_canvas_hit_detection_and_resize(qtbot=None):
         assert canvas.selection==Rect(40,20,90,65)
     finally:
         canvas.close()
-
-
-def test_prepare_before_analyze_and_default_fps():
-    if not VIDEO.is_file():pytest.skip('FFmpeg fixture unavailable')
-    app=QApplication.instance() or QApplication([])
-    window=Window();window.show()
-    try:
-        assert window.settings.fps==0.5
-        assert window.fps.currentIndex()==1
-        window.open_source(VIDEO)
-        spin(app,lambda:window.controller.state==State.SOURCE_READY)
-        assert window._first_frame is not None
-        assert window._auto_roi is not None
-        assert window._first_frame.width()>0
-        assert window._suggested_roi==window._auto_roi
-        assert window.crop_button.isEnabled()
-        assert window.mask_button.isEnabled()
-        assert window.analyze_button.isEnabled()
-    finally:
-        window.close()
-        spin(app,lambda:not window.isVisible())

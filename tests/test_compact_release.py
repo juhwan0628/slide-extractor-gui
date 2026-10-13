@@ -58,3 +58,17 @@ def test_unsafe_checksum_path_rejected(tmp_path):
         f.write("0"*64+"  ../secret\n")
     with pytest.raises(ValueError,match="name"):
         load().compact_assets(tmp_path/"input",tmp_path/"output","0.4.9rc3")
+
+def test_beta_version_support_archive_preserves_installer_bytes(tmp_path):
+ root=tmp_path/'input';files=fixture(root)
+ beta={name.replace('0.4.9rc3','0.5.0b1'):data for name,data in files.items()}
+ for name in files:
+  renamed=name.replace('0.4.9rc3','0.5.0b1')
+  if renamed!=name:(root/name).rename(root/renamed)
+ (root/'SHA256SUMS.txt').write_text(''.join(f'{hashlib.sha256(data).hexdigest()}  {name}\n'
+                                         for name,data in beta.items()))
+ out=tmp_path/'output';load().compact_assets(root,out,'0.5.0b1')
+ for name in load().installer_names('0.5.0b1'):assert (out/name).read_bytes()==beta[name]
+ with zipfile.ZipFile(out/load().bundle_name('0.5.0b1')) as z:
+  assert z.read('qt-source.tar.xz')==beta['qt-source.tar.xz']
+ assert len(list(out.iterdir()))==4

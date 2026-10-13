@@ -11,6 +11,9 @@ import math
 import uuid
 
 
+KEYFRAME_ALGORITHM = "decoder-keyframes-v1"
+
+
 def _fraction(value: Fraction | int | float) -> Fraction:
     if isinstance(value, float):
         if not math.isfinite(value):
@@ -99,10 +102,9 @@ class SourceRef:
 @dataclass(frozen=True)
 class Sample:
     sample_id: str
-    grid_index: int
+    ordinal: int
     source_pts: int
     time_base: Fraction
-    nominal_time: Fraction
     cache_path: str
     width: int
     height: int
@@ -110,10 +112,9 @@ class Sample:
 
     def __post_init__(self):
         object.__setattr__(self, "time_base", _fraction(self.time_base))
-        object.__setattr__(self, "nominal_time", _fraction(self.nominal_time))
-        if (not self.sample_id or type(self.grid_index) is not int or self.grid_index < 0
+        if (not self.sample_id or type(self.ordinal) is not int or self.ordinal < 0
                 or type(self.source_pts) is not int or type(self.pts_origin) is not int
-                or self.time_base <= 0 or self.nominal_time < 0 or any(type(v) is not int or v <= 0 for v in (self.width, self.height))
+                or self.time_base <= 0 or any(type(v) is not int or v <= 0 for v in (self.width, self.height))
                 or self.actual_time < 0):
             raise ValueError("invalid sample")
 
@@ -197,6 +198,10 @@ def _validate_analysis_records(samples, transitions=(), segments=()):
         ids = [getattr(x, key) for x in records]
         if len(ids) != len(set(ids)):
             raise ValueError(f"duplicate {label} id")
+    if any(s.ordinal!=i for i,s in enumerate(samples)):
+        raise ValueError("sample ordinals must be contiguous observation order")
+    if samples and any(s.time_base!=samples[0].time_base or s.pts_origin!=samples[0].pts_origin for s in samples):
+        raise ValueError("sample clocks must use one time base and origin")
     sample_times = {s.sample_id: s.actual_time for s in samples}
     if any(a.actual_time >= b.actual_time for a, b in zip(samples, samples[1:])):
         raise ValueError("sample times must strictly increase")
@@ -227,6 +232,17 @@ def _validate_analysis_records(samples, transitions=(), segments=()):
     return sample_times
 
 
+def _validate_source_samples(source,samples):
+    if not samples:return
+    meta=dict(source.metadata)
+    if {"time_base_num","time_base_den","origin_pts"}<=meta.keys():
+        tb=Fraction(meta["time_base_num"],meta["time_base_den"])
+        if samples[0].time_base!=tb or samples[0].pts_origin!=meta["origin_pts"]:
+            raise ValueError("sample clock does not match source")
+    if "duration_s" in meta and samples[-1].actual_time>=_fraction(meta["duration_s"]):
+        raise ValueError("sample must precede source duration")
+
+
 @dataclass
 class Project:
     source: SourceRef
@@ -238,6 +254,7 @@ class Project:
     revision: int = 0
     cache_generation: str = field(default_factory=lambda: str(uuid.uuid4()))
     analysis_generation: str = field(default_factory=lambda: str(uuid.uuid4()))
+    sampling_algorithm: str = KEYFRAME_ALGORITHM
 
     def __post_init__(self):
         self.samples = tuple(self.samples)
@@ -247,6 +264,8 @@ class Project:
         self.validate()
 
     def validate(self):
+        if self.sampling_algorithm!=KEYFRAME_ALGORITHM:raise ValueError("Unsupported sampling algorithm")
+        _validate_source_samples(self.source,self.samples)
         sample_times = _validate_analysis_records(self.samples, self.transitions, self.segments)
         page_ids = [p.page_id for p in self.pages]
         if len(page_ids) != len(set(page_ids)):
@@ -290,13 +309,14 @@ class ExportSnapshot:
     export_id: str
     cache_generation: str
     analysis_generation: str
+    sampling_algorithm: str = KEYFRAME_ALGORITHM
 
     def __post_init__(self):
         object.__setattr__(self, "settings", _freeze(self.settings))
         for name in ("samples", "transitions", "segments", "pages"):
             object.__setattr__(self, name, tuple(getattr(self, name)))
         Project(self.source, self.settings, self.samples, self.transitions, self.segments,
-                self.pages, self.revision, self.cache_generation, self.analysis_generation)
+                self.pages, self.revision, self.cache_generation, self.analysis_generation,self.sampling_algorithm)
 
 
 def make_export_snapshot(project: Project) -> ExportSnapshot:
@@ -304,7 +324,7 @@ def make_export_snapshot(project: Project) -> ExportSnapshot:
     return ExportSnapshot(project.source, _freeze(project.settings), tuple(project.samples),
                           tuple(project.transitions), tuple(project.segments),
                           tuple(project.pages), project.revision, str(uuid.uuid4()),
-                          project.cache_generation, project.analysis_generation)
+                          project.cache_generation, project.analysis_generation,project.sampling_algorithm)
 
 
 @dataclass(frozen=True)
@@ -318,6 +338,7 @@ class AnalysisRequest:
         object.__setattr__(self, "settings", _freeze(self.settings))
         object.__setattr__(self, "samples", tuple(self.samples))
         _validate_analysis_records(self.samples)
+        _validate_source_samples(self.source,self.samples)
 
 
 @dataclass(frozen=True)

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from .models import Rect
+from .models import Rect,KEYFRAME_ALGORITHM
 
 PROCESS_TIMEOUTS = {"version": 5.0, "probe": 15.0, "preview": 15.0,
                     "frame": 60.0, "progress": 60.0,
@@ -19,7 +19,6 @@ def export_timeout(page_count: int) -> float:
 
 @dataclass(frozen=True)
 class AnalysisSettings:
-    fps: float = 1.0
     roi_mode: str = "auto"
     effective_roi: Rect | None = None
     masks: tuple[Rect, ...] = ()
@@ -28,7 +27,7 @@ class AnalysisSettings:
 
     def __post_init__(self):
         object.__setattr__(self, "masks", tuple(self.masks))
-        if self.fps not in (0.5, 1.0) or self.roi_mode not in ("auto", "manual", "full") or self.settings_revision < 0:
+        if self.roi_mode not in ("auto", "manual", "full") or self.settings_revision < 0:
             raise ValueError("invalid analysis settings")
         if self.roi_mode == "manual" and self.effective_roi is None:
             raise ValueError("manual ROI is required")

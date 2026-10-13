@@ -18,8 +18,8 @@ from slide_core.profiling import profile_directory
 from slide_core.media import probe_source
 from slide_core.models import Rect,CancelledError
 from slide_core.export import recover_export,RecoveryRequired,OutputOverwriteRequired,snapshot_export,snapshot_pdf,ExportPublishedError
-from slide_core.export_v3 import export_project
 from slide_core.pdf_only_export import export_pdf_only
+from slide_core.keyframe_export import export_project
 from slide_core.editing import add_page,delete_page,replace_page,merge_pages,delete_pages
 from .state import Controller,State
 from .workers import JobCoordinator
@@ -35,11 +35,11 @@ from .timeline import Timeline
 from .history import EditHistory,Snapshot
 
 class Window(QMainWindow):
-    def __init__(self):
+    def __init__(self,*,settings=None):
         super().__init__()
         self.resize(1250,800);self.setMinimumSize(960,640)
         self.setWindowTitle('Slide Extractor · PTS Editor')
-        self.controller=Controller();self.settings=AnalysisSettings(fps=0.5)
+        self.controller=Controller();self.settings=settings if settings is not None else AnalysisSettings()
         self._sample_preparation=None
         self._first_frame=None;self._suggested_roi=None;self._auto_roi=None;self._first_frame_warning=None
         self.jobs=JobCoordinator(self);self.jobs.done.connect(self._job_finished)
@@ -62,7 +62,6 @@ class Window(QMainWindow):
         self.reset_roi=QPushButton('Auto ROI');self.reset_roi.clicked.connect(self._reset_roi);top.addWidget(self.reset_roi)
         self.mask_button=QPushButton('Ignore mask');self.mask_button.clicked.connect(lambda:self.choose_region(True));top.addWidget(self.mask_button)
         self.clear_mask=QPushButton('Clear mask');self.clear_mask.clicked.connect(self._clear_mask);top.addWidget(self.clear_mask)
-        self.fps=QComboBox();self.fps.addItems(['1 FPS','0.5 FPS']);self.fps.setCurrentIndex(1);self.fps.currentIndexChanged.connect(self._fps_changed);top.addWidget(self.fps)
         self.analyze_button=QPushButton('Analyze');self.analyze_button.clicked.connect(self.analyze);top.addWidget(self.analyze_button)
         self.cancel_button=QPushButton('Cancel');self.cancel_button.clicked.connect(self.cancel);top.addWidget(self.cancel_button)
         self.advanced_button=QPushButton('Analysis settings…')
@@ -232,7 +231,6 @@ class Window(QMainWindow):
                        self.analyze_button):
             widget.setVisible(preparation)
         self.play_button.hide();self.slider.hide();self.delete_button.hide()
-        self.fps.hide()
         self.save_options_button.setVisible(reviewing)
         self.export_button.setVisible(reviewing)
         self.review_filename.setVisible(reviewing)
@@ -265,7 +263,7 @@ class Window(QMainWindow):
         if self._sample_preparation is not None:self._sample_preparation.close()
         self.controller.source=None;self.controller.state=State.EMPTY
         self.controller.pending_job=None
-        self.settings=AnalysisSettings(fps=self.settings.fps)
+        self.settings=AnalysisSettings()
         self._first_frame=None;self._suggested_roi=None;self._auto_roi=None;self._first_frame_warning=None
         self.current_index=0;self._thumb_cursor=0;self._last_export=None
         self.review_filename.clear();self.complete_details.clear()
@@ -328,12 +326,8 @@ class Window(QMainWindow):
         if self.stage not in ('empty','preparation') or self.jobs.worker is not None:return
         dialog=QDialog(self);dialog.setWindowTitle('Analysis settings')
         form=QFormLayout(dialog)
-        fps=QComboBox();fps.addItems(['0.5 FPS','1 FPS'])
-        fps.setCurrentIndex(0 if self.settings.fps==0.5 else 1)
-        form.addRow('Sampling rate',fps)
-        self._dialog_buttons(dialog,form)
-        if dialog.exec()!=QDialog.DialogCode.Accepted:return
-        self.fps.setCurrentIndex(1 if fps.currentIndex()==0 else 0)
+        form.addRow("Sampling",QLabel("Video keyframes · original frame timing"))
+        self._dialog_buttons(dialog,form);dialog.exec()
 
     def open_save_options(self):
         if self.stage!='review' or self.controller.project is None or self.jobs.worker is not None:return
@@ -342,7 +336,7 @@ class Window(QMainWindow):
         sidecar=QCheckBox('Save timestamps as JSON alongside PDF')
         sidecar.setChecked(self.json_enabled)
         form.addRow(sidecar)
-        fmt=QComboBox();fmt.addItems(['Simple slide times','Detailed JSON v3'])
+        fmt=QComboBox();fmt.addItems(['Simple slide times','Detailed keyframe JSON v4'])
         fmt.setCurrentIndex(0 if self.json_format=='simple' else 1)
         fmt.setEnabled(sidecar.isChecked());sidecar.toggled.connect(fmt.setEnabled)
         form.addRow('JSON format',fmt)
@@ -385,7 +379,7 @@ class Window(QMainWindow):
         count=len(self.selected_page_ids())
         self.selection_label.setText(f'Pages · chronological · {count} selected')
         self.open_button.setEnabled(a['open']);self.crop_button.setEnabled(a['region'])
-        self.mask_button.setEnabled(a['region']);self.fps.setEnabled(a['region'])
+        self.mask_button.setEnabled(a['region'])
         self.reset_roi.setEnabled(a['region']);self.clear_mask.setEnabled(a['region'])
         self.analyze_button.setEnabled(a['analyze']);self.cancel_button.setEnabled(a['cancel'])
         # Export only the validated READY project, never stale dirty settings.
@@ -451,13 +445,6 @@ class Window(QMainWindow):
                 round(r.width*image.width()/sw),round(r.height*image.height()/sh))
             painter.end()
         self._paint(image)
-
-    def _fps_changed(self,index):
-        if self.settings.fps==(1. if index==0 else .5):return
-        self.settings=replace(self.settings,fps=1. if index==0 else .5,
-                              settings_revision=self.settings.settings_revision+1)
-        self.controller.settings_changed(self.settings);self._refresh_actions()
-        if self.stage=='preparation':self._start_sample_preparation()
 
     def _reset_roi(self):
         if not self.controller.actions()['region']:return
@@ -529,7 +516,7 @@ class Window(QMainWindow):
         if self.controller.source is not None and self.controller.state in {State.REVIEW_READY,State.REVIEW_DIRTY}:
             self.controller.state=State.SOURCE_READY
         self._sample_preparation=BackgroundSamples(self.controller.source,
-            Path(gettempdir())/'slide-gui-cache',fps=self.settings.fps,predecessor=old,release_readers=self.images.wait_idle,
+            Path(gettempdir())/'slide-gui-cache',predecessor=old,release_readers=self.images.wait_idle,
             profile_path=profile_directory(Path(__file__).resolve().parents[1])/f'preparation-{uuid4()}.json')
         if self.stage=='preparation':self._show_preparation()
         self._refresh_actions()
@@ -577,7 +564,7 @@ class Window(QMainWindow):
                 QMessageBox.StandardButton.No)
             if answer!=QMessageBox.StandardButton.Yes:return
         task=self._sample_preparation
-        if task is None or task.source!=self.controller.source or task.fps!=self.settings.fps or task.token.cancelled or (task.ready.is_set() and task.error is not None):
+        if task is None or task.source!=self.controller.source or task.sampling_algorithm!="decoder-keyframes-v1" or task.token.cancelled or (task.ready.is_set() and task.error is not None):
             self._start_sample_preparation()
         old=self.controller.project
         self._stop_play();self._job_type='analysis'
@@ -639,7 +626,7 @@ class Window(QMainWindow):
             source,first=result
             self.controller.complete_probe(source)
             self.history.reset();self._undo_delete=None
-            self.settings=AnalysisSettings(fps=self.settings.fps)
+            self.settings=AnalysisSettings()
             self._first_frame=None;self._suggested_roi=None;self._auto_roi=None
             if first is not None:
                 rgb,w,h,roi,warning=first
@@ -1012,7 +999,7 @@ class Window(QMainWindow):
 
     def export_pending(self):
         if not self.controller.actions()['export'] or self.jobs.worker is not None:return
-        file,_=QFileDialog.getSaveFileName(self,'Save PDF' + (' and JSON' if self.json_enabled else ''),'','PDF (*.pdf)')
+        file,_=QFileDialog.getSaveFileName(self,'Save PDF + JSON' if self.json_enabled else 'Save PDF','','PDF (*.pdf)')
         if not file:return
         destination=Path(file).with_suffix('.pdf')
         parent=destination.parent
@@ -1030,7 +1017,7 @@ class Window(QMainWindow):
             QMessageBox.warning(self,'Invalid output',str(exc));return
         overwrite=False
         conflicts=[destination]
-        if self.json_enabled:conflicts.append(destination.with_suffix('.json'))
+        if self.json_enabled:conflicts.append(destination.with_suffix(".json"))
         if any(path.exists() or path.is_symlink() for path in conflicts):
             approval=QMessageBox.question(self,'Replace existing output?',
                 'This will replace: '+', '.join(str(path) for path in conflicts)+'\nContinue?',
@@ -1042,10 +1029,10 @@ class Window(QMainWindow):
         self._job_type='export'
         if self.json_enabled:
             self._job_id=self.jobs.start(export_project,self.controller.project,destination,
-                                         overwrite=overwrite,sidecar_format=self.json_format,snapshot=approval_snapshot,_progress_enabled=True)
+                overwrite=overwrite,sidecar_format=self.json_format,snapshot=approval_snapshot,_progress_enabled=True)
         else:
             self._job_id=self.jobs.start(export_pdf_only,self.controller.project,destination,
-                                         overwrite=overwrite,snapshot=approval_snapshot,_progress_enabled=True)
+                overwrite=overwrite,snapshot=approval_snapshot,_progress_enabled=True)
         self.controller.begin_export(self._job_id)
         self._set_stage('exporting')
         self.export_title.setText('Preparing PDF export…')

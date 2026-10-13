@@ -1,0 +1,331 @@
+{
+  "reference_commit": "a5ee678",
+  "baseline_commit": "4a8d486db124e31b130d37055985fa1e631ae300",
+  "tests": {
+    "test_m3_preparation_cache.py": {
+      "retained_or_ported": [
+        "test_crashed_writer_cache_is_pruned",
+        "test_live_writer_with_temporary_is_not_removed",
+        "test_unknown_temporary_is_preserved",
+        "test_linked_temporary_is_preserved",
+        "test_lock_cleanup_denial_can_be_retried",
+        "test_analyze_retries_transient_preparation_failure",
+        "test_cancelled_preparation_retries_after_decoder_drains",
+        "test_cleanup_failure_blocks_gui_retry_without_second_decoder"
+      ],
+      "historical_only_or_pending_m3": []
+    },
+    "test_m4_settings_flow.py": {
+      "retained_or_ported": [
+        "test_home_dialog_contains_analysis_settings_only",
+        "test_save_options_preserve_edited_project",
+        "test_home_cancel_preserves_current_work",
+        "test_home_confirmation_clears_work_and_cache",
+        "test_analysis_settings_cannot_open_from_review"
+      ],
+      "historical_only_or_pending_m3": [
+        "test_save_options_export_json_and_home_keeps_output"
+      ]
+    },
+    "test_bulk_editing.py": {
+      "retained_or_ported": [
+        "test_merge_uses_last_timestamp_not_selection_input_order",
+        "test_merge_rejects_unknown_ids_without_partial_changes",
+        "test_empty_single_duplicate_selection_noop",
+        "test_bulk_delete_is_one_revision_and_focuses_nearest_survivor",
+        "test_bulk_delete_all_then_noop",
+        "test_bulk_delete_rejects_stale_selection"
+      ],
+      "historical_only_or_pending_m3": [
+        "test_merge_preserves_exact_last_page_and_exports_matching_json"
+      ]
+    },
+    "test_m4_audit_cleanup.py": {
+      "retained_or_ported": [
+        "test_legacy_archive_satisfies_real_spec_data_inputs",
+        "test_openssl_evidence_rejects_unrelated_apache_files",
+        "test_openssl_evidence_is_exact_dedicated_material",
+        "test_recovery_reports_unsafe_activity_lease_and_preserves_files",
+        "test_gui_profile_includes_preparation_and_click_wait",
+        "test_preparation_failure_still_writes_profile",
+        "test_silent_preparation_failure_has_own_diagnostic",
+        "test_openssl_evidence_uses_real_installed_layout",
+        "test_recovery_reports_lock_system_failure",
+        "test_openssl_evidence_rejects_unsafe_layout"
+      ],
+      "historical_only_or_pending_m3": []
+    },
+    "test_v043_process_cleanup.py": {
+      "retained_or_ported": [
+        "test_group_permission_denied_still_reaps_owned_child",
+        "test_natural_exit_needs_no_group_signal",
+        "test_group_disappeared_still_reaps_owned_child",
+        "test_repeated_exact_frame_extraction_with_denied_group_signal"
+      ],
+      "historical_only_or_pending_m3": []
+    },
+    "test_m1_export_safety.py": {
+      "retained_or_ported": [
+        "test_pair_publication_contends_with_pdf_only_lock",
+        "test_live_prepared_transaction_is_not_recovered",
+        "test_auto_cleanup_does_not_recover_another_live_export",
+        "test_pdf_sync_failure_reports_already_published_output",
+        "test_unsupported_hardlinks_reject_cleanly_before_outputs_change",
+        "test_separate_processes_do_not_publish_over_same_pdf",
+        "test_gui_does_not_call_published_pdf_cancelled_or_failed",
+        "test_pair_busy_does_not_leave_a_recovery_journal",
+        "test_pdf_lock_cleanup_failure_reports_published_file",
+        "test_pair_cleanup_failure_reports_published_pair",
+        "test_macos_case_and_unicode_aliases_share_output_lock",
+        "test_recovery_skips_live_preparation_in_separate_process",
+        "test_rejected_committed_cleanup_retains_verified_backups"
+      ],
+      "historical_only_or_pending_m3": []
+    },
+    "test_cache_lifecycle.py": {
+      "retained_or_ported": [
+        "test_sampling_session_automatically_prunes_expired_cache",
+        "test_pressure_evicts_only_unused_cache_and_preserves_live_pin",
+        "test_failed_writer_discards_partial_cache_without_hiding_error",
+        "test_sampling_cancel_discards_partial_cache",
+        "test_cached_reanalysis_shares_project_lifetime_protection",
+        "test_other_process_cannot_prune_project_pin",
+        "test_locked_capacity_fails_without_deleting_active_session",
+        "test_cleanup_error_preserves_original_failure",
+        "test_failed_prune_keeps_owner_manifest_for_retry",
+        "test_disk_pressure_reclaims_unused_cache_before_free_reserve_failure",
+        "test_manifest_publication_failure_discards_partial_cache"
+      ],
+      "historical_only_or_pending_m3": []
+    },
+    "test_decoder_options.py": {
+      "retained_or_ported": [],
+      "historical_only_or_pending_m3": [
+        "test_cpu_thread_option_keeps_exact_pts_and_pages",
+        "test_default_analysis_uses_metadata_cpu_and_matches_explicit_baseline",
+        "test_hardware_selection_precedes_download_but_retains_all_frame_audit",
+        "test_invalid_decoder_option_is_rejected",
+        "test_metadata_only_cpu_preserves_full_analysis_output",
+        "test_videotoolbox_is_explicit_and_requires_hardware_frames"
+      ]
+    },
+    "test_current_export_transaction.py": {
+      "retained_or_ported": [
+        "test_live_export_produces_matched_pdf_json_pair_and_cleans_journal",
+        "test_second_export_changes_pair_together",
+        "test_output_pair_rolls_back_when_json_publication_fails",
+        "test_source_changed_in_extraction_not_published",
+        "test_existing_incomplete_export_requires_explicit_recovery",
+        "test_foreign_recovery_journal_blocks_export_without_mutating_files"
+      ],
+      "historical_only_or_pending_m3": []
+    },
+    "test_pre_public_failures.py": {
+      "retained_or_ported": [
+        "test_failed_video_open_preserves_history_and_can_undo",
+        "test_cancelled_video_probe_preserves_history",
+        "test_successful_video_open_clears_old_history",
+        "test_recovery_failure_is_announced_without_export"
+      ],
+      "historical_only_or_pending_m3": []
+    },
+    "test_release_correctness.py": {
+      "retained_or_ported": [
+        "test_tagged_media_first_frame_and_export_use_probe_transform",
+        "test_reanalysis_checks_cancel_before_next_cached_image",
+        "test_source_preparation_passes_cancel_to_probe",
+        "test_pdf_only_supports_windows_directory_handle_rejection",
+        "test_directory_sync_real_permission_failure_is_not_silenced",
+        "test_first_frame_cancel_reaps_stalled_decoder"
+      ],
+      "historical_only_or_pending_m3": []
+    },
+    "test_export_paths.py": {
+      "retained_or_ported": [
+        "test_source_collision_preserves_files",
+        "test_invalid_output_leaf_rejected",
+        "test_output_pair_hardlink_rejected",
+        "test_existing_outputs_require_approval",
+        "test_normalizes_suffix_before_export",
+        "test_snapshot_does_not_grant_overwrite_approval",
+        "test_sidecar_alias_added_during_extraction_never_truncates_source",
+        "test_output_created_during_extraction_requires_approval",
+        "test_parent_symlink_resolves_to_source_collision",
+        "test_real_export_worker_requires_overwrite_approval",
+        "test_gui_confirms_normalized_paths",
+        "test_gui_replacement_after_yes_is_rejected"
+      ],
+      "historical_only_or_pending_m3": []
+    },
+    "test_release_performance.py": {
+      "retained_or_ported": [
+        "test_repeated_sample_lookup_has_bounded_work",
+        "test_thumbnail_update_does_not_rescan_pages",
+        "test_reanalysis_decodes_each_cached_image_once"
+      ],
+      "historical_only_or_pending_m3": [
+        "test_default_extraction_uses_metadata_audit_and_matches_cpu"
+      ]
+    },
+    "test_v041_beta_audit_p1.py": {
+      "retained_or_ported": [
+        "test_interrupted_commit_preserves_original_pair",
+        "test_directory_sync_unavailable_still_publishes_pair",
+        "test_export_source_identity_does_not_read_entire_video",
+        "test_pts_extraction_stops_before_unrequested_eof",
+        "test_vfr_gap_does_not_suppress_later_stable_transition",
+        "test_probed_color_metadata_reaches_decode_pipeline",
+        "test_cancel_after_pdf_publish_reports_success"
+      ],
+      "historical_only_or_pending_m3": []
+    },
+    "test_preparation_lifecycle.py": {
+      "retained_or_ported": [
+        "test_replacement_removes_cache_before_new_decode",
+        "test_reader_barrier_waits_for_inflight_file",
+        "test_running_source_change_drains_decoder_before_restart",
+        "test_cleanup_failure_prevents_second_decoder",
+        "test_quick_source_changes_leave_only_final_cache",
+        "test_cancelled_decode_cleanup_failure_blocks_successor",
+        "test_post_sampling_cancellation_reports_failed_cleanup",
+        "test_source_replacement_and_failed_probe_preserve_ownership"
+      ],
+      "historical_only_or_pending_m3": [
+        "test_quick_fps_changes_leave_only_final_cache",
+        "test_ready_one_fps_compacts_without_decode",
+        "test_running_fps_change_drains_decoder_before_restart",
+        "test_sparse_samples_use_time_buckets_not_array_parity",
+        "test_window_fps_change_compacts_adopted_cache_and_close_removes_it"
+      ]
+    },
+    "test_background_samples.py": {
+      "retained_or_ported": [
+        "test_ready_samples_analyze_without_second_decoder",
+        "test_prepared_source_and_algorithm_must_match",
+        "test_analysis_waits_for_same_running_preparation",
+        "test_cancelled_waiter_does_not_block",
+        "test_window_silent_preparation_and_analyze_click"
+      ],
+      "historical_only_or_pending_m3": [
+        "test_prepared_source_and_fps_must_match"
+      ]
+    },
+    "test_media_integration.py": {
+      "retained_or_ported": [],
+      "historical_only_or_pending_m3": [
+        "test_bucket_oracle_and_exact_frame",
+        "test_corrupt_or_missing_input_rejected",
+        "test_odd_roi_on_exact_full_resolution_frame",
+        "test_true_vfr_gaps_no_synthetic_buckets",
+        "test_unicode_path_and_sar"
+      ]
+    },
+    "test_m10_export.py": {
+      "retained_or_ported": [
+        "test_pdf_only_and_simple_json"
+      ],
+      "historical_only_or_pending_m3": []
+    },
+    "test_gui_state.py": {
+      "retained_or_ported": [
+        "test_empty_probe_and_error_recovery",
+        "test_busy_cancel_and_stale_results",
+        "test_ready_dirty_revert_and_export_states"
+      ],
+      "historical_only_or_pending_m3": []
+    },
+    "test_gui_smoke.py": {
+      "retained_or_ported": [
+        "test_cancel_worker_preserves_previous_project",
+        "test_close_while_probe_is_running",
+        "test_roi_dialog_uses_existing_cached_jpeg_only"
+      ],
+      "historical_only_or_pending_m3": [
+        "test_m5_gui_export_exact_pts_pdf_json",
+        "test_open_analyze_edit_play_close"
+      ]
+    },
+    "test_sampling.py": {
+      "retained_or_ported": [],
+      "historical_only_or_pending_m3": [
+        "test_bad_source_detected_before_sampling",
+        "test_bucket_rate_and_selected_full_frame",
+        "test_cancelled_does_not_publish_complete_cache",
+        "test_invalid_rate_fails",
+        "test_missing_selected_pts_fails_instead_of_substitution",
+        "test_nonzero_source_origin",
+        "test_short_first_frame_and_exact_bucket",
+        "test_small_video_no_upscale"
+      ]
+    },
+    "test_m7_preparation.py": {
+      "retained_or_ported": [
+        "test_eight_resize_handles_and_move",
+        "test_handles_clamp_to_image_and_minimum_area",
+        "test_canvas_hit_detection_and_resize"
+      ],
+      "historical_only_or_pending_m3": [
+        "test_prepare_before_analyze_and_default_fps"
+      ]
+    },
+    "test_timeline_json.py": {
+      "retained_or_ported": [
+        "test_roundtrip_validates_and_uses_utf8_newline",
+        "test_pdf_facts_are_cross_checked",
+        "test_rejects_invalid_payload",
+        "test_rejects_bad_uuid_datetime_rounding_collision_and_unknown_nested_field",
+        "test_first_late_representative_starts_navigation_at_zero_and_boundaries_survive_page_edit",
+        "test_auto_page_replace_preserves_creation_origin_and_boundary_track",
+        "test_rectangles_reject_negative_coordinates",
+        "test_rejects_detector_crop_too_small_or_fully_masked",
+        "test_cache_must_be_downscaled_full_display_aspect",
+        "test_rejects_bad_schema_types_and_private_nested_paths",
+        "test_uuid_requires_canonical_format_and_rfc3339_accepts_offset",
+        "test_rejects_path_leaks_in_freeform_metadata",
+        "test_negative_value_is_rejected_before_rounding",
+        "test_rejects_rfc3339_offsets_outside_clock_ranges",
+        "test_rfc3339_accepts_lowercase_t_and_z",
+        "test_observation_timestamp_is_derived_from_exact_source_pts",
+        "test_roi_cache_scaling_clips_rounding_at_cache_edges"
+      ],
+      "historical_only_or_pending_m3": [
+        "test_sample_grid_is_derived_from_exact_source_pts_bucket"
+      ]
+    },
+    "test_export_integration.py": {
+      "retained_or_ported": [
+        "test_roundtrip_m5_real_video",
+        "test_manual_edit_keeps_ids_and_order",
+        "test_odd_roi_mask_and_full_frame_crop",
+        "test_overwrite_requires_approval",
+        "test_changed_source_blocks_write",
+        "test_empty_pages_and_missing_cache_or_frame_fails_safe",
+        "test_failed_staging_preserves_original_pair",
+        "test_missing_cached_representative_blocks_export"
+      ],
+      "historical_only_or_pending_m3": []
+    },
+    "test_analysis_profile.py": {
+      "retained_or_ported": [
+        "test_profile_preserves_output_and_reports_sampling_and_detection",
+        "test_failed_analysis_profile_reports_failure"
+      ],
+      "historical_only_or_pending_m3": []
+    },
+    "test_analysis.py": {
+      "retained_or_ported": [
+        "test_cached_reanalysis_does_not_decode_source",
+        "test_failure_keeps_previous_project_unchanged",
+        "test_missing_cache_fails_closed",
+        "test_initial_black_frame_fallback_and_cancel",
+        "test_auto_derived_roi_does_not_mark_same_user_settings_dirty",
+        "test_reanalysis_rejects_replacement_source",
+        "test_analysis_failure_removes_only_newly_created_cache"
+      ],
+      "historical_only_or_pending_m3": [
+        "test_fps_change_requires_new_cache_generation"
+      ]
+    }
+  },
+  "pending_m3": "Core paired transaction/path/schema/GUI cases are ported to keyframe v4; remaining historical FPS/GPU-specific cases run only in frozen baseline or reference."
+}

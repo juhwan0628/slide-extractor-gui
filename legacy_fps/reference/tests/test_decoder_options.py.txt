@@ -4,7 +4,7 @@ from slide_core import pts
 from slide_core.analysis import analyze_project
 from slide_core.config import AnalysisSettings
 from slide_core.profiling import AnalysisProfile
-from tests.test_sampling import make_video
+from tests.media_fixtures import make_video
 
 def test_videotoolbox_is_explicit_and_requires_hardware_frames(tmp_path):
     source=make_video(tmp_path/'video.mp4',duration=2,fps=4)

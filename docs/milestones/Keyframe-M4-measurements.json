@@ -1,0 +1,1758 @@
+{
+  "report_type": "keyframe-m4-measurements",
+  "schema_version": 1,
+  "app_commit": "41c1475",
+  "worker_commit": "55f4baf8b62d5ee3a269b32c5efe26901ef36e4a",
+  "environment": {
+    "platform": "Linux-7.0.0-1011-oracle-aarch64-with-glibc2.39",
+    "machine": "aarch64",
+    "python": "3.12.3",
+    "cpu_count": 4,
+    "ffmpeg_version": "ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers",
+    "baseline_commit": "4a8d486db124e31b130d37055985fa1e631ae300",
+    "host_contended": true,
+    "application_cache": "fresh per worker, discarded after report",
+    "os_cache": "not dropped"
+  },
+  "scope": "9 complete-source cases once;27 middle300-second excerpt runs,3 per input/mode; contended Linux host; warm OS cache possible",
+  "runs": [
+    {
+      "lecture": "sp",
+      "scope": "full",
+      "mode": "keyframes",
+      "round": 0,
+      "status": "success",
+      "duration_s": 2093.066667,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 2096,
+      "pages": 220,
+      "cache_bytes": 88277130,
+      "roi": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.31016868201550096,
+        "preparation": 58.29787492204923,
+        "ready_analysis": 11.291270417976193,
+        "cold_total": 69.58914534002542,
+        "preparation_wait": 0,
+        "click_to_result": 11.291270417976193,
+        "export": 274.88273404503707
+      },
+      "cpu_seconds": {
+        "parent": 87.76617900000001,
+        "children": 92.245248
+      },
+      "maxrss_kib": {
+        "parent": 1259956,
+        "largest_child": 528064
+      },
+      "pdf_bytes": 107778920,
+      "max_observed_gap_s": 1.0
+    },
+    {
+      "lecture": "sp",
+      "scope": "full",
+      "mode": "0.5",
+      "round": 0,
+      "status": "success",
+      "duration_s": 2093.066667,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 1047,
+      "pages": 171,
+      "cache_bytes": 44178337,
+      "roi": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.4061700659804046,
+        "preparation": 94.3541486930335,
+        "ready_analysis": 6.030162343988195,
+        "cold_total": 100.38431103702169,
+        "preparation_wait": 0,
+        "click_to_result": 6.030162343988195,
+        "export": 232.85546611598693
+      },
+      "cpu_seconds": {
+        "parent": 71.698878,
+        "children": 166.569213
+      },
+      "maxrss_kib": {
+        "parent": 489324,
+        "largest_child": 435464
+      },
+      "pdf_bytes": 85180990,
+      "max_observed_gap_s": 2.0
+    },
+    {
+      "lecture": "sp",
+      "scope": "full",
+      "mode": "1",
+      "round": 0,
+      "status": "success",
+      "duration_s": 2093.066667,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 2094,
+      "pages": 215,
+      "cache_bytes": 88400147,
+      "roi": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.4524144650204107,
+        "preparation": 107.44559767690953,
+        "ready_analysis": 14.677182485931553,
+        "cold_total": 122.12278016284108,
+        "preparation_wait": 0,
+        "click_to_result": 14.677182485931553,
+        "export": 348.14071509602945
+      },
+      "cpu_seconds": {
+        "parent": 94.43677799999999,
+        "children": 192.37741
+      },
+      "maxrss_kib": {
+        "parent": 722236,
+        "largest_child": 525016
+      },
+      "pdf_bytes": 106536459,
+      "max_observed_gap_s": 1.0
+    },
+    {
+      "lecture": "multicore",
+      "scope": "full",
+      "mode": "keyframes",
+      "round": 0,
+      "status": "success",
+      "duration_s": 7036.4,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 7044,
+      "pages": 970,
+      "cache_bytes": 373640948,
+      "roi": {
+        "x": 160,
+        "y": 0,
+        "width": 960,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.4124209730653092,
+        "preparation": 256.5342429149896,
+        "ready_analysis": 63.97686239797622,
+        "cold_total": 320.5111053129658,
+        "preparation_wait": 0,
+        "click_to_result": 63.97686239797622,
+        "export": 1147.2349547829945
+      },
+      "cpu_seconds": {
+        "parent": 272.03145400000005,
+        "children": 354.994306
+      },
+      "maxrss_kib": {
+        "parent": 2097236,
+        "largest_child": 1187888
+      },
+      "pdf_bytes": 349002217,
+      "max_observed_gap_s": 1.0
+    },
+    {
+      "lecture": "multicore",
+      "scope": "full",
+      "mode": "0.5",
+      "round": 0,
+      "status": "success",
+      "duration_s": 7036.4,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 3519,
+      "pages": 653,
+      "cache_bytes": 186657234,
+      "roi": {
+        "x": 160,
+        "y": 0,
+        "width": 960,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.5023543309653178,
+        "preparation": 299.32528650201857,
+        "ready_analysis": 27.35047022602521,
+        "cold_total": 326.6757567280438,
+        "preparation_wait": 0,
+        "click_to_result": 27.35047022602521,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 47.935455,
+        "children": 240.397299
+      },
+      "maxrss_kib": {
+        "parent": 88144,
+        "largest_child": 100260
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 2.0
+    },
+    {
+      "lecture": "multicore",
+      "scope": "full",
+      "mode": "1",
+      "round": 0,
+      "status": "success",
+      "duration_s": 7036.4,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 7037,
+      "pages": 972,
+      "cache_bytes": 373323816,
+      "roi": {
+        "x": 160,
+        "y": 0,
+        "width": 960,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.5340827209874988,
+        "preparation": 306.20600388606545,
+        "ready_analysis": 44.07239536696579,
+        "cold_total": 350.27839925303124,
+        "preparation_wait": 0,
+        "click_to_result": 44.07239536696579,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 73.772656,
+        "children": 253.90603099999998
+      },
+      "maxrss_kib": {
+        "parent": 93616,
+        "largest_child": 99932
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 1.0
+    },
+    {
+      "lecture": "ethics",
+      "scope": "full",
+      "mode": "keyframes",
+      "round": 0,
+      "status": "success",
+      "duration_s": 2994.333333,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 3021,
+      "pages": 59,
+      "cache_bytes": 157660556,
+      "roi": {
+        "x": 160,
+        "y": 0,
+        "width": 960,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.4246700359508395,
+        "preparation": 102.63410942896735,
+        "ready_analysis": 19.640561167965643,
+        "cold_total": 122.27467059693299,
+        "preparation_wait": 0,
+        "click_to_result": 19.640561167965643,
+        "export": 69.61894901900087
+      },
+      "cpu_seconds": {
+        "parent": 38.090028999999994,
+        "children": 63.708923
+      },
+      "maxrss_kib": {
+        "parent": 241036,
+        "largest_child": 178080
+      },
+      "pdf_bytes": 22795660,
+      "max_observed_gap_s": 1.0000000000002274
+    },
+    {
+      "lecture": "ethics",
+      "scope": "full",
+      "mode": "0.5",
+      "round": 0,
+      "status": "success",
+      "duration_s": 2994.333333,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 1498,
+      "pages": 56,
+      "cache_bytes": 78122392,
+      "roi": {
+        "x": 160,
+        "y": 0,
+        "width": 960,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.42964775196742266,
+        "preparation": 130.04683061002288,
+        "ready_analysis": 6.887071502977051,
+        "cold_total": 136.93390211299993,
+        "preparation_wait": 0,
+        "click_to_result": 6.887071502977051,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 18.854582,
+        "children": 105.967746
+      },
+      "maxrss_kib": {
+        "parent": 83336,
+        "largest_child": 96856
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 2.0
+    },
+    {
+      "lecture": "ethics",
+      "scope": "full",
+      "mode": "1",
+      "round": 0,
+      "status": "success",
+      "duration_s": 2994.333333,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 2995,
+      "pages": 60,
+      "cache_bytes": 156303244,
+      "roi": {
+        "x": 160,
+        "y": 0,
+        "width": 960,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.49130707094445825,
+        "preparation": 133.74739963700995,
+        "ready_analysis": 15.086727050947957,
+        "cold_total": 148.8341266879579,
+        "preparation_wait": 0,
+        "click_to_result": 15.086727050947957,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 28.773354,
+        "children": 111.80015
+      },
+      "maxrss_kib": {
+        "parent": 83476,
+        "largest_child": 96196
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 1.0
+    },
+    {
+      "lecture": "sp",
+      "scope": "clip",
+      "mode": "keyframes",
+      "round": 0,
+      "status": "success",
+      "duration_s": 300.133333,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 301,
+      "pages": 30,
+      "cache_bytes": 14689275,
+      "roi": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.43381129391491413,
+        "preparation": 9.000704408041202,
+        "ready_analysis": 1.0701181120239198,
+        "cold_total": 10.070822520065121,
+        "preparation_wait": 0,
+        "click_to_result": 1.0701181120239198,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 2.1824660000000002,
+        "children": 4.140347
+      },
+      "maxrss_kib": {
+        "parent": 80048,
+        "largest_child": 74916
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 1.0
+    },
+    {
+      "lecture": "sp",
+      "scope": "clip",
+      "mode": "0.5",
+      "round": 0,
+      "status": "success",
+      "duration_s": 300.133333,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 151,
+      "pages": 24,
+      "cache_bytes": 7360077,
+      "roi": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.4186659250408411,
+        "preparation": 14.674070265959017,
+        "ready_analysis": 1.1266371520468965,
+        "cold_total": 15.800707418005913,
+        "preparation_wait": 0,
+        "click_to_result": 1.1266371520468965,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 2.1735170000000004,
+        "children": 13.754421
+      },
+      "maxrss_kib": {
+        "parent": 79708,
+        "largest_child": 86036
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 2.0
+    },
+    {
+      "lecture": "sp",
+      "scope": "clip",
+      "mode": "1",
+      "round": 0,
+      "status": "success",
+      "duration_s": 300.133333,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 301,
+      "pages": 30,
+      "cache_bytes": 14689275,
+      "roi": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.272815482923761,
+        "preparation": 14.759254093980417,
+        "ready_analysis": 2.4882478630170226,
+        "cold_total": 17.24750195699744,
+        "preparation_wait": 0,
+        "click_to_result": 2.4882478630170226,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 3.1077179999999998,
+        "children": 14.343205
+      },
+      "maxrss_kib": {
+        "parent": 80020,
+        "largest_child": 87016
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 1.0
+    },
+    {
+      "lecture": "multicore",
+      "scope": "clip",
+      "mode": "keyframes",
+      "round": 0,
+      "status": "success",
+      "duration_s": 300.266667,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 301,
+      "pages": 27,
+      "cache_bytes": 14984262,
+      "roi": {
+        "x": 160,
+        "y": 0,
+        "width": 960,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.31995772395748645,
+        "preparation": 10.392806028947234,
+        "ready_analysis": 1.3118311259895563,
+        "cold_total": 11.70463715493679,
+        "preparation_wait": 0,
+        "click_to_result": 1.3118311259895563,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 2.4340089999999996,
+        "children": 4.67482
+      },
+      "maxrss_kib": {
+        "parent": 81576,
+        "largest_child": 81028
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 1.0
+    },
+    {
+      "lecture": "multicore",
+      "scope": "clip",
+      "mode": "0.5",
+      "round": 0,
+      "status": "success",
+      "duration_s": 300.266667,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 151,
+      "pages": 22,
+      "cache_bytes": 7515252,
+      "roi": {
+        "x": 160,
+        "y": 0,
+        "width": 960,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.40710978501010686,
+        "preparation": 12.799104019999504,
+        "ready_analysis": 0.7355631809914485,
+        "cold_total": 13.534667200990953,
+        "preparation_wait": 0,
+        "click_to_result": 0.7355631809914485,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 2.249333,
+        "children": 10.244157999999999
+      },
+      "maxrss_kib": {
+        "parent": 83228,
+        "largest_child": 89284
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 2.0
+    },
+    {
+      "lecture": "multicore",
+      "scope": "clip",
+      "mode": "1",
+      "round": 0,
+      "status": "success",
+      "duration_s": 300.266667,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 301,
+      "pages": 27,
+      "cache_bytes": 14986098,
+      "roi": {
+        "x": 160,
+        "y": 0,
+        "width": 960,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.3167331750737503,
+        "preparation": 13.589372172951698,
+        "ready_analysis": 2.077193717006594,
+        "cold_total": 15.666565889958292,
+        "preparation_wait": 0,
+        "click_to_result": 2.077193717006594,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 3.2277729999999996,
+        "children": 10.810432
+      },
+      "maxrss_kib": {
+        "parent": 82380,
+        "largest_child": 88392
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 1.0
+    },
+    {
+      "lecture": "ethics",
+      "scope": "clip",
+      "mode": "keyframes",
+      "round": 0,
+      "status": "success",
+      "duration_s": 300.533333,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 304,
+      "pages": 7,
+      "cache_bytes": 14369674,
+      "roi": {
+        "x": 160,
+        "y": 0,
+        "width": 960,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.3593379369704053,
+        "preparation": 10.309544851072133,
+        "ready_analysis": 2.706313787959516,
+        "cold_total": 13.015858639031649,
+        "preparation_wait": 0,
+        "click_to_result": 2.706313787959516,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 2.4417999999999997,
+        "children": 4.875775999999999
+      },
+      "maxrss_kib": {
+        "parent": 81448,
+        "largest_child": 78992
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 1.000000000000007
+    },
+    {
+      "lecture": "ethics",
+      "scope": "clip",
+      "mode": "0.5",
+      "round": 0,
+      "status": "success",
+      "duration_s": 300.533333,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 151,
+      "pages": 6,
+      "cache_bytes": 7106132,
+      "roi": {
+        "x": 160,
+        "y": 0,
+        "width": 960,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.4017146578989923,
+        "preparation": 13.056204691994935,
+        "ready_analysis": 1.35742370900698,
+        "cold_total": 14.413628401001915,
+        "preparation_wait": 0,
+        "click_to_result": 1.35742370900698,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 2.2595400000000003,
+        "children": 10.832286
+      },
+      "maxrss_kib": {
+        "parent": 79608,
+        "largest_child": 85968
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 2.0
+    },
+    {
+      "lecture": "ethics",
+      "scope": "clip",
+      "mode": "1",
+      "round": 0,
+      "status": "success",
+      "duration_s": 300.533333,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 301,
+      "pages": 6,
+      "cache_bytes": 14210633,
+      "roi": {
+        "x": 160,
+        "y": 0,
+        "width": 960,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.44261932594235986,
+        "preparation": 13.868806193000637,
+        "ready_analysis": 2.3648764790268615,
+        "cold_total": 16.2336826720275,
+        "preparation_wait": 0,
+        "click_to_result": 2.3648764790268615,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 3.381182,
+        "children": 11.782678
+      },
+      "maxrss_kib": {
+        "parent": 79548,
+        "largest_child": 86296
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 1.0
+    },
+    {
+      "lecture": "multicore",
+      "scope": "clip",
+      "mode": "0.5",
+      "round": 1,
+      "status": "success",
+      "duration_s": 300.266667,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 151,
+      "pages": 22,
+      "cache_bytes": 7515252,
+      "roi": {
+        "x": 160,
+        "y": 0,
+        "width": 960,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.46228333306498826,
+        "preparation": 12.747348759090528,
+        "ready_analysis": 1.1972106650937349,
+        "cold_total": 13.944559424184263,
+        "preparation_wait": 0,
+        "click_to_result": 1.1972106650937349,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 2.3580469999999996,
+        "children": 10.42009
+      },
+      "maxrss_kib": {
+        "parent": 81540,
+        "largest_child": 88788
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 2.0
+    },
+    {
+      "lecture": "multicore",
+      "scope": "clip",
+      "mode": "1",
+      "round": 1,
+      "status": "success",
+      "duration_s": 300.266667,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 301,
+      "pages": 27,
+      "cache_bytes": 14986098,
+      "roi": {
+        "x": 160,
+        "y": 0,
+        "width": 960,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.39604992896784097,
+        "preparation": 13.26180748490151,
+        "ready_analysis": 1.6548871559789404,
+        "cold_total": 14.91669464088045,
+        "preparation_wait": 0,
+        "click_to_result": 1.6548871559789404,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 3.2416650000000002,
+        "children": 10.906536
+      },
+      "maxrss_kib": {
+        "parent": 83736,
+        "largest_child": 88444
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 1.0
+    },
+    {
+      "lecture": "multicore",
+      "scope": "clip",
+      "mode": "keyframes",
+      "round": 1,
+      "status": "success",
+      "duration_s": 300.266667,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 301,
+      "pages": 27,
+      "cache_bytes": 14984262,
+      "roi": {
+        "x": 160,
+        "y": 0,
+        "width": 960,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.4004064860055223,
+        "preparation": 10.995507239014842,
+        "ready_analysis": 2.093861368019134,
+        "cold_total": 13.089368607033975,
+        "preparation_wait": 0,
+        "click_to_result": 2.093861368019134,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 2.469188,
+        "children": 4.761584
+      },
+      "maxrss_kib": {
+        "parent": 82860,
+        "largest_child": 81164
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 1.0
+    },
+    {
+      "lecture": "ethics",
+      "scope": "clip",
+      "mode": "0.5",
+      "round": 1,
+      "status": "success",
+      "duration_s": 300.533333,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 151,
+      "pages": 6,
+      "cache_bytes": 7106132,
+      "roi": {
+        "x": 160,
+        "y": 0,
+        "width": 960,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.3713291580788791,
+        "preparation": 13.372379805077799,
+        "ready_analysis": 0.7898624369408935,
+        "cold_total": 14.162242242018692,
+        "preparation_wait": 0,
+        "click_to_result": 0.7898624369408935,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 2.236089,
+        "children": 10.840784
+      },
+      "maxrss_kib": {
+        "parent": 79740,
+        "largest_child": 85716
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 2.0
+    },
+    {
+      "lecture": "ethics",
+      "scope": "clip",
+      "mode": "1",
+      "round": 1,
+      "status": "success",
+      "duration_s": 300.533333,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 301,
+      "pages": 6,
+      "cache_bytes": 14210633,
+      "roi": {
+        "x": 160,
+        "y": 0,
+        "width": 960,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.40668621892109513,
+        "preparation": 13.7773899580352,
+        "ready_analysis": 2.582743722014129,
+        "cold_total": 16.36013368004933,
+        "preparation_wait": 0,
+        "click_to_result": 2.582743722014129,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 3.252549,
+        "children": 11.448482
+      },
+      "maxrss_kib": {
+        "parent": 79696,
+        "largest_child": 86400
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 1.0
+    },
+    {
+      "lecture": "ethics",
+      "scope": "clip",
+      "mode": "keyframes",
+      "round": 1,
+      "status": "success",
+      "duration_s": 300.533333,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 304,
+      "pages": 7,
+      "cache_bytes": 14369674,
+      "roi": {
+        "x": 160,
+        "y": 0,
+        "width": 960,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.36666727799456567,
+        "preparation": 10.406756088021211,
+        "ready_analysis": 2.597813048050739,
+        "cold_total": 13.00456913607195,
+        "preparation_wait": 0,
+        "click_to_result": 2.597813048050739,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 2.4308560000000003,
+        "children": 4.889867
+      },
+      "maxrss_kib": {
+        "parent": 79924,
+        "largest_child": 79060
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 1.000000000000007
+    },
+    {
+      "lecture": "sp",
+      "scope": "clip",
+      "mode": "0.5",
+      "round": 1,
+      "status": "success",
+      "duration_s": 300.133333,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 151,
+      "pages": 24,
+      "cache_bytes": 7360077,
+      "roi": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.33892992208711803,
+        "preparation": 14.543290049070492,
+        "ready_analysis": 0.6111924760043621,
+        "cold_total": 15.154482525074854,
+        "preparation_wait": 0,
+        "click_to_result": 0.6111924760043621,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 2.1617230000000003,
+        "children": 13.701276
+      },
+      "maxrss_kib": {
+        "parent": 79720,
+        "largest_child": 86804
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 2.0
+    },
+    {
+      "lecture": "sp",
+      "scope": "clip",
+      "mode": "1",
+      "round": 1,
+      "status": "success",
+      "duration_s": 300.133333,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 301,
+      "pages": 30,
+      "cache_bytes": 14689275,
+      "roi": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.29211952292826027,
+        "preparation": 15.241903456975706,
+        "ready_analysis": 2.0938500800402835,
+        "cold_total": 17.33575353701599,
+        "preparation_wait": 0,
+        "click_to_result": 2.0938500800402835,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 3.032255,
+        "children": 14.222328
+      },
+      "maxrss_kib": {
+        "parent": 80060,
+        "largest_child": 86932
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 1.0
+    },
+    {
+      "lecture": "sp",
+      "scope": "clip",
+      "mode": "keyframes",
+      "round": 1,
+      "status": "success",
+      "duration_s": 300.133333,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 301,
+      "pages": 30,
+      "cache_bytes": 14689275,
+      "roi": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.3985719479387626,
+        "preparation": 9.179428591975011,
+        "ready_analysis": 1.8538205979857594,
+        "cold_total": 11.03324918996077,
+        "preparation_wait": 0,
+        "click_to_result": 1.8538205979857594,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 2.3826579999999997,
+        "children": 4.211574000000001
+      },
+      "maxrss_kib": {
+        "parent": 79912,
+        "largest_child": 76008
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 1.0
+    },
+    {
+      "lecture": "ethics",
+      "scope": "clip",
+      "mode": "1",
+      "round": 2,
+      "status": "success",
+      "duration_s": 300.533333,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 301,
+      "pages": 6,
+      "cache_bytes": 14210633,
+      "roi": {
+        "x": 160,
+        "y": 0,
+        "width": 960,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.49096117296721786,
+        "preparation": 13.809116938035004,
+        "ready_analysis": 2.435480581014417,
+        "cold_total": 16.24459751904942,
+        "preparation_wait": 0,
+        "click_to_result": 2.435480581014417,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 3.24922,
+        "children": 11.515191999999999
+      },
+      "maxrss_kib": {
+        "parent": 79740,
+        "largest_child": 86220
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 1.0
+    },
+    {
+      "lecture": "ethics",
+      "scope": "clip",
+      "mode": "keyframes",
+      "round": 2,
+      "status": "success",
+      "duration_s": 300.533333,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 304,
+      "pages": 7,
+      "cache_bytes": 14369674,
+      "roi": {
+        "x": 160,
+        "y": 0,
+        "width": 960,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.45603087602648884,
+        "preparation": 10.871303079999052,
+        "ready_analysis": 1.3355864309705794,
+        "cold_total": 12.206889510969631,
+        "preparation_wait": 0,
+        "click_to_result": 1.3355864309705794,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 2.490113,
+        "children": 4.938553
+      },
+      "maxrss_kib": {
+        "parent": 79976,
+        "largest_child": 77580
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 1.000000000000007
+    },
+    {
+      "lecture": "ethics",
+      "scope": "clip",
+      "mode": "0.5",
+      "round": 2,
+      "status": "success",
+      "duration_s": 300.533333,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 151,
+      "pages": 6,
+      "cache_bytes": 7106132,
+      "roi": {
+        "x": 160,
+        "y": 0,
+        "width": 960,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.38752097403630614,
+        "preparation": 13.736992148100398,
+        "ready_analysis": 1.3555830410914496,
+        "cold_total": 15.092575189191848,
+        "preparation_wait": 0,
+        "click_to_result": 1.3555830410914496,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 2.3871219999999997,
+        "children": 11.340283999999999
+      },
+      "maxrss_kib": {
+        "parent": 79532,
+        "largest_child": 85776
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 2.0
+    },
+    {
+      "lecture": "sp",
+      "scope": "clip",
+      "mode": "1",
+      "round": 2,
+      "status": "success",
+      "duration_s": 300.133333,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 301,
+      "pages": 30,
+      "cache_bytes": 14689275,
+      "roi": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.36429617600515485,
+        "preparation": 14.710260609979741,
+        "ready_analysis": 0.9896812910446897,
+        "cold_total": 15.699941901024431,
+        "preparation_wait": 0,
+        "click_to_result": 0.9896812910446897,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 3.08917,
+        "children": 14.484841
+      },
+      "maxrss_kib": {
+        "parent": 79892,
+        "largest_child": 87072
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 1.0
+    },
+    {
+      "lecture": "sp",
+      "scope": "clip",
+      "mode": "keyframes",
+      "round": 2,
+      "status": "success",
+      "duration_s": 300.133333,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 301,
+      "pages": 30,
+      "cache_bytes": 14689275,
+      "roi": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.47618992696516216,
+        "preparation": 9.14067311398685,
+        "ready_analysis": 1.0982682129833847,
+        "cold_total": 10.238941326970235,
+        "preparation_wait": 0,
+        "click_to_result": 1.0982682129833847,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 2.220834,
+        "children": 4.171385
+      },
+      "maxrss_kib": {
+        "parent": 79952,
+        "largest_child": 75364
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 1.0
+    },
+    {
+      "lecture": "sp",
+      "scope": "clip",
+      "mode": "0.5",
+      "round": 2,
+      "status": "success",
+      "duration_s": 300.133333,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 151,
+      "pages": 24,
+      "cache_bytes": 7360077,
+      "roi": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.27739859698340297,
+        "preparation": 14.10609374102205,
+        "ready_analysis": 0.9390527789946645,
+        "cold_total": 15.045146520016715,
+        "preparation_wait": 0,
+        "click_to_result": 0.9390527789946645,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 2.1794700000000002,
+        "children": 13.77945
+      },
+      "maxrss_kib": {
+        "parent": 79648,
+        "largest_child": 86436
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 2.0
+    },
+    {
+      "lecture": "multicore",
+      "scope": "clip",
+      "mode": "1",
+      "round": 2,
+      "status": "success",
+      "duration_s": 300.266667,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 301,
+      "pages": 27,
+      "cache_bytes": 14986098,
+      "roi": {
+        "x": 160,
+        "y": 0,
+        "width": 960,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.3961619259789586,
+        "preparation": 13.276698846020736,
+        "ready_analysis": 1.6877005799906328,
+        "cold_total": 14.964399426011369,
+        "preparation_wait": 0,
+        "click_to_result": 1.6877005799906328,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 3.2179789999999997,
+        "children": 10.833596
+      },
+      "maxrss_kib": {
+        "parent": 82372,
+        "largest_child": 88564
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 1.0
+    },
+    {
+      "lecture": "multicore",
+      "scope": "clip",
+      "mode": "keyframes",
+      "round": 2,
+      "status": "success",
+      "duration_s": 300.266667,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 301,
+      "pages": 27,
+      "cache_bytes": 14984262,
+      "roi": {
+        "x": 160,
+        "y": 0,
+        "width": 960,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.4040127529297024,
+        "preparation": 10.444190653972328,
+        "ready_analysis": 2.4672990419203416,
+        "cold_total": 12.91148969589267,
+        "preparation_wait": 0,
+        "click_to_result": 2.4672990419203416,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 2.4425200000000005,
+        "children": 4.670243999999999
+      },
+      "maxrss_kib": {
+        "parent": 82956,
+        "largest_child": 80524
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 1.0
+    },
+    {
+      "lecture": "multicore",
+      "scope": "clip",
+      "mode": "0.5",
+      "round": 2,
+      "status": "success",
+      "duration_s": 300.266667,
+      "source_dimensions": [
+        1280,
+        720
+      ],
+      "samples": 151,
+      "pages": 22,
+      "cache_bytes": 7515252,
+      "roi": {
+        "x": 160,
+        "y": 0,
+        "width": 960,
+        "height": 720
+      },
+      "seconds": {
+        "probe": 0.33953880390617996,
+        "preparation": 12.919222394935787,
+        "ready_analysis": 1.562077229958959,
+        "cold_total": 14.481299624894746,
+        "preparation_wait": 0,
+        "click_to_result": 1.562077229958959,
+        "export": null
+      },
+      "cpu_seconds": {
+        "parent": 2.233511,
+        "children": 10.347192
+      },
+      "maxrss_kib": {
+        "parent": 83004,
+        "largest_child": 88548
+      },
+      "pdf_bytes": null,
+      "max_observed_gap_s": 2.0
+    }
+  ],
+  "decode_controls": [
+    {
+      "lecture": "sp",
+      "mode": "keyframes",
+      "round": 0,
+      "wall_s": 44.8329084959114,
+      "user_cpu_s": 18.716552,
+      "sys_cpu_s": 0.18290099999999998,
+      "load": [
+        7.86572265625,
+        7.7412109375,
+        7.06787109375
+      ]
+    },
+    {
+      "lecture": "sp",
+      "mode": "keyframes",
+      "round": 1,
+      "wall_s": 50.076561692985706,
+      "user_cpu_s": 18.824126999999997,
+      "sys_cpu_s": 0.311606,
+      "load": [
+        9.79443359375,
+        8.27880859375,
+        7.28759765625
+      ]
+    },
+    {
+      "lecture": "sp",
+      "mode": "keyframes",
+      "round": 2,
+      "wall_s": 48.92625926702749,
+      "user_cpu_s": 19.002489000000004,
+      "sys_cpu_s": 0.33889699999999995,
+      "load": [
+        10.27685546875,
+        8.62744140625,
+        7.458984375
+      ]
+    },
+    {
+      "lecture": "sp",
+      "mode": "full",
+      "round": 0,
+      "wall_s": 104.11627691995818,
+      "user_cpu_s": 88.81613099999998,
+      "sys_cpu_s": 1.6395150000000003,
+      "load": [
+        11.01416015625,
+        9.4228515625,
+        7.87255859375
+      ]
+    },
+    {
+      "lecture": "sp",
+      "mode": "full",
+      "round": 1,
+      "wall_s": 100.57428050693125,
+      "user_cpu_s": 87.61115800000002,
+      "sys_cpu_s": 1.6778079999999997,
+      "load": [
+        10.35205078125,
+        9.74462890625,
+        8.1640625
+      ]
+    },
+    {
+      "lecture": "sp",
+      "mode": "full",
+      "round": 2,
+      "wall_s": 94.58768790902104,
+      "user_cpu_s": 86.95728600000001,
+      "sys_cpu_s": 1.4930219999999998,
+      "load": [
+        10.21435546875,
+        9.9326171875,
+        8.3857421875
+      ]
+    },
+    {
+      "lecture": "multicore",
+      "mode": "keyframes",
+      "round": 0,
+      "wall_s": 194.78570855001453,
+      "user_cpu_s": 80.923246,
+      "sys_cpu_s": 0.616466,
+      "load": [
+        9.9599609375,
+        9.7099609375,
+        8.5693359375
+      ]
+    },
+    {
+      "lecture": "multicore",
+      "mode": "full",
+      "round": 0,
+      "wall_s": 335.7767622160027,
+      "user_cpu_s": 222.413062,
+      "sys_cpu_s": 5.44049,
+      "load": [
+        12.7099609375,
+        11.900390625,
+        10.1123046875
+      ]
+    },
+    {
+      "lecture": "ethics",
+      "mode": "keyframes",
+      "round": 0,
+      "wall_s": 107.15545016899705,
+      "user_cpu_s": 35.57802699999999,
+      "sys_cpu_s": 0.3387739999999999,
+      "load": [
+        12.345703125,
+        11.876953125,
+        10.28759765625
+      ]
+    },
+    {
+      "lecture": "ethics",
+      "mode": "full",
+      "round": 0,
+      "wall_s": 181.0079370669555,
+      "user_cpu_s": 100.70043600000002,
+      "sys_cpu_s": 2.2865789999999997,
+      "load": [
+        15.0546875,
+        13.4697265625,
+        11.19482421875
+      ]
+    }
+  ],
+  "fixed_cohort": [
+    {
+      "lecture": "sp",
+      "repeat": 0,
+      "pages": 20,
+      "export_s": 32.40334764600266,
+      "extract_s": 13.354104519938119,
+      "write_pdf_including_internal_verification_qpdf_s": 17.334915123065002,
+      "verify_s": 0.6356245449278504,
+      "publish_cleanup_s": 1.0787034580716863,
+      "cpu_parent_s": 7.107462999999998,
+      "cpu_children_s": 5.911224999999996,
+      "process_maxrss_kib": 163588,
+      "pdf_bytes": 8972477
+    },
+    {
+      "lecture": "sp",
+      "repeat": 1,
+      "pages": 20,
+      "export_s": 31.075680572888814,
+      "extract_s": 13.077486941940151,
+      "write_pdf_including_internal_verification_qpdf_s": 16.240064376965165,
+      "verify_s": 0.5643795810174197,
+      "publish_cleanup_s": 1.193749672966078,
+      "cpu_parent_s": 7.014267999999998,
+      "cpu_children_s": 5.878425999999994,
+      "process_maxrss_kib": 172668,
+      "pdf_bytes": 8972478
+    },
+    {
+      "lecture": "sp",
+      "repeat": 2,
+      "pages": 20,
+      "export_s": 31.91244495403953,
+      "extract_s": 12.932934763026424,
+      "write_pdf_including_internal_verification_qpdf_s": 17.445539796026424,
+      "verify_s": 0.5514427919406444,
+      "publish_cleanup_s": 0.9825276030460373,
+      "cpu_parent_s": 7.004513999999998,
+      "cpu_children_s": 5.8656990000000055,
+      "process_maxrss_kib": 182396,
+      "pdf_bytes": 8972477
+    },
+    {
+      "lecture": "multicore",
+      "repeat": 0,
+      "pages": 20,
+      "export_s": 41.05577665101737,
+      "extract_s": 17.62508716795128,
+      "write_pdf_including_internal_verification_qpdf_s": 18.358683414990082,
+      "verify_s": 1.6598744430812076,
+      "publish_cleanup_s": 3.4121316249947995,
+      "cpu_parent_s": 7.105170999999995,
+      "cpu_children_s": 7.263237000000035,
+      "process_maxrss_kib": 182396,
+      "pdf_bytes": 6311526
+    },
+    {
+      "lecture": "multicore",
+      "repeat": 1,
+      "pages": 20,
+      "export_s": 41.11821876000613,
+      "extract_s": 16.80529219098389,
+      "write_pdf_including_internal_verification_qpdf_s": 19.198524003033526,
+      "verify_s": 2.347085634013638,
+      "publish_cleanup_s": 2.767316931975074,
+      "cpu_parent_s": 7.187066999999997,
+      "cpu_children_s": 7.188737999999984,
+      "process_maxrss_kib": 182396,
+      "pdf_bytes": 6311527
+    },
+    {
+      "lecture": "multicore",
+      "repeat": 2,
+      "pages": 20,
+      "export_s": 41.32157944201026,
+      "extract_s": 18.561928410083055,
+      "write_pdf_including_internal_verification_qpdf_s": 18.29819730296731,
+      "verify_s": 1.4396544030169025,
+      "publish_cleanup_s": 3.021799325942993,
+      "cpu_parent_s": 7.1328090000000035,
+      "cpu_children_s": 7.257504000000012,
+      "process_maxrss_kib": 182396,
+      "pdf_bytes": 6311527
+    },
+    {
+      "lecture": "ethics",
+      "repeat": 0,
+      "pages": 20,
+      "export_s": 42.21131456899457,
+      "extract_s": 17.736851252033375,
+      "write_pdf_including_internal_verification_qpdf_s": 22.04186607291922,
+      "verify_s": 0.7450198060832918,
+      "publish_cleanup_s": 1.68757743795868,
+      "cpu_parent_s": 6.441362999999981,
+      "cpu_children_s": 5.761269000000009,
+      "process_maxrss_kib": 182396,
+      "pdf_bytes": 7611234
+    },
+    {
+      "lecture": "ethics",
+      "repeat": 1,
+      "pages": 20,
+      "export_s": 38.55153174989391,
+      "extract_s": 19.37256378098391,
+      "write_pdf_including_internal_verification_qpdf_s": 16.402232814929448,
+      "verify_s": 0.9191263560205698,
+      "publish_cleanup_s": 1.8576087979599833,
+      "cpu_parent_s": 6.486315999999993,
+      "cpu_children_s": 5.807592999999999,
+      "process_maxrss_kib": 182396,
+      "pdf_bytes": 7611234
+    },
+    {
+      "lecture": "ethics",
+      "repeat": 2,
+      "pages": 20,
+      "export_s": 40.10788045206573,
+      "extract_s": 17.867201077984646,
+      "write_pdf_including_internal_verification_qpdf_s": 19.915480305091478,
+      "verify_s": 0.857603479991667,
+      "publish_cleanup_s": 1.4675955889979377,
+      "cpu_parent_s": 6.412026999999981,
+      "cpu_children_s": 5.753440999999999,
+      "process_maxrss_kib": 186272,
+      "pdf_bytes": 7611234
+    }
+  ],
+  "click_paths": {
+    "early": {
+      "status": "success",
+      "seconds": {
+        "probe": 0.6437014510156587,
+        "preparation": 312.3519518809626,
+        "ready_analysis": 75.14443936292082,
+        "cold_total": 387.4963912438834,
+        "preparation_wait": 312.3462129920954,
+        "click_to_result": 387.4906523550162,
+        "export": null
+      },
+      "decoder_invocations_before_export": 1,
+      "background_done": true
+    },
+    "ready": {
+      "status": "success",
+      "seconds": {
+        "probe": 0.6796464959625155,
+        "preparation": 252.5549833480036,
+        "ready_analysis": 40.6051877560094,
+        "cold_total": 293.160171104013,
+        "preparation_wait": 2.1039973944425583e-05,
+        "click_to_result": 40.605208795983344,
+        "export": null
+      },
+      "decoder_invocations_before_export": 1,
+      "background_done": true
+    }
+  },
+  "sampled_memory": {
+    "runs/multicore/keyframes-0": {
+      "rss_sum_kib": 2114076,
+      "pss_sum_kib": 2095496,
+      "worker_rss_kib": 2097700,
+      "samples": 286
+    }
+  }
+}

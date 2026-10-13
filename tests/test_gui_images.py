@@ -61,7 +61,7 @@ def test_inflight_qimage_queue_never_exceeds_eight(tmp_path):
 def test_visible_request_promotes_prefetch_and_survives_full_queue(tmp_path,monkeypatch):
     from threading import Event
     from gui import images
-    from tests.test_gui_smoke import spin
+    from tests.qt_fixtures import spin
     qt=app();real=images.QImage;entered=Event();release=Event()
     def delayed(*args,**kwargs):
         if args and isinstance(args[0],str):
@@ -94,7 +94,7 @@ def test_visible_request_promotes_prefetch_and_survives_full_queue(tmp_path,monk
 def test_switch_discards_inflight_visible_request(tmp_path,monkeypatch):
     from threading import Event
     from gui import images
-    from tests.test_gui_smoke import spin
+    from tests.qt_fixtures import spin
     qt=app();real=images.QImage;entered=Event();release=Event()
     def delayed(*args,**kwargs):
         if args and isinstance(args[0],str):

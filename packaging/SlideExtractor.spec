@@ -31,8 +31,9 @@ if build_manifest.is_file():
     datas.append((str(build_manifest), '.'))
 a = Analysis([str(root/'packaging/desktop_entry.py')], pathex=[str(root)],
              binaries=binaries, datas=datas, hiddenimports=[], hookspath=[],
-             runtime_hooks=[], excludes=['fitz','pymupdf','pytest','scipy','skimage'],
+             runtime_hooks=[], excludes=['legacy_fps','fitz','pymupdf','pytest','scipy','skimage'],
              noarchive=False)
+runpy.run_path(str(root/'packaging/keyframe_release_contract.py'))['verify_modules'](item[0] for item in a.pure)
 pyz = PYZ(a.pure)
 exe = EXE(pyz, a.scripts, [], exclude_binaries=True, name='SlideExtractor',
           debug=False, strip=False, upx=False, console=False, argv_emulation=False,

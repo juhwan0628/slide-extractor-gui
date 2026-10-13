@@ -1,0 +1,6 @@
+{
+  "commit": "4a8d486db124e31b130d37055985fa1e631ae300",
+  "version": "0.4.12rc1",
+  "repository": "https://github.com/juhwan0628/slide-extractor-gui",
+  "purpose": "External FPS comparison and frozen historical regression only. Not an app dependency."
+}

@@ -1,3 +1,4 @@
+from slide_core.models import Rect
 from uuid import uuid4
 import pytest
 from gui.state import Controller,State
@@ -28,7 +29,7 @@ def test_ready_dirty_revert_and_export_states():
     c=Controller(source='source',state=State.ANALYZING,pending_job='x')
     assert c.finish_analysis('x',project)
     assert c.actions()['export']
-    assert c.settings_changed(AnalysisSettings(roi_mode='full',fps=.5))
+    assert c.settings_changed(AnalysisSettings(roi_mode='manual',effective_roi=Rect(0,0,10,10)))
     assert c.state==State.REVIEW_DIRTY and not c.actions()['export']
     assert not c.settings_changed(settings)
     assert c.state==State.REVIEW_READY

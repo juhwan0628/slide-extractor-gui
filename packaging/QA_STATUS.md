@@ -1,5 +1,14 @@
 # 배포 검증 기록
 
+## 2026-10-13 — 0.5.0b1 키프레임 전용 M5 후보
+
+- 후보04849e137c198f619f851606014a667a814d4d40, native38286090517, 같은 소스CI38286090268 성공. Mac198 passed2 skipped / Windows197 passed3 skipped.
+- 원본 번들·DMG/EXE 설치 앱·QtCore 교체 테스트 사본에서 빈 PATH의 키프레임 분석·편집·PDF 단독·상세v4/간단JSON·캐시/잠금 정리 검증. 실제 보고서6개도 다운로드 후 공유 계약으로 재검증했습니다.
+- 별도 감사38313742170 / 감사 커밋24941686671c1e76237ae634ac09997e5bc47d1e: 두 OS PASSED, errors 없음. 설치 파일·감사 manifest 해시는 release-approval.json에 고정합니다.
+- 수정 후보 서버833 passed179.30s; 최종 검토/배포 정책 포함847 passed179.41s. 최종 감사 소스CI38313742096 Linux846 passed1 skipped, Windows 잠금·캐시 및 격리FPS 기준선 성공.
+- 초기 native38284876402의 PNG 입력 합성 실패 및 Windows 개발 벤치마크 resource 의존성을 재현·수정하고 제외했습니다. 실행 코드·native 입력은 수정 후보 이후 변경하지 않습니다.
+- 독립 최종 리뷰에서 남은 Critical/Important 없음. VALIDATED_CANDIDATE이며 공개 승인false, main/기존 릴리스 유지. 실제 기기 보안 정책·임의 입력 정확도/성능은 보장하지 않습니다. [후보 파일·전체 검증](../docs/milestones/Keyframe-M5-results.md).
+
 ## 2026-10-11 — 0.4.12rc1 안정화 M1–M5
 
 - 저장과 복구는 같은 출력 리소스 잠금 및 활성 트랜잭션 잠금을 사용합니다. 게시 후 정리 실패는 저장 성공과 경고로 구분합니다.

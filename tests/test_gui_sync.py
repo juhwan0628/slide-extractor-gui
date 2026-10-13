@@ -7,7 +7,7 @@ from gui.state import Controller,State
 from slide_core.editing import replace_page,delete_page
 
 def create(tmp_path):
-    samples=tuple(Sample(str(uuid4()),i,i,Fraction(1),Fraction(i),str(i),80,60) for i in range(4))
+    samples=tuple(Sample(str(uuid4()),i,i,Fraction(1),str(i),80,60) for i in range(4))
     source=SourceRef(tmp_path/'video.mp4',100,1,0,80,60,DisplayTransform(80,60))
     pages=[Page(str(uuid4()),samples[i].sample_id,'manual',None,None,'add') for i in (0,2)]
     return Project(source,samples=samples,pages=pages)
@@ -31,7 +31,7 @@ def test_focus_is_not_changed_by_active_playback(tmp_path):
 
 def test_five_hundred_pages_have_bounded_model_rows(tmp_path):
     app=QApplication.instance() or QApplication([])
-    samples=tuple(Sample(str(uuid4()),i,i,Fraction(1),Fraction(i),str(i),80,60) for i in range(500))
+    samples=tuple(Sample(str(uuid4()),i,i,Fraction(1),str(i),80,60) for i in range(500))
     source=SourceRef(tmp_path/'video.mp4',1000,1,0,80,60,DisplayTransform(80,60))
     pages=[Page(str(uuid4()),s.sample_id,'auto',None,None,'auto') for s in samples]
     project=Project(source,samples=samples,pages=pages)

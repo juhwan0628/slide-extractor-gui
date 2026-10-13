@@ -31,9 +31,8 @@ def test_background_loads_all_pages_with_stable_row_heights():
         old=w.controller.project
         template=old.samples[0]
         # More pages than the loader's bounded 16-item pending queue.
-        samples=tuple(replace(template,sample_id=f's{i}',grid_index=i,
-                              source_pts=template.source_pts+i*1000000,
-                              nominal_time=template.nominal_time+i) for i in range(24))
+        samples=tuple(replace(template,sample_id=f's{i}',ordinal=i,
+                              source_pts=template.source_pts+i) for i in range(24))
         pages=[Page(str(uuid4()),s.sample_id,'manual',None,None,'add') for s in samples]
         project=Project(old.source,old.settings,samples,(),(),pages,
                         0,str(uuid4()),str(uuid4()))

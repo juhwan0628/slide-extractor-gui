@@ -6,11 +6,11 @@ from pypdf import PdfReader
 from slide_core.analysis import analyze_project
 from slide_core.config import AnalysisSettings
 from slide_core.models import Rect
-from slide_core.export_v3 import export_project
+from slide_core.keyframe_export import export_project
 from slide_core.export import OutputOverwriteRequired,RecoveryRequired
-from slide_core.timeline_json import loads
+from slide_core.keyframe_json import loads
 from slide_core.editing import add_page,delete_page,replace_page
-from tests.test_sampling import make_video
+from tests.media_fixtures import make_video
 
 def prepare(tmp_path, settings=None):
     video=make_video(tmp_path/'synthetic.mp4',duration=4,fps=4)
@@ -30,7 +30,7 @@ def test_roundtrip_m5_real_video(tmp_path):
     before=video.path.read_bytes()
     out,side=export_project(project,tmp_path/'lecture.slides.pdf')
     value=inspect(out,side)
-    assert value['schema_version']==3
+    assert value['schema_version']==4
     assert len(value['pages'])==len(project.pages)
     assert video.path.read_bytes()==before
     assert not list(tmp_path.glob('.slide-export-*.journal.json'))
@@ -80,9 +80,9 @@ def test_empty_pages_and_missing_cache_or_frame_fails_safe(tmp_path,monkeypatch)
     old=project.pages.copy();project.pages=[]
     with pytest.raises(ValueError):export_project(project,tmp_path/'empty.pdf')
     project.pages=old
-    from slide_core import export_v3
+    from slide_core import keyframe_export
     def missing(*a,**kw):return []
-    monkeypatch.setattr(export_v3,'extract_selected',missing)
+    monkeypatch.setattr(keyframe_export,'extract_selected',missing)
     with pytest.raises(ValueError,match='count mismatch'):
         export_project(project,tmp_path/'bad.pdf')
     assert not (tmp_path/'bad.pdf').exists()
@@ -91,9 +91,9 @@ def test_failed_staging_preserves_original_pair(tmp_path,monkeypatch):
     _,project=prepare(tmp_path)
     out,js=export_project(project,tmp_path/'out.pdf')
     previous=out.read_bytes(),js.read_bytes()
-    from slide_core import export_v3
+    from slide_core import keyframe_export
     def fail(*a,**kw):raise OSError('injected out of space')
-    monkeypatch.setattr(export_v3.ExportTransaction,'prepare',fail)
+    monkeypatch.setattr(keyframe_export.ExportTransaction,'prepare',fail)
     with pytest.raises(OSError,match='out of space'):
         export_project(project,tmp_path/'out.pdf',overwrite=True)
     assert (out.read_bytes(),js.read_bytes())==previous
