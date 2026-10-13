@@ -113,3 +113,15 @@ def test_real_native_smoke_uses_unicode_input(tmp_path,monkeypatch):
     result=entry['verify_native_half'](tmp_path,frozen=False)
     assert result['native_half_checked'] is True
     assert seen==['H264 한글 경로 영상.mp4']
+
+def test_native_review_accepts_internal_macos_data_alias(tmp_path):
+    import hashlib,json
+    inputs=tmp_path/'inputs';inputs.mkdir();evidence_fixture(inputs)
+    root=tmp_path/'app';frameworks=root/'Contents/Frameworks';resources=root/'Contents/Resources'
+    (frameworks/'tools').mkdir(parents=True);resources.mkdir(parents=True)
+    tool=frameworks/'tools/slide-keyframe-decode';tool.write_bytes(b'fixture')
+    record=frameworks/'native-helper-build.json';record.write_bytes((inputs/'native-helper-build.json').read_bytes())
+    (resources/'native-helper-build.json').symlink_to(record)
+    inventory={'tools':{'slide-keyframe-decode':{'bundle_sha256':hashlib.sha256(b'fixture').hexdigest()}}}
+    review=runpy.run_path(str(ROOT/'packaging/review_candidate.py'))['review_native_materials']
+    assert review(root,inputs,inventory,'')['helper_sha256']==hashlib.sha256(b'fixture').hexdigest()

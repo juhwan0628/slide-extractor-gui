@@ -36,8 +36,15 @@ def review_native_materials(root,inputs,inventory,extension):
     contract=runpy.run_path(str(ROOT/'packaging/native_helper_contract.py'))
     evidence=contract['validate_helper_evidence'](inputs,extension)
     import hashlib
-    tools=[p for p in root.rglob('slide-keyframe-decode'+extension) if p.is_file() and 'tools' in p.relative_to(root).parts]
-    records=[p for p in root.rglob('native-helper-build.json') if p.is_file()]
+    def canonical(paths):
+        resolved=set();base=root.resolve()
+        for path in paths:
+            target=path.resolve()
+            if not target.is_relative_to(base):raise ValueError('Unsafe native material alias outside installed bundle')
+            resolved.add(target)
+        return sorted(resolved)
+    tools=canonical(p for p in root.rglob('slide-keyframe-decode'+extension) if p.is_file() and 'tools' in p.relative_to(root).parts)
+    records=canonical(p for p in root.rglob('native-helper-build.json') if p.is_file())
     if len(tools)!=1 or len(records)!=1:raise ValueError('Missing/ambiguous native installed material')
     if hashlib.sha256(tools[0].read_bytes()).hexdigest()!=inventory['tools']['slide-keyframe-decode']['bundle_sha256']:
         raise ValueError('Installed native helper differs from candidate')
