@@ -76,3 +76,40 @@ def test_evidence_rejects_ambiguous_dynamic_link_flags(tmp_path):
     data['link_command']='c++ keyframe_decode.o -lavformat -lavcodec -lavfilter -lavutil\n'
     (kit/'link-command.txt').write_text(data['link_command']);record.write_text(json.dumps(data))
     with pytest.raises(ValueError,match='static'):f(tmp_path,'',approved=True)
+
+def test_helper_recipe_accepts_empty_platform_link_flags(tmp_path):
+    import os,shutil,subprocess
+    shell=os.environ.get('SLIDE_TEST_BASH','/bin/bash')
+    if not Path(shell).is_file():pytest.skip('POSIX build shell unavailable')
+    (tmp_path/'packaging').mkdir();(tmp_path/'native').mkdir()
+    shutil.copyfile(ROOT/'packaging/build-native-helper.sh',tmp_path/'packaging/build-native-helper.sh')
+    (tmp_path/'native/keyframe_decode.cpp').write_text('// fixture')
+    sdk=tmp_path/'build/ffmpeg-sdk/lib';(sdk/'pkgconfig').mkdir(parents=True)
+    for name in ('avformat','avcodec','avfilter','avutil'):(sdk/('lib'+name+'.a')).write_bytes(b'archive')
+    tools=tmp_path/'tools';tools.mkdir()
+    scripts={
+        'uname':'#!/bin/sh\necho Darwin\n',
+        'pkg-config':'#!/bin/sh\ncase "$*" in *--cflags*) exit 0;; esac\necho "-lavformat -lavcodec -lavfilter -lavutil"\n',
+        'clang++':'#!/bin/sh\nwhile [ "$#" -gt 0 ]; do\nif [ "$1" = "-o" ]; then shift; : > "$1"; fi\nshift\ndone\n',
+        'python':'#!/bin/sh\nexit 0\n'}
+    for name,content in scripts.items():
+        p=tools/name;p.write_text(content);p.chmod(0o755)
+    result=subprocess.run([shell,str(tmp_path/'packaging/build-native-helper.sh')],env={**os.environ,'PATH':str(tools)+os.pathsep+os.environ['PATH']},capture_output=True,text=True)
+    assert result.returncode==0,result.stderr
+    assert (tmp_path/'vendor/approved/helper-relink/link-command.txt').is_file()
+
+def test_real_native_smoke_uses_unicode_input(tmp_path,monkeypatch):
+    import sys
+    extension='.exe' if sys.platform=='win32' else ''
+    helper=next((p for p in (ROOT/'vendor/approved'/('slide-keyframe-decode'+extension),ROOT/'build/native'/('slide-keyframe-decode'+extension)) if p.is_file()),None)
+    if helper is None:pytest.skip('Native helper not built on this host')
+    monkeypatch.setenv('SLIDE_NATIVE_KEYFRAME_HELPER',str(helper))
+    from slide_core import preparation
+    real=preparation.prepare_samples;seen=[]
+    def spy(source,*a,**kw):
+        seen.append(Path(source).name);return real(source,*a,**kw)
+    monkeypatch.setattr(preparation,'prepare_samples',spy)
+    entry=runpy.run_path(str(ROOT/'packaging/desktop_entry.py'))
+    result=entry['verify_native_half'](tmp_path,frozen=False)
+    assert result['native_half_checked'] is True
+    assert seen==['H264 한글 경로 영상.mp4']

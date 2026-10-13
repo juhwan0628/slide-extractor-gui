@@ -27,8 +27,8 @@ for i in "${!LINK_ARGS[@]}"; do
    LINK_ARGS[$i]="$SDK/lib/lib$library.a" ;;
  esac
 done
-$CXX "$RELINK/keyframe_decode.o" "${LINK_ARGS[@]}" "${LINK_EXTRA[@]}" -o "$OUTPUT/slide-keyframe-decode$EXT"
-printf '%q ' "$CXX" keyframe_decode.o "${LINK_ARGS[@]}" "${LINK_EXTRA[@]}" -o "slide-keyframe-decode$EXT" > "$RELINK/link-command.txt"
+$CXX "$RELINK/keyframe_decode.o" "${LINK_ARGS[@]}" ${LINK_EXTRA[@]+"${LINK_EXTRA[@]}"} -o "$OUTPUT/slide-keyframe-decode$EXT"
+printf '%q ' "$CXX" keyframe_decode.o "${LINK_ARGS[@]}" ${LINK_EXTRA[@]+"${LINK_EXTRA[@]}"} -o "slide-keyframe-decode$EXT" > "$RELINK/link-command.txt"
 printf '\n' >> "$RELINK/link-command.txt"
 cp native/keyframe_decode.cpp "$RELINK/"
 cp -R "$SDK/lib" "$RELINK/ffmpeg-libraries"

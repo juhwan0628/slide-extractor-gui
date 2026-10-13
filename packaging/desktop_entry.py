@@ -135,8 +135,11 @@ def verify_native_half(temp, *, frozen):
     from slide_core.keyframe_export import export_project
     from slide_core.keyframe_json import loads
     fixture=(Path(sys._MEIPASS)/'fixtures/native-half.mp4' if frozen else Path(__file__).resolve().parent/'fixtures/native-half.mp4')
+    import shutil
+    unicode_input=Path(temp)/'H264 한글 경로 영상.mp4'
+    shutil.copyfile(fixture,unicode_input)
     with tempfile.TemporaryDirectory(dir=temp,prefix='native-half-') as cache:
-        prep=prepare_samples(fixture,cache)
+        prep=prepare_samples(unicode_input,cache)
         try:
             assert prep.decoder_backend=='native-idr' and prep.selection_policy=='half', 'Native half silently fell back'
             assert len(prep.keyframe_index)==6 and len(prep.samples)==3
