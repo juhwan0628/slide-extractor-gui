@@ -20,10 +20,44 @@ extern "C" {
 #ifdef _WIN32
 #include <fcntl.h>
 #include <io.h>
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <shellapi.h>
+#include <vector>
+#include <utility>
 #endif
 
 struct Unsupported : std::runtime_error { using std::runtime_error::runtime_error; };
 struct Failure : std::runtime_error { using std::runtime_error::runtime_error; };
+#ifdef _WIN32
+// The CRT's narrow argv uses the active ANSI code page and loses filenames.
+// FFmpeg's public file APIs expect UTF-8; parse the original UTF-16 command line.
+struct Utf8Arguments {
+    std::vector<std::string> text;
+    std::vector<char*> args;
+    Utf8Arguments() {
+        int count=0;
+        LPWSTR* wide=CommandLineToArgvW(GetCommandLineW(),&count);
+        if(!wide) throw Failure("cannot parse Unicode command line");
+        try {
+            text.reserve(count);
+            for(int i=0;i<count;++i) {
+                int size=WideCharToMultiByte(CP_UTF8,WC_ERR_INVALID_CHARS,wide[i],-1,nullptr,0,nullptr,nullptr);
+                if(size<=0) throw Failure("invalid Unicode argument");
+                std::string item(size,'\0');
+                if(!WideCharToMultiByte(CP_UTF8,WC_ERR_INVALID_CHARS,wide[i],-1,item.data(),size,nullptr,nullptr))
+                    throw Failure("cannot convert Unicode argument");
+                item.pop_back();text.push_back(std::move(item));
+            }
+        } catch(...) {LocalFree(wide);throw;}
+        LocalFree(wide);
+        for(auto& item:text) args.push_back(item.data());
+        args.push_back(nullptr);
+    }
+};
+#endif
+
 static void checked(int rc, const char* message) { if(rc<0) throw Failure(message); }
 static void checked_input(int rc, const char* message) {
     if(rc==AVERROR_INVALIDDATA || rc==AVERROR(EINVAL)) throw Unsupported(message);
@@ -118,6 +152,9 @@ int main(int argc,char**argv) {
     _setmode(_fileno(stdout),_O_BINARY);
 #endif
     try {
+#ifdef _WIN32
+        Utf8Arguments unicode;argc=static_cast<int>(unicode.args.size()-1);argv=unicode.args.data();
+#endif
         if(argc!=6 && argc!=7) throw Failure("usage: helper source stream filter width height");
         int stream=number(argv[2]), width=number(argv[4]),height=number(argv[5]);
         if(width<1 || width>640 || height<1 || height>16384) throw Failure("output dimensions");

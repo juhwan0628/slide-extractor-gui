@@ -7,7 +7,7 @@ OUTPUT="$PWD/vendor/approved"
 RELINK="$OUTPUT/helper-relink"
 mkdir -p "$RELINK"
 case "$(uname -s)" in
- MINGW*|MSYS*) CXX=g++; EXT=.exe; LINK_EXTRA=(-static) ;;
+ MINGW*|MSYS*) CXX=g++; EXT=.exe; LINK_EXTRA=(-static -lshell32) ;;
  Darwin) CXX=clang++; EXT=; LINK_EXTRA=() ;;
  Linux) CXX=c++; EXT=; LINK_EXTRA=() ;;
  *) echo 'Unsupported helper host'; exit 1 ;;

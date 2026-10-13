@@ -2,7 +2,7 @@
   "schema_version": 1,
   "platform": "Linux-7.0.0-1011-oracle-aarch64-with-glibc2.39",
   "helper_sha256": "e60e4a8d858eb66b54bbc250bbcd51da88c4f2886b77fd02578bbb6768b22ec3",
-  "helper_source_sha256": "cdd6391edd239dbe52e2a09f7ab74554f5f71cc785311c40781831bdc128ac3b",
+  "helper_source_sha256": "9a4f7b272903997ec506db627de107c7721368de61a63bc8cb6de9698812a977",
   "ffmpeg_source": {
     "version": "8.1.2",
     "url": "https://ffmpeg.org/releases/ffmpeg-8.1.2.tar.xz",

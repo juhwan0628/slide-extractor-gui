@@ -8,3 +8,7 @@ target_link_libraries(slide-keyframe-decode PRIVATE PkgConfig::FFMPEG)
 if(NOT MSVC)
   target_compile_options(slide-keyframe-decode PRIVATE -Wall -Wextra -Wpedantic)
 endif()
+
+if(WIN32)
+  target_link_libraries(slide-keyframe-decode PRIVATE shell32)
+endif()
