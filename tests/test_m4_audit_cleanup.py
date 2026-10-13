@@ -63,8 +63,8 @@ def test_gui_profile_includes_preparation_and_click_wait(tmp_path,monkeypatch,ea
     from PySide6.QtWidgets import QApplication
     from gui import window as wm,sample_preparation as bg
     from gui.state import State
-    from tests.test_sampling import make_video
-    from tests.test_gui_smoke import spin
+    from tests.media_fixtures import make_video
+    from tests.qt_fixtures import spin
     app=QApplication.instance() or QApplication([])
     monkeypatch.setattr(wm,'gettempdir',lambda:str(tmp_path))
     monkeypatch.setattr(wm,'profile_directory',lambda *a:tmp_path/'profiles')
@@ -113,8 +113,8 @@ def test_silent_preparation_failure_has_own_diagnostic(tmp_path,monkeypatch):
     from gui import window as wm,sample_preparation as bg
     from gui.state import State
     from slide_core.media import MediaError
-    from tests.test_sampling import make_video
-    from tests.test_gui_smoke import spin
+    from tests.media_fixtures import make_video
+    from tests.qt_fixtures import spin
     app=QApplication.instance() or QApplication([])
     monkeypatch.setattr(wm,'gettempdir',lambda:str(tmp_path))
     monkeypatch.setattr(wm,'profile_directory',lambda *a:tmp_path/'profiles')

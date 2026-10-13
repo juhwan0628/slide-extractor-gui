@@ -8,7 +8,7 @@ import pytest
 from PIL import Image
 from pypdf import PdfReader
 
-from slide_core import export_v3 as engine
+from slide_core import keyframe_export as engine
 from tests.export_fixtures import make_project,extract_stub
 from slide_core.export import ExportTransaction, RecoveryRequired, snapshot_export
 
@@ -25,7 +25,7 @@ def test_live_export_produces_matched_pdf_json_pair_and_cleans_journal(project,t
     before=project.source.path.read_bytes()
     pdf,sidecar=engine.export_project(project,output)
     payload=json.loads(sidecar.read_text())
-    assert payload["schema_version"]==3
+    assert payload["schema_version"]==4
     assert payload["artifact"]["pdf_sha256"]==hashlib.sha256(pdf.read_bytes()).hexdigest()
     assert PdfReader(pdf).metadata.subject=="slide-extractor:export_id="+payload["artifact"]["export_id"]
     assert len(PdfReader(pdf).pages)==payload["artifact"]["pdf_page_count"]

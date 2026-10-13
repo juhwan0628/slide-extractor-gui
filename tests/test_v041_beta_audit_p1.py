@@ -174,7 +174,7 @@ def test_pts_extraction_stops_before_unrequested_eof(tmp_path, monkeypatch):
     subprocess.run(
         ["ffmpeg", "-hide_banner", "-loglevel", "error", "-nostdin", "-y",
          "-f", "lavfi", "-i", "color=c=red:size=80x48:rate=4:duration=3",
-         "-c:v", "ffv1", str(path)],
+         "-c:v", "libx264", "-g", "1", str(path)],
         check=True, capture_output=True, timeout=20,
     )
     source = media.probe_source(path)
@@ -215,8 +215,8 @@ def test_vfr_gap_does_not_suppress_later_stable_transition(tmp_path, times, expe
     for i, timestamp in enumerate(times):
         image_path = tmp_path / f"sample-{i}.png"
         Image.new("L", (80, 48), 20 if i < 2 else 180).save(image_path)
-        samples.append(Sample(f"s{i}", timestamp, timestamp, Fraction(1),
-                              Fraction(timestamp), str(image_path), 80, 48))
+        samples.append(Sample(f"s{i}", i, timestamp, Fraction(1),
+                              str(image_path), 80, 48))
 
     def frames():
         for sample in samples:
@@ -236,7 +236,7 @@ def test_vfr_gap_does_not_suppress_later_stable_transition(tmp_path, times, expe
         assert segments[-1].first_sample_id == samples[times.index(expected[0])].sample_id
 
 
-@pytest.mark.parametrize("consumer", ["sample_stream", "extract_selected"])
+@pytest.mark.parametrize("consumer", ["keyframe_stream", "extract_selected"])
 def test_probed_color_metadata_reaches_decode_pipeline(tmp_path, monkeypatch, consumer):
     """Tagged SD BT.709/full-range must retain probe's explicit display filter."""
     path = tmp_path / "tagged-source.mp4"
@@ -270,8 +270,8 @@ def test_probed_color_metadata_reaches_decode_pipeline(tmp_path, monkeypatch, co
 
     monkeypatch.setattr(pts, "build_display_pipeline", record_pipeline)
     monkeypatch.setattr(pts, "_decode_stream", decoded)
-    if consumer == "sample_stream":
-        samples, session = pts.sample_stream(source, tmp_path / "cache")
+    if consumer == "keyframe_stream":
+        samples, session = pts.keyframe_stream(source, tmp_path / "cache")
         assert len(samples) == 1 and session.is_dir()
         assert Path(samples[0].cache_path).is_file()
     else:
@@ -300,7 +300,7 @@ def test_cancel_after_pdf_publish_reports_success(tmp_path, monkeypatch):
     source = _source(source_path)
     cache = tmp_path / "cache.png"
     Image.new("RGB", (80, 48), (120, 50, 20)).save(cache)
-    sample = Sample("s0", 0, 0, Fraction(1, 4), Fraction(0), str(cache), 80, 48)
+    sample = Sample("s0", 0, 0, Fraction(1, 4), str(cache), 80, 48)
     page = Page(str(uuid4()), sample.sample_id, "manual", None, None, "insert")
     project = Project(source, AnalysisSettings(roi_mode="full", effective_roi=Rect(0, 0, 80, 48)),
                       samples=(sample,), pages=[page])

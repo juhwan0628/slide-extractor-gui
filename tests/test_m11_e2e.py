@@ -5,6 +5,7 @@ from PySide6.QtWidgets import QApplication,QFileDialog
 from PySide6.QtCore import Qt
 from PySide6.QtTest import QTest
 from pypdf import PdfReader
+from tests.media_fixtures import make_scene_video
 from gui.window import Window
 from gui.state import State
 from slide_core.models import Rect
@@ -20,13 +21,12 @@ def wait(app,predicate,timeout=20):
     raise AssertionError('M11 Qt operation timed out')
 
 def test_full_prepare_mask_analyze_review_edit_export(tmp_path,monkeypatch):
-    if not VIDEO.is_file():return
+    video=make_scene_video(tmp_path/'scene.mp4')
     app=QApplication.instance() or QApplication([])
     w=Window();w.show()
     try:
-        w.fps.setCurrentIndex(0) # 1fps to exercise the four-sample fixture.
         assert not w.json_enabled
-        w.open_source(VIDEO)
+        w.open_source(video)
         wait(app,lambda:w.controller.state==State.SOURCE_READY)
         assert w.stage=='preparation' and w._first_frame is not None
         assert w._auto_roi is not None

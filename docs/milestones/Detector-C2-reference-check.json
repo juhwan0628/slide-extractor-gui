@@ -1,0 +1,50 @@
+[
+  {
+    "policy": "all",
+    "candidate_group_count": 6,
+    "candidate_representatives_s": [
+      40.0,
+      79.4,
+      82.0,
+      97.66666666666667,
+      230.0,
+      300.06666666666666
+    ],
+    "reference_matches": [
+      {
+        "reference_s": 51.4,
+        "candidate_representative_s": 79.4,
+        "global_mad": 0.004601375272331155
+      },
+      {
+        "reference_s": 82.0,
+        "candidate_representative_s": 82.0,
+        "global_mad": 0.0
+      }
+    ]
+  },
+  {
+    "policy": "half",
+    "candidate_group_count": 6,
+    "candidate_representatives_s": [
+      40.0,
+      79.4,
+      81.0,
+      96.66666666666667,
+      230.0,
+      299.06666666666666
+    ],
+    "reference_matches": [
+      {
+        "reference_s": 51.4,
+        "candidate_representative_s": 79.4,
+        "global_mad": 0.004601375272331155
+      },
+      {
+        "reference_s": 82.0,
+        "candidate_representative_s": 81.0,
+        "global_mad": 0.00020778867102396514
+      }
+    ]
+  }
+]

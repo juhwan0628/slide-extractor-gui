@@ -1,0 +1,11 @@
+{
+  "reference_time_s": 152.46666666666667,
+  "reference_index": 153,
+  "closest_half_time_s": 153.4,
+  "closest_half_mad": 0.029505310457516337,
+  "all_close_indices": [
+    153,
+    211,
+    299
+  ]
+}

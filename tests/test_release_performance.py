@@ -11,11 +11,11 @@ from slide_core import analysis,pts
 from slide_core.config import AnalysisSettings
 from slide_core.models import Project,SourceRef,DisplayTransform,Sample,Page
 from gui.page_model import PageModel
-from tests.test_sampling import make_video
+from tests.media_fixtures import make_video
 
 
 def project(tmp_path,count=512):
-    samples=tuple(Sample(f's{i}',i,i,Fraction(1),Fraction(i),str(i),80,48) for i in range(count))
+    samples=tuple(Sample(f's{i}',i,i,Fraction(1),str(i),80,48) for i in range(count))
     source=SourceRef(tmp_path/'video.mp4',10,1,0,80,48,DisplayTransform(80,48))
     pages=[Page(str(uuid4()),s.sample_id,'manual',None,None,'add') for s in samples]
     return Project(source,samples=samples,pages=pages)
@@ -61,16 +61,3 @@ def test_reanalysis_decodes_each_cached_image_once(tmp_path,monkeypatch):
     with pytest.raises(Exception,match='CacheUnavailable'):
         analysis.analyze_project(source,settings,tmp_path/'cache',previous=old)
     assert old.pages
-
-
-def test_default_extraction_uses_metadata_audit_and_matches_cpu(tmp_path,monkeypatch):
-    source=make_video(tmp_path/'video.mp4',duration=2,fps=4,bframes=2)
-    samples,_=pts.sample_stream(source,tmp_path/'cache');calls=[];original=pts._ffmpeg
-    def record(source,vf,**kwargs):
-        cmd=original(source,vf,**kwargs);calls.append(cmd[cmd.index('-vf')+1]);return cmd
-    monkeypatch.setattr(pts,'_ffmpeg',record)
-    default=pts.extract_selected(source,samples,tmp_path/'default')
-    assert calls and all('showinfo@audit=checksum=0' in f for f in calls)
-    baseline=pts.extract_selected(source,samples,tmp_path/'baseline',decode_options={'backend':'cpu'})
-    for a,b in zip(default,baseline,strict=True):
-        with Image.open(a) as x,Image.open(b) as y:assert x.tobytes()==y.tobytes()

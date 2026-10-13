@@ -61,7 +61,7 @@ def test_inflight_qimage_queue_never_exceeds_eight(tmp_path):
 def test_visible_request_promotes_prefetch_and_survives_full_queue(tmp_path,monkeypatch):
     from threading import Event
     from gui import images
-    from tests.test_gui_smoke import spin
+    from tests.qt_fixtures import spin
     qt=app();real=images.QImage;entered=Event();release=Event()
     def delayed(*args,**kwargs):
         if args and isinstance(args[0],str):
@@ -94,7 +94,7 @@ def test_visible_request_promotes_prefetch_and_survives_full_queue(tmp_path,monk
 def test_switch_discards_inflight_visible_request(tmp_path,monkeypatch):
     from threading import Event
     from gui import images
-    from tests.test_gui_smoke import spin
+    from tests.qt_fixtures import spin
     qt=app();real=images.QImage;entered=Event();release=Event()
     def delayed(*args,**kwargs):
         if args and isinstance(args[0],str):
@@ -113,3 +113,19 @@ def test_switch_discards_inflight_visible_request(tmp_path,monkeypatch):
         assert results==['new-visible']
         assert loader.cached('old-visible') is None
     finally:release.set();loader.stop()
+
+
+def test_lazy_resolver_is_cancelled_when_loader_stops(tmp_path):
+    from threading import Event
+    from PySide6.QtWidgets import QApplication
+    from gui.images import ImageLoader
+    app=QApplication.instance() or QApplication([])
+    entered=Event();cancelled=Event();loader=ImageLoader()
+    def resolve(token):
+        entered.set()
+        while not token.cancelled:cancelled.wait(.01)
+        cancelled.set();token.raise_if_cancelled()
+    loader.request('lazy',tmp_path/'missing.jpg',resolver=resolve)
+    assert entered.wait(2)
+    loader.stop()
+    assert cancelled.is_set() and not loader._thread.is_alive()

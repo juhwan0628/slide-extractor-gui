@@ -101,8 +101,15 @@ def collect(root):
     extension='.exe' if sys.platform=='win32' else ''
     output=subprocess.run([str((root/('ffmpeg'+extension)).resolve()),'-version'],capture_output=True,text=True,check=True,timeout=20).stdout
     data=input_manifest(root,sources,output)
+    helper_name='slide-keyframe-decode'+extension
+    helper_components=[]
+    if (root/helper_name).is_file():
+        evidence=json.loads((root/'native-helper-build.json').read_text())
+        if evidence['helper_sha256']!=digest(root/helper_name):raise ValueError('Helper evidence hash mismatch')
+        data['native_helper']=evidence
+        helper_components=[{'name':'slide-keyframe-decode','sha256':evidence['helper_sha256'],'static_link':'FFmpeg '+sources['ffmpeg']['version'],'relink_kit':'helper-relink'}]
     (root/'binary-manifest.json').write_text(json.dumps(data,indent=2)+'\n',encoding='utf-8')
-    (root/'SBOM.json').write_text(json.dumps({'status':'OBSERVED_INPUT_INVENTORY','components':packages+[{'name':'FFmpeg','version':sources['ffmpeg']['version']},{'name':'Python','version':platform.python_version()},{'name':'Qt','version':sources['qt']['version']}],'license_files':license_index},indent=2)+'\n',encoding='utf-8')
+    (root/'SBOM.json').write_text(json.dumps({'status':'OBSERVED_INPUT_INVENTORY','components':packages+helper_components+[{'name':'FFmpeg','version':sources['ffmpeg']['version']},{'name':'Python','version':platform.python_version()},{'name':'Qt','version':sources['qt']['version']}],'license_files':license_index},indent=2)+'\n',encoding='utf-8')
     shutil.copyfile(ROOT/'packaging/SOURCE_AND_REPLACEMENT.md',root/'SOURCE_AND_REPLACEMENT.md')
     if (ROOT/'build/opencv-build.json').is_file():
         shutil.copyfile(ROOT/'build/opencv-build.json',root/'opencv-build.json')

@@ -6,11 +6,11 @@ from pypdf import PdfReader
 from slide_core.analysis import analyze_project
 from slide_core.config import AnalysisSettings
 from slide_core.models import Rect
-from slide_core.export_v3 import export_project
+from slide_core.keyframe_export import export_project
 from slide_core.export import OutputOverwriteRequired,RecoveryRequired
-from slide_core.timeline_json import loads
-from slide_core.editing import add_page,delete_page,replace_page
-from tests.test_sampling import make_video
+from slide_core.keyframe_json import loads
+from slide_core.editing import add_page,delete_page,replace_page,merge_pages
+from tests.media_fixtures import make_video
 
 def prepare(tmp_path, settings=None):
     video=make_video(tmp_path/'synthetic.mp4',duration=4,fps=4)
@@ -30,15 +30,22 @@ def test_roundtrip_m5_real_video(tmp_path):
     before=video.path.read_bytes()
     out,side=export_project(project,tmp_path/'lecture.slides.pdf')
     value=inspect(out,side)
-    assert value['schema_version']==3
+    assert value['schema_version']==6
     assert len(value['pages'])==len(project.pages)
     assert video.path.read_bytes()==before
     assert not list(tmp_path.glob('.slide-export-*.journal.json'))
 
 def test_manual_edit_keeps_ids_and_order(tmp_path):
     _,project=prepare(tmp_path)
+    # Spatial detection may select every observation of this moving test pattern.
+    # Free a real sample, preserving the duplicate-sample guard during replacement.
+    used={p.representative_sample_id for p in project.pages}
+    if len(used)==len(project.samples):
+        assert merge_pages(project,[p.page_id for p in project.pages[:2]]).status=='changed'
+        used={p.representative_sample_id for p in project.pages}
+    free=next(s for s in project.samples if s.sample_id not in used)
     page=project.pages[0]
-    result=replace_page(project,page.page_id,project.samples[1].actual_time)
+    result=replace_page(project,page.page_id,free.actual_time)
     assert result.status=='changed'
     new=add_page(project,project.samples[-1].actual_time)
     assert new.status in ('changed','no_op')
@@ -80,9 +87,9 @@ def test_empty_pages_and_missing_cache_or_frame_fails_safe(tmp_path,monkeypatch)
     old=project.pages.copy();project.pages=[]
     with pytest.raises(ValueError):export_project(project,tmp_path/'empty.pdf')
     project.pages=old
-    from slide_core import export_v3
+    from slide_core import keyframe_export
     def missing(*a,**kw):return []
-    monkeypatch.setattr(export_v3,'extract_selected',missing)
+    monkeypatch.setattr(keyframe_export,'extract_selected',missing)
     with pytest.raises(ValueError,match='count mismatch'):
         export_project(project,tmp_path/'bad.pdf')
     assert not (tmp_path/'bad.pdf').exists()
@@ -91,9 +98,9 @@ def test_failed_staging_preserves_original_pair(tmp_path,monkeypatch):
     _,project=prepare(tmp_path)
     out,js=export_project(project,tmp_path/'out.pdf')
     previous=out.read_bytes(),js.read_bytes()
-    from slide_core import export_v3
+    from slide_core import keyframe_export
     def fail(*a,**kw):raise OSError('injected out of space')
-    monkeypatch.setattr(export_v3.ExportTransaction,'prepare',fail)
+    monkeypatch.setattr(keyframe_export.ExportTransaction,'prepare',fail)
     with pytest.raises(OSError,match='out of space'):
         export_project(project,tmp_path/'out.pdf',overwrite=True)
     assert (out.read_bytes(),js.read_bytes())==previous

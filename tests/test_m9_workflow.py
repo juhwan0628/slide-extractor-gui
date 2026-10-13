@@ -4,6 +4,7 @@ from pathlib import Path
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import Qt,QPoint
 from PySide6.QtTest import QTest
+from tests.media_fixtures import make_scene_video
 from gui.window import Window
 from gui.state import State
 from gui.timeline import Timeline
@@ -17,13 +18,12 @@ def spin(app,condition,timeout=15):
         time.sleep(.005)
     raise AssertionError('timeout')
 
-def test_keyboard_page_focus_and_delete_undo():
-    if not VIDEO.exists():return
+def test_keyboard_page_focus_and_delete_undo(tmp_path):
+    video=make_scene_video(tmp_path/'scene.mp4')
     app=QApplication.instance() or QApplication([])
     w=Window();w.show()
     try:
-        w.fps.setCurrentIndex(0)
-        w.open_source(VIDEO)
+        w.open_source(video)
         spin(app,lambda:w.controller.state==State.SOURCE_READY)
         w.analyze()
         spin(app,lambda:w.controller.state==State.REVIEW_READY)

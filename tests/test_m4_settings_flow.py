@@ -4,8 +4,8 @@ import pytest
 from PySide6.QtWidgets import QApplication,QDialog,QCheckBox,QComboBox,QMessageBox,QFileDialog
 from gui.window import Window
 from gui.state import State
-from tests.test_sampling import make_video
-from tests.test_gui_smoke import spin
+from tests.media_fixtures import make_video
+from tests.qt_fixtures import spin
 
 @pytest.fixture
 def window(tmp_path,monkeypatch):
@@ -30,8 +30,7 @@ def test_home_dialog_contains_analysis_settings_only(window,monkeypatch):
         assert dialog.windowTitle()=='Analysis settings'
         assert not dialog.findChildren(QCheckBox)
         combos=dialog.findChildren(QComboBox)
-        assert len(combos)==1 and combos[0].count()==2
-        combos[0].setCurrentIndex(1)
+        assert not combos
         return QDialog.DialogCode.Rejected
     monkeypatch.setattr(QDialog,'exec',inspect)
     settings=w.settings;task=w._sample_preparation
@@ -51,10 +50,7 @@ def test_save_options_preserve_edited_project(window,monkeypatch,accept):
         assert dialog.windowTitle()=='Save options'
         boxes=dialog.findChildren(QCheckBox);combos=dialog.findChildren(QComboBox)
         assert len(boxes)==1 and len(combos)==1
-        assert combos[0].itemText(0)=='Simple slide times'
-        assert not combos[0].isEnabled()
-        boxes[0].setChecked(True);assert combos[0].isEnabled()
-        combos[0].setCurrentIndex(1)
+        boxes[0].setChecked(True);combos[0].setCurrentIndex(1)
         return QDialog.DialogCode.Accepted if accept else QDialog.DialogCode.Rejected
     monkeypatch.setattr(QDialog,'exec',inspect)
     w.open_save_options()
@@ -62,7 +58,7 @@ def test_save_options_preserve_edited_project(window,monkeypatch,accept):
     assert tuple(project.pages)==pages and project.revision==revision
     assert tuple(w.history.undo_stack)==history and w.settings==settings
     assert w.controller.state==State.REVIEW_READY and w.export_button.isEnabled()
-    assert w.json_enabled==accept and w.json_format==('detailed' if accept else 'simple')
+    assert w.json_enabled==accept
     assert w.export_button.text()==('Save PDF + JSON' if accept else 'Save PDF')
 
 
@@ -100,29 +96,10 @@ def test_home_confirmation_clears_work_and_cache(window,monkeypatch,tmp_path):
     w.open_source(make_video(tmp_path/'next.mp4',duration=2,fps=4).path)
     spin(app,lambda:w.controller.state==State.SOURCE_READY)
     w.analyze();spin(app,lambda:w.controller.state==State.REVIEW_READY)
-    assert len(w.controller.project.samples)==1
+    from tests.test_keyframe_sampling import keyframes
+    assert [s.source_pts for s in w.controller.project.samples]==keyframes(w.controller.source)
 
 
-@pytest.mark.parametrize('format',['simple','detailed'])
-def test_save_options_export_json_and_home_keeps_output(window,monkeypatch,tmp_path,format):
-    app,w=window;review(app,w)
-    def configure(dialog):
-        dialog.findChild(QCheckBox).setChecked(True)
-        dialog.findChild(QComboBox).setCurrentIndex(0 if format=='simple' else 1)
-        return QDialog.DialogCode.Accepted
-    monkeypatch.setattr(QDialog,'exec',configure)
-    w.open_save_options()
-    target=tmp_path/'slides.pdf'
-    monkeypatch.setattr(QFileDialog,'getSaveFileName',lambda *a,**kw:(str(target),'PDF'))
-    w.export_pending();spin(app,lambda:w.stage=='complete',timeout=30)
-    data=json.loads(target.with_suffix('.json').read_text())
-    assert ('schema_version' in data)==(format=='detailed')
-    assert w.new_video_button.text()=='Start over'
-    monkeypatch.setattr(QMessageBox,'question',lambda *a,**kw:QMessageBox.StandardButton.Yes)
-    w.new_video_button.click()
-    assert w.stage=='empty' and w.controller.project is None
-    assert target.is_file() and target.with_suffix('.json').is_file()
-    assert w._last_export is None
 
 
 def test_analysis_settings_cannot_open_from_review(window,monkeypatch):

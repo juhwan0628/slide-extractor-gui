@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "platform": "Linux-7.0.0-1011-oracle-aarch64-with-glibc2.39",
+  "helper_sha256": "e60e4a8d858eb66b54bbc250bbcd51da88c4f2886b77fd02578bbb6768b22ec3",
+  "helper_source_sha256": "cdd6391edd239dbe52e2a09f7ab74554f5f71cc785311c40781831bdc128ac3b",
+  "ffmpeg_source": {
+    "version": "8.1.2",
+    "url": "https://ffmpeg.org/releases/ffmpeg-8.1.2.tar.xz",
+    "sha256": "464beb5e7bf0c311e68b45ae2f04e9cc2af88851abb4082231742a74d97b524c"
+  },
+  "ffmpeg_libraries": {
+    "libavcodec.a": "dcaf368130abbdade64b865777ca4433b00dcc719c2beadbcaa723808c14f7e4",
+    "libavdevice.a": "b497cf3d3be2fb159460aa6da42767d4f25e901dc6fcbd2c1f08abe278d8818f",
+    "libavfilter.a": "450ea28252a8e0631c1f377932eb3018dab21dc8e9ec571e6be31e4507497ecf",
+    "libavformat.a": "0c0616684d0e8d866f95a996cb15763df6e3d6f926f187b5a6fa96952a2db0bc",
+    "libavutil.a": "55f8f39de5a7d30fbf2782b312d81075a458d7e279b81d936e0ab17ce7f206ee",
+    "libswresample.a": "72f3d73959b24d75b3184a49aa66a544d96ffa81dbd4d2d8d2eecb22b8e771c0",
+    "libswscale.a": "78b2132454d39b90500bca91b9137e1a20fa98d6136ee3179efb7bdd79126513"
+  },
+  "link_command": "c++ keyframe_decode.o -L/home/ubuntu/workspace/01_lecture/slide-extractor-gui-keyframe/build/ffmpeg-source/../../build/ffmpeg-sdk/lib -lm -lm /home/ubuntu/workspace/01_lecture/slide-extractor-gui-keyframe/build/ffmpeg-sdk/lib/libavfilter.a -lm /home/ubuntu/workspace/01_lecture/slide-extractor-gui-keyframe/build/ffmpeg-sdk/lib/libswscale.a /home/ubuntu/workspace/01_lecture/slide-extractor-gui-keyframe/build/ffmpeg-sdk/lib/libavformat.a -lm /home/ubuntu/workspace/01_lecture/slide-extractor-gui-keyframe/build/ffmpeg-sdk/lib/libavcodec.a -lm /home/ubuntu/workspace/01_lecture/slide-extractor-gui-keyframe/build/ffmpeg-sdk/lib/libswresample.a /home/ubuntu/workspace/01_lecture/slide-extractor-gui-keyframe/build/ffmpeg-sdk/lib/libavutil.a -lm -latomic -pthread -o slide-keyframe-decode \n",
+  "relink_object_sha256": "b78d16aa32e3657369fed7cb73b48a1e799c35f1ec935575fc125428d9eb2ecb",
+  "public_release_approved": false
+}

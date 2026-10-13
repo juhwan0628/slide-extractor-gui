@@ -63,33 +63,12 @@ def _ffmpeg(source, vf, *, output='pipe:1', raw=True, seek=None, frame_limit=Non
     cmd=[executable('ffmpeg'),'-hide_banner','-loglevel','info',
          '-nostdin','-copyts','-noautorotate']
     options=decode_options or {}
-    backend=options.get('backend','cpu')
-    threads=options.get('threads',0)
-    if backend not in ('cpu','cpu-metadata','videotoolbox','videotoolbox-select') or type(threads) is not int or not 0<=threads<=64:
-        raise ValueError('Unsupported decoder backend/thread count')
-    if threads:cmd+=['-threads',str(threads)]
-    if backend in ('videotoolbox','videotoolbox-select'):
-        # Explicit hardware surfaces + hwdownload: software fallback cannot
-        # silently count as a successful VideoToolbox comparison.
-        pixel=dict(source.metadata).get('pixel_format','yuv420p')
-        if pixel in ('yuv420p','yuvj420p','nv12'):download='nv12'
-        elif pixel in ('yuv420p10le','p010le'):download='p010le'
-        else:raise ValueError('Unsupported VideoToolbox download pixel format')
-        cmd+=['-hwaccel','videotoolbox','-hwaccel_output_format','videotoolbox_vld']
-        transfer='hwdownload,format='+download+','
-        if backend=='videotoolbox-select':
-            # Audit every PTS/color/transform using metadata only. Selection
-            # reads timestamps, never scene/pixel values, on hardware frames.
-            if not vf.startswith('showinfo@audit,select=') or ',showinfo@sample,' not in vf:
-                raise ValueError('Hardware preselection requires audited sampling pipeline')
-            vf=vf.replace('showinfo@audit,','showinfo@audit=checksum=0,',1)
-            vf=vf.replace(',showinfo@sample,',','+transfer+'showinfo@sample,',1)
-        else:
-            vf=transfer+vf
-    elif backend=='cpu-metadata':
-        vf=vf.replace('showinfo@audit,','showinfo@audit=checksum=0,',1)
+    if options.get('backend','cpu-keyframes')!='cpu-keyframes' or options.get('threads',0)!=0:
+        raise ValueError('Product decoder requires keyframes and automatic threads')
+    vf=vf.replace('showinfo@audit,','showinfo@audit=checksum=0,',1)
+    cmd+=['-skip_frame','nokey']
     if seek is not None:
-        cmd+=['-seek_timestamp','1','-ss',str(float(seek))]
+        cmd+=['-noaccurate_seek','-seek_timestamp','1','-ss',str(float(seek))]
     cmd+=['-i',str(source.path),'-map',f'0:{source.stream_index}',
           '-an','-sn','-dn','-vf',vf,'-fps_mode','passthrough']
     if frame_limit is not None:cmd+=['-frames:v',str(frame_limit)]
@@ -129,6 +108,8 @@ def _kill(proc):
 
 def _decode_stream(source, vf, width, height, *, timeout=120, stall_timeout=None, cancelled=None, seek=None, frame_limit=None, decode_options=None):
     """Return audited frames; total deadline and inactivity budget are separate."""
+    if frame_limit is not None:
+        vf=vf.replace('showinfo@sample,',f'trim=end_frame={frame_limit},showinfo@sample,',1)
     cmd=_ffmpeg(source,vf,seek=seek,frame_limit=frame_limit,decode_options=decode_options)
     proc=subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,
                           start_new_session=os.name!='nt',bufsize=0,
@@ -147,6 +128,8 @@ def _decode_stream(source, vf, width, height, *, timeout=120, stall_timeout=None
     pixels=Queue(maxsize=8)
     pts_meta=Queue(maxsize=16)
     errors=[]
+    keyframes_only=True
+    all_keyframes=',select=' not in vf and frame_limit is None
     audits={'previous':None,'frames':0,'selected':0,'color':None}
     recent=deque(maxlen=30)
     ended=Event()
@@ -164,6 +147,8 @@ def _decode_stream(source, vf, width, height, *, timeout=120, stall_timeout=None
                     if pts=='N/A' or n!=audits['frames']:
                         errors.append('InvalidTiming: missing/out-of-order audit PTS');break
                     value=int(pts)
+                    if keyframes_only and not re.search(r'\biskey:\s*1\b',line):
+                        errors.append('DecodeFailed: decoder emitted a non-keyframe');break
                     if audits['previous'] is not None and value<=audits['previous']:
                         errors.append('InvalidTiming: repeated/regressing display PTS');break
                     if (m:=_FORMAT.search(line)) and (int(m[1])!=source.width or int(m[2])!=source.height or m[3]!='P'):
@@ -175,6 +160,8 @@ def _decode_stream(source, vf, width, height, *, timeout=120, stall_timeout=None
                     n,pts=int(match[1]),match[2]
                     if pts=='N/A' or n!=audits['selected']:
                         errors.append('InvalidTiming: selected ordinal/PTS mismatch');break
+                    if keyframes_only and (int(pts)!=audits['previous'] or (all_keyframes and audits['frames']!=n+1)):
+                        errors.append('InvalidTiming: keyframe image/audit PTS mismatch');break
                     audits['selected']+=1
                     push(pts_meta,int(pts))
                 elif '[showinfo@audit' in line and 'color_range:' in line:
@@ -211,7 +198,9 @@ def _decode_stream(source, vf, width, height, *, timeout=120, stall_timeout=None
             if not pts_done:
                 try:
                     item=pts_meta.get(timeout=.05)
-                    if item is _STOP:pts_done=True
+                    if item is _STOP:
+                        check_wait()
+                        pts_done=True
                     else:
                         try:
                             payload=pixels.get(timeout=.2)
@@ -236,6 +225,7 @@ def _decode_stream(source, vf, width, height, *, timeout=120, stall_timeout=None
                 except Empty:
                     if proc.poll() is None:continue
                     raise MediaError('DecodeFailed: raw reader did not complete',code='DecodeFailed')
+                check_wait()
                 if tail is not _STOP:
                     raise MediaError('DecodeFailed: unexpected extra raw frame',code='DecodeFailed')
                 break
@@ -247,7 +237,8 @@ def _decode_stream(source, vf, width, height, *, timeout=120, stall_timeout=None
             except subprocess.TimeoutExpired:pass
         if proc.returncode!=0:
             raise MediaError('DecodeFailed: FFmpeg process error '+str(list(recent)),code='DecodeFailed')
-        if emitted!=audits['selected'] or audits['frames']<emitted:
+        if (emitted!=audits['selected'] or audits['frames']<emitted or
+                (all_keyframes and audits['frames']!=emitted)):
             raise MediaError('DecodeFailed: raw frame/PTS count mismatch',code='DecodeFailed')
     finally:
         ended.set()
@@ -258,74 +249,10 @@ def _decode_stream(source, vf, width, height, *, timeout=120, stall_timeout=None
             proc.stdout.close();proc.stderr.close()
 
 
-def sample_stream(source:SourceRef,cache_root:Path,*,fps:Fraction=Fraction(1),
-                  cancelled=None,timeout=120,progress=None,profile=None,decode_options=None,cache_owner=None):
-    """Select bucket-first frames; timeout limits inactivity, not total duration."""
-    fps=Fraction(fps)
-    if fps not in (Fraction(1),Fraction(1,2)):
-        raise ValueError('sampling rate must be 1 or 0.5 fps')
-    tb,origin=_source_info(source)
-    period=1/fps
-    numerator=tb.numerator*period.denominator
-    denominator=tb.denominator*period.numerator
-    if max(abs(origin),abs(numerator),abs(denominator))>2**53:
-        raise MediaError('InvalidTiming: select exceeds exact arithmetic envelope',code='InvalidTiming')
-    # prev_selected_pts is available in supported FFmpeg select versions.
-    bucket=lambda x:f'floor(({x}-({origin}))*{numerator}/{denominator})'
-    expr=f'isnan(prev_selected_pts)+gt({bucket("pts")},{bucket("prev_selected_pts")})'
-    info=dict(source.metadata)
-    pipe=build_display_pipeline(
-        width=source.width,height=source.height,
-        sar=source.transform.sample_aspect_ratio,rotation=source.transform.rotation,
-        color_matrix=info.get('color_matrix'),color_range=info.get('color_range'),
-        transfer=info.get('color_transfer'),pixel_format=info.get('pixel_format','yuv420p'))
-    vf=f'showinfo@audit,select={expr!r},showinfo@sample,{pipe.cache_filter}'
-    if not source_matches(source):raise MediaError('SourceChanged',code='SourceChanged')
-    from .profiling import measured
-    samples=[]
-    if progress:progress('sampling',None,None)
-    with CacheSession(cache_root, auto_prune=True, discard_on_error=True) as session:
-        prior=-1
-        decoded=_decode_stream(source,vf,pipe.cache_width,pipe.cache_height,
-                               timeout=None,stall_timeout=timeout,cancelled=cancelled,decode_options=decode_options)
-        def observed():
-            try:
-                while True:
-                    with measured(profile,'decode_wait'):
-                        try:item=next(decoded)
-                        except StopIteration:return
-                    yield item
-            finally:decoded.close()
-        for index,(pts,data) in enumerate(observed()):
-            grid=(pts-origin)*numerator//denominator
-            if grid<=prior or pts<origin:
-                raise MediaError('InvalidTiming: wrong sample grid',code='InvalidTiming')
-            prior=grid
-            with measured(profile,'jpeg_encode'):
-                rgb=Image.frombytes('RGB',(pipe.cache_width,pipe.cache_height),data)
-                with io.BytesIO() as file:
-                    rgb.save(file,format='JPEG',quality=90)
-                    jpeg=file.getvalue()
-            with measured(profile,'cache_write'):
-                path=session.write_jpeg(index,jpeg)
-            if progress and index%16==0:progress('sampling',None,None)
-            samples.append(Sample(
-                sample_id=str(uuid4()),grid_index=grid,source_pts=pts,
-                time_base=tb,nominal_time=grid*period,cache_path=str(path),
-                width=pipe.cache_width,height=pipe.cache_height,pts_origin=origin))
-        if not samples:
-            raise MediaError('InvalidTiming: empty decoded video',code='InvalidTiming')
-        if not source_matches(source):raise MediaError('SourceChanged',code='SourceChanged')
-        session.complete()
-        if cache_owner is not None:
-            cache_owner(session.retain())
-        return tuple(samples),session.directory
-
-
 def extract_selected(source:SourceRef,pages,output_root:Path,*,cancelled=None,roi=None,progress=None,decode_options=None):
     """Decode requested integer PTS exactly; never substitute adjacent frames."""
     tb,origin=_source_info(source)
-    decode_options={'backend':'cpu-metadata','threads':0} if decode_options is None else decode_options
+    decode_options={'backend':'cpu-keyframes','threads':0} if decode_options is None else decode_options
     info=dict(source.metadata)
     pipe=build_display_pipeline(width=source.width,height=source.height,
         sar=source.transform.sample_aspect_ratio,rotation=source.transform.rotation,
@@ -341,40 +268,15 @@ def extract_selected(source:SourceRef,pages,output_root:Path,*,cancelled=None,ro
         # Select by exact decoded PTS. No nominal seconds or OpenCV seek used.
         vf=f"showinfo@audit,select='gte(pts,{pts})',showinfo@sample,{pipe.full_filter}"
         if not source_matches(source):raise MediaError('SourceChanged',code='SourceChanged')
-        started=time.monotonic()
-        # Input seek decodes from the nearest preceding keyframe. Recheck exact
-        # source PTS after decode; a missed target retries once from the origin.
-        target_seconds=pts*tb
-        origin_seconds=origin*tb
-        seeks=(max(origin_seconds,target_seconds-Fraction(2,1)),None)
-        payload=None
-        for attempt,seek in enumerate(seeks):
-            remaining=120-(time.monotonic()-started)
-            if remaining<=0:raise MediaError('Timeout',code='Timeout')
-            decoded = _decode_stream(source,vf,pipe.transform.display_width,
-                                     pipe.transform.display_height,
-                                     timeout=remaining,cancelled=cancelled,seek=seek,frame_limit=2,decode_options=decode_options)
-            try:
-                try:
-                    actual, image_data = next(decoded)
-                except StopIteration:
-                    if attempt==0:continue
-                    raise MediaError('DecodeFailed: selected PTS missing',code='DecodeFailed')
-                if actual != pts:
-                    if attempt==0:continue
-                    raise MediaError('DecodeFailed: selected PTS missing',code='DecodeFailed')
-                try:
-                    following,_ = next(decoded)
-                except StopIteration:
-                    pass
-                else:
-                    if following == pts:
-                        raise MediaError('DecodeFailed: duplicated selected PTS',code='DecodeFailed')
-                payload=image_data
-                break
-            finally:
-                decoded.close()
-        if payload is None:raise MediaError('DecodeFailed: selected PTS missing',code='DecodeFailed')
+        decoded=_decode_stream(source,vf,pipe.transform.display_width,
+            pipe.transform.display_height,timeout=120,cancelled=cancelled,
+            seek=pts*tb,frame_limit=2,decode_options=decode_options)
+        try:
+            frames=list(decoded)
+        finally:decoded.close()
+        if not frames or frames[0][0]!=pts:
+            raise MediaError('DecodeFailed: selected PTS missing',code='DecodeFailed')
+        payload=frames[0][1]
         rgb=Image.frombytes('RGB',(pipe.transform.display_width,pipe.transform.display_height),payload)
         if roi is not None:
             if roi.x+roi.width>rgb.width or roi.y+roi.height>rgb.height:
@@ -386,3 +288,88 @@ def extract_selected(source:SourceRef,pages,output_root:Path,*,cancelled=None,ro
     if not source_matches(source):raise MediaError('SourceChanged',code='SourceChanged')
     if progress:progress('extracting',len(pages),len(pages))
     return tuple(result)
+
+
+def keyframe_stream(source:SourceRef,cache_root:Path,*,cancelled=None,timeout=120,
+                    progress=None,profile=None,cache_owner=None,backend='cpu-keyframes',selection_policy='all'):
+    """Shipped FFmpeg default; explicit native all-IDR validation with clean fallback."""
+    if backend not in ('cpu-keyframes','native-idr'):
+        raise ValueError('Unknown keyframe backend')
+    if selection_policy not in ('all','half') or (selection_policy=='half' and backend!='native-idr'):
+        raise ValueError('Half selection requires the native IDR backend')
+    if profile is not None:
+        profile.metadata['requested_selection_policy']=selection_policy
+    from .native_keyframes import NativeUnsupported
+    common=dict(cancelled=cancelled,timeout=timeout,progress=progress,
+                profile=profile,cache_owner=cache_owner)
+    try:
+        return _cache_keyframe_stream(source,cache_root,backend=backend,selection_policy=selection_policy,**common)
+    except NativeUnsupported:
+        if backend != 'native-idr':
+            raise
+        # The CacheSession context has already discarded the failed generation.
+        if profile is not None:
+            profile.metadata['native_fallback']=True
+        return _cache_keyframe_stream(source,cache_root,backend='cpu-keyframes',**common)
+
+
+def _cache_keyframe_stream(source:SourceRef,cache_root:Path,*,cancelled=None,timeout=120,
+                    progress=None,profile=None,cache_owner=None,backend='cpu-keyframes',selection_policy='all'):
+    """Cache decoder-flagged keyframes at their original integer PTS.
+
+    ordinal is the observation order; actual_time is derived only from original PTS.
+    These irregular observations must not be serialized as a v3 FPS-grid timeline.
+    Uses the existing bounded pipes, display transform and cache ownership rules.
+    """
+    tb,origin=_source_info(source)
+    info=dict(source.metadata)
+    pipe=build_display_pipeline(
+        width=source.width,height=source.height,
+        sar=source.transform.sample_aspect_ratio,rotation=source.transform.rotation,
+        color_matrix=info.get('color_matrix'),color_range=info.get('color_range'),
+        transfer=info.get('color_transfer'),pixel_format=info.get('pixel_format','yuv420p'))
+    vf=f'showinfo@audit,showinfo@sample,{pipe.cache_filter}'
+    if not source_matches(source):raise MediaError('SourceChanged',code='SourceChanged')
+    from .profiling import measured
+    samples=[]
+    if progress:progress('sampling',None,None)
+    with CacheSession(cache_root,auto_prune=True,discard_on_error=True) as session:
+        if backend == 'native-idr':
+            from .native_keyframes import decode_native
+            decoded=decode_native(source,pipe,cancelled=cancelled,stall_timeout=timeout,selection_policy=selection_policy)
+        else:
+            decoded=_decode_stream(source,vf,pipe.cache_width,pipe.cache_height,
+                                   timeout=None,stall_timeout=timeout,cancelled=cancelled,
+                                   decode_options={'backend':'cpu-keyframes','threads':0})
+        try:
+            while True:
+                with measured(profile,'decode_wait'):
+                    try:pts,data=next(decoded)
+                    except StopIteration:break
+                if pts<origin:
+                    raise MediaError('InvalidTiming: keyframe precedes origin',code='InvalidTiming')
+                index=len(samples)
+                with measured(profile,'jpeg_encode'):
+                    rgb=Image.frombytes('RGB',(pipe.cache_width,pipe.cache_height),data)
+                    with io.BytesIO() as file:
+                        rgb.save(file,format='JPEG',quality=90)
+                        jpeg=file.getvalue()
+                with measured(profile,'cache_write'):
+                    path=session.write_jpeg(index,jpeg)
+                samples.append(Sample(
+                    sample_id=str(uuid4()),ordinal=index,source_pts=pts,
+                    time_base=tb,cache_path=str(path),
+                    width=pipe.cache_width,height=pipe.cache_height,pts_origin=origin))
+                if progress:progress('sampling',index+1,None)
+        finally:decoded.close()
+        if not samples:
+            raise MediaError('InvalidTiming: empty keyframe stream',code='InvalidTiming')
+        if not source_matches(source):raise MediaError('SourceChanged',code='SourceChanged')
+        if cancelled is not None and cancelled.cancelled:
+            raise MediaError('Cancelled',code='Cancelled')
+        session.complete()
+        if cache_owner is not None:cache_owner(session.retain())
+        if profile is not None:
+            profile.metadata.update(sampling_algorithm='decoder-keyframes-v1',
+                                    decoder_backend=backend,selection_policy=selection_policy,sample_count=len(samples))
+        return tuple(samples),session.directory

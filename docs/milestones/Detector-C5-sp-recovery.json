@@ -1,0 +1,108 @@
+{
+  "status": "post-validation calibration, not independent heldout success",
+  "tile_fraction": 0.3,
+  "representatives": [
+    {
+      "supported_pixels": 0,
+      "retained_supported_pixels": 0,
+      "missing_supported_pixels": 0,
+      "transient_pixels": 1,
+      "missing_core_edges": 0,
+      "occlusion_tiles": 0,
+      "missing_supported_fraction": 0.0,
+      "single_observation": false,
+      "time_s": 1.0,
+      "start_s": 0.0
+    },
+    {
+      "supported_pixels": 67,
+      "retained_supported_pixels": 56,
+      "missing_supported_pixels": 11,
+      "transient_pixels": 10,
+      "missing_core_edges": 165,
+      "occlusion_tiles": 0,
+      "missing_supported_fraction": 0.00019097222222222223,
+      "single_observation": false,
+      "time_s": 9.0,
+      "start_s": 2.0
+    },
+    {
+      "supported_pixels": 0,
+      "retained_supported_pixels": 0,
+      "missing_supported_pixels": 0,
+      "transient_pixels": 0,
+      "missing_core_edges": 43,
+      "occlusion_tiles": 0,
+      "missing_supported_fraction": 0.0,
+      "single_observation": false,
+      "time_s": 33.86666666666667,
+      "start_s": 10.866666666666667
+    },
+    {
+      "supported_pixels": 1064,
+      "retained_supported_pixels": 1020,
+      "missing_supported_pixels": 44,
+      "transient_pixels": 0,
+      "missing_core_edges": 39,
+      "occlusion_tiles": 0,
+      "missing_supported_fraction": 0.0007638888888888889,
+      "single_observation": false,
+      "time_s": 192.86666666666667,
+      "start_s": 34.86666666666667
+    },
+    {
+      "supported_pixels": 2207,
+      "retained_supported_pixels": 1344,
+      "missing_supported_pixels": 863,
+      "transient_pixels": 11,
+      "missing_core_edges": 116,
+      "occlusion_tiles": 0,
+      "missing_supported_fraction": 0.014982638888888889,
+      "single_observation": false,
+      "time_s": 300.8666666666667,
+      "start_s": 200.86666666666667
+    }
+  ],
+  "identities": [
+    {
+      "occurrence": 0,
+      "identity": 0,
+      "revisit_of": null,
+      "similar_candidate": null,
+      "candidate_distance": null,
+      "exact_hash": "29101db583c9ed4a6823d1305853095edb540a39a7f8e9d36f5d95b424823efe"
+    },
+    {
+      "occurrence": 1,
+      "identity": 1,
+      "revisit_of": null,
+      "similar_candidate": null,
+      "candidate_distance": 0.0606703431372549,
+      "exact_hash": "77fea62182c19096e1b8b702c64d754b1f0aa0a540be9c2dfafdd4359669483d"
+    },
+    {
+      "occurrence": 2,
+      "identity": 2,
+      "revisit_of": null,
+      "similar_candidate": 0,
+      "candidate_distance": 0.0031645561002178646,
+      "exact_hash": "115270e149d86906d6a148941444e41de85a45d0b21e510731ee823bbda3ffa2"
+    },
+    {
+      "occurrence": 3,
+      "identity": 3,
+      "revisit_of": null,
+      "similar_candidate": null,
+      "candidate_distance": 0.028520220588235293,
+      "exact_hash": "e291accb9d3f00a91032e1895304537ed843a110535a2d2c916f0e80780ec70a"
+    },
+    {
+      "occurrence": 4,
+      "identity": 4,
+      "revisit_of": null,
+      "similar_candidate": null,
+      "candidate_distance": 0.031095315904139435,
+      "exact_hash": "0ad9cf797f1dc3f52bab0d33b2444175d4a42d0cb30e5d70b38fc2c855622bc9"
+    }
+  ]
+}

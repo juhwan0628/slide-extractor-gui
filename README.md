@@ -24,22 +24,24 @@
 
 - **로컬 처리:** 영상 분석과 PDF 생성은 내 기기에서 수행합니다. 클라우드 업로드나 계정 로그인 없이 사용합니다.
 - **확인하고 편집:** 타임라인과 썸네일로 이동하면서 누락된 페이지를 추가하고, 중복 페이지를 제거하거나 대표 프레임을 바꿉니다.
-- **CPU 최적화:** 멀티스레드와 프레임 메타데이터를 기본으로 활용합니다. 별도 GPU가 필요하지 않습니다.
+- **CPU 최적화:** 키프레임 디코딩과 원본 PTS 메타데이터를 활용합니다. 별도 GPU가 필요하지 않습니다.
 - **같은 앱, 두 OS:** 공통 Python·Qt 소스로 Apple Silicon Mac과 Windows x64 설치 파일을 만듭니다.
 - **출력 선택:** 기본은 PDF 단독 저장이며, 분석 결과 화면의 `Save options…`에서 타임스탬프 JSON을 함께 저장할 수 있습니다.
 
 ## 다운로드
 
-현재 버전은 **0.4.12rc1 베타**입니다. 영상 선택 시 백그라운드 준비를 시작하며 기본 0.5 FPS로 분석합니다. 이번 안정화 업데이트는 동시 저장·복구 보호, 빠른 프리뷰 이동, 준비 재시도와 캐시 정리를 강화했습니다. 두 OS의 설치·분석·PDF 저장 검사를 GitHub Actions에서 통과했습니다. MIT 및 제3자 고지·대응 소스 자료는 릴리스에 함께 제공합니다.
+현재 공개 설치본은 **0.5.0b1 키프레임 전용 베타**입니다. Mac·Windows 설치 검증과 별도 출고 감사, 사용자 두 OS 실기기 동작 확인을 완료했습니다.
+
+[변경 사항](RELEASE_NOTES.md) · [검증 기록](docs/milestones/Keyframe-M5-results.md) · [실영상 검증](docs/milestones/Keyframe-M4-results.md)
 
 | 기기 | 설치 파일 | 누적 다운로드 | 설치 안내 |
 |---|---|---|---|
-| Apple Silicon Mac | [DMG 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.12rc1/SlideExtractor-v0.4.12rc1-macOS-arm64.dmg) | ![Mac downloads](docs/downloads/macos.svg) | [Mac 설치](INSTALL-MAC.md) |
-| Windows x64 | [설치 EXE 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.12rc1/SlideExtractor-v0.4.12rc1-Setup-Windows-x64.exe) | ![Windows downloads](docs/downloads/windows.svg) | [Windows 설치](INSTALL-WINDOWS.md) |
+| Apple Silicon Mac | [DMG 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.5.0b1/SlideExtractor-v0.5.0b1-macOS-arm64.dmg) | ![Mac downloads](docs/downloads/macos.svg) | [Mac 설치](INSTALL-MAC.md) |
+| Windows x64 | [설치 EXE 다운로드](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.5.0b1/SlideExtractor-v0.5.0b1-Setup-Windows-x64.exe) | ![Windows downloads](docs/downloads/windows.svg) | [Windows 설치](INSTALL-WINDOWS.md) |
 
 다운로드 수는 공개된 모든 버전의 설치 DMG·EXE 누적 다운로드 횟수입니다. 재다운로드를 포함하며 사용자 수나 설치 횟수를 뜻하지 않습니다. 소스·라이선스 ZIP은 제외합니다. 저장소 내부 SVG 배지는 GitHub Actions에서 매시간 갱신하며, 실행 대기와 이미지 캐시로 표시가 지연될 수 있습니다. [최근 집계 시각](https://juhwan.ing/slide-extractor-downloads/status.json) · [집계 운영 방식](docs/downloads/OPERATIONS.md)
 
-일반 사용자는 위 설치 파일 하나만 받으면 됩니다. [대응 소스·라이선스·검증 자료 ZIP](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.4.12rc1/SlideExtractor-v0.4.12rc1-Sources-Licenses.zip)은 개발·라이선스 확인용이며 설치에 필요하지 않습니다.
+일반 사용자는 위 설치 파일 하나만 받으면 됩니다. [대응 소스·라이선스·검증 자료 ZIP](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.5.0b1/SlideExtractor-v0.5.0b1-Sources-Licenses.zip)은 개발·라이선스 확인용이며 설치에 필요하지 않습니다.
 
 GitHub Releases에서 설치 파일을 직접 다운로드합니다. **Python·Qt·FFmpeg·FFprobe는 포함돼 있습니다.** Intel Mac과 Windows ARM은 이번 베타 검증 대상이 아닙니다.
 
@@ -72,10 +74,11 @@ GitHub Releases에서 설치 파일을 직접 다운로드합니다. **Python·Q
 
 필기가 누적되거나 같은 페이지를 재방문하는 영상은 수동 Merge로 정리할 수 있습니다. 자동 필기·재방문 처리 개선은 향후 연구 과제로 남겨두며 이번 버전의 변화 감지 알고리즘은 유지합니다.
 
-## 이번 베타의 변경
+## 0.5.0b1의 변경
 
 - 영상 선택 시 백그라운드에서 준비하고 Analyze에서 같은 작업을 이어받습니다.
-- 기본 0.5 FPS와 설정 변경 시 캐시 재사용·정리, 긴 영상의 진행 정지 기준 타임아웃을 적용합니다.
+- FPS 설정 없이 키프레임만 준비하고 재사용합니다. 긴 영상은 진행 정지 시간을 기준으로 타임아웃을 판단합니다.
+- 상세 JSON v4는 원본 PTS와 관측 사이 전환 구간을 기록합니다. 기존 FPS/v3 형식과 호환되지 않습니다.
 - 분석 전 설정과 결과 화면의 Save options…를 분리하고 Start over로 현재 작업·캐시를 정리합니다.
 
 기존 기능과 수정도 포함합니다.

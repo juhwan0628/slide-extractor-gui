@@ -1,0 +1,122 @@
+[
+  {
+    "dataset": "original",
+    "clip": "sp",
+    "policy": "half",
+    "backend": "native-idr",
+    "indexed_keys": 301,
+    "decoded_analysis_images": 151,
+    "initial_jpegs": 151,
+    "prepare_s": 2.4101204990874976,
+    "automatic_pages": 3,
+    "representatives_s": [
+      92.0,
+      284.0,
+      296.0
+    ],
+    "lazy_edit_export": {
+      "preview_pts": 17403,
+      "edited_pts": 48123,
+      "pdf_pages": 4
+    }
+  },
+  {
+    "dataset": "original",
+    "clip": "multicore",
+    "policy": "half",
+    "backend": "native-idr",
+    "indexed_keys": 301,
+    "decoded_analysis_images": 151,
+    "initial_jpegs": 151,
+    "prepare_s": 2.837693454930559,
+    "automatic_pages": 4,
+    "representatives_s": [
+      78.0,
+      177.93333333333334,
+      207.73333333333332,
+      289.46666666666664
+    ],
+    "lazy_edit_export": {
+      "preview_pts": 17403,
+      "edited_pts": 48123,
+      "pdf_pages": 5
+    }
+  },
+  {
+    "dataset": "original",
+    "clip": "ethics",
+    "policy": "half",
+    "backend": "native-idr",
+    "indexed_keys": 304,
+    "decoded_analysis_images": 152,
+    "initial_jpegs": 152,
+    "prepare_s": 2.8566511359531432,
+    "automatic_pages": 6,
+    "representatives_s": [
+      40.0,
+      79.4,
+      81.0,
+      96.66666666666667,
+      230.0,
+      299.06666666666666
+    ],
+    "lazy_edit_export": {
+      "preview_pts": 17403,
+      "edited_pts": 48123,
+      "pdf_pages": 7
+    }
+  },
+  {
+    "dataset": "validation2",
+    "clip": "sp",
+    "policy": "half",
+    "backend": "native-idr",
+    "indexed_keys": 304,
+    "decoded_analysis_images": 152,
+    "initial_jpegs": 152,
+    "prepare_s": 2.4565658550709486,
+    "automatic_pages": 7,
+    "representatives_s": [
+      146.0,
+      205.4,
+      214.8,
+      266.46666666666664,
+      296.0,
+      297.3333333333333,
+      298.6
+    ],
+    "lazy_edit_export": null
+  },
+  {
+    "dataset": "validation2",
+    "clip": "multicore",
+    "policy": "half",
+    "backend": "native-idr",
+    "indexed_keys": 301,
+    "decoded_analysis_images": 151,
+    "initial_jpegs": 151,
+    "prepare_s": 2.4970599939115345,
+    "automatic_pages": 1,
+    "representatives_s": [
+      270.0
+    ],
+    "lazy_edit_export": null
+  },
+  {
+    "dataset": "validation2",
+    "clip": "ethics",
+    "policy": "half",
+    "backend": "native-idr",
+    "indexed_keys": 302,
+    "decoded_analysis_images": 151,
+    "initial_jpegs": 151,
+    "prepare_s": 2.267444606870413,
+    "automatic_pages": 3,
+    "representatives_s": [
+      28.0,
+      227.06666666666666,
+      299.06666666666666
+    ],
+    "lazy_edit_export": null
+  }
+]

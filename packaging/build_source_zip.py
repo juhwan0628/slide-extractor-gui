@@ -7,16 +7,20 @@ ROOT=Path(__file__).resolve().parents[1]
 BASE=('app.py','requirements.txt','README.md','LICENSE',
       'BUILD-WINDOWS.bat','INSTALL-WINDOWS.md','packaging/build_windows_personal.py','packaging/windows_media.py','packaging/build_windows_kit.py',
       'scripts/validate-windows-portable.bat',
-      'LICENSE_AUDIT.md','THIRD_PARTY_NOTICES.md',
+      'LICENSE_AUDIT.md','THIRD_PARTY_NOTICES.md','docs/KEYFRAME-JSON-v4.md',
       'packaging/BUILD_AND_TEST.md','packaging/QA_STATUS.md',
       'scripts/run-macos.command','scripts/run-windows.bat',
       'scripts/build-macos-personal.command','packaging/SlideExtractor-personal.spec',
-      'packaging/desktop_entry.py','INSTALL-MAC.md',
+      'packaging/desktop_entry.py','packaging/keyframe_release_contract.py','INSTALL-MAC.md',
       'packaging/SlideExtractor.spec','packaging/audit_release.py',
       'packaging/binary-manifest.example.json','packaging/build-macos-dmg.sh','packaging/windows.iss',
       'packaging/build_manifest.py','packaging/prepare_vendor.py','packaging/build_source_zip.py',
       'packaging/requirements-macos-arm64.lock','packaging/requirements-windows-x64.lock',
-      'packaging/requirements-linux-aarch64-validation.lock')
+      'packaging/requirements-linux-aarch64-validation.lock',
+      'packaging/native_helper_contract.py','packaging/fixtures/native-half.mp4','packaging/fixtures/README.md',
+      'packaging/build-native-helper.sh','packaging/record_native_helper.py',
+      'packaging/build-ffmpeg.sh','packaging/native-sources.lock.json','packaging/native_inputs.py',
+      'native/keyframe_decode.cpp','native/CMakeLists.txt','native/README.md')
 
 def build(output:Path, *, include_tests=False):
     files=[ROOT/name for name in BASE]

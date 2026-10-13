@@ -24,9 +24,9 @@ def source():
 
 
 def samples():
-    # Actual times 0, 1, 2, 3; nominal times deliberately differ.
+    # Exact observation times 0, 1, 2, 3.
     return tuple(Sample(f's{i}', i, -90 + 30 * i, Fraction(1, 30),
-                        Fraction(2 * i), f'{i}.jpg', 16, 16, pts_origin=-90)
+                        f'{i}.jpg', 16, 16, pts_origin=-90)
                  for i in range(4))
 
 
@@ -50,6 +50,7 @@ def build(builder, *, samples=(), transitions=(), segments=(), revision=0):
         # Validate edited state, without letting Project construction mask bugs.
         project = Project(source(), revision=7)
         project.samples, project.transitions, project.segments = samples, transitions, segments
+        project.observation_sample_ids=None
         project.revision = revision
         return make_export_snapshot(project)
     return ExportSnapshot(source(), None, samples, transitions, segments, (),

@@ -22,3 +22,5 @@ vendor/
 .worktrees/
 
 .venv-native*/
+
+.superpowers/sdd/

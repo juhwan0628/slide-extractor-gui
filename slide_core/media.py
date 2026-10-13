@@ -31,7 +31,7 @@ class _ProcessResult:
 
 def _run_process(argv, *, tool: str, phase: str, timeout: float, cancel_token: CancelToken | None = None,
                  stall_timeout: float | None = None, terminate_grace: float = PROCESS_TERMINATE_GRACE_S,
-                 progress=None, clock=time.monotonic, accepted_returncodes=(0,), binary_stdout=False):
+                 progress=None, clock=time.monotonic, accepted_returncodes=(0,), binary_stdout=False, stdout_line_filter=None):
     """Run argv while draining both pipes and always reaping the child/readers."""
     args = list(map(str, argv))
     if not args or not Path(args[0]).is_absolute():
@@ -84,10 +84,13 @@ def _run_process(argv, *, tool: str, phase: str, timeout: float, cancel_token: C
                                 stderr_tail[0] = first[excess:]
                                 tail_size[0] -= excess
                     else:
-                        output.write(block)
+                        if stdout_line_filter is None:output.write(block)
                         pending += block
                         while b"\n" in pending:
                             line, pending = pending.split(b"\n", 1)
+                            if stdout_line_filter is not None:
+                                filtered=stdout_line_filter(line)
+                                if filtered is not None:output.write(filtered+b"\n")
                             key, sep, value = line.partition(b"=")
                             if sep and key in (b"frame", b"out_time_us", b"out_time_ms"):
                                 try:
@@ -109,6 +112,9 @@ def _run_process(argv, *, tool: str, phase: str, timeout: float, cancel_token: C
                                                 progress_queue.put_nowait(candidate)
                                             except queue.Full:
                                                 pass
+                if not tail and stdout_line_filter is not None and pending:
+                    filtered=stdout_line_filter(pending)
+                    if filtered is not None:output.write(filtered+b"\n")
             except Exception as exc:
                 with reader_lock:
                     reader_errors.append(exc)

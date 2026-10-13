@@ -2,6 +2,10 @@
 
 공통 소스와 `slide_core/version.py`에서 버전을 관리합니다. 사용자는 Mac Apple Silicon DMG 또는 Windows x64 설치 EXE를 받습니다. Python·Qt·FFmpeg·FFprobe가 포함됩니다.
 
+## 0.5.0b1 키프레임 전용 베타
+
+M5 자동 검증·원본 설치본 감사·독립 리뷰에 더해 사용자가 두 OS 실기기 정상 동작을 확인했고, 2026-10-13 공개 배포를 명시적으로 지시했습니다. release-approval.json은 APPROVED/public_release_approved=true입니다. 검증된 동일 설치 바이트와 대응 소스·라이선스 자료를 공개합니다. [검증 기록](docs/milestones/Keyframe-M5-results.md)
+
 ## 0.4.12rc1 저장·편집·캐시 안정화 검증 기록
 
 - 후보 커밋 `c7bcc6cd06a13b3b07c97f47a888e3a72def6fe1`, 서버 전체 706 passed.

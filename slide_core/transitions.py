@@ -16,7 +16,7 @@ def _gates(metrics: LocalChangeMetrics, config: DetectorConfig) -> tuple[str, ..
     return tuple(dict.fromkeys(triggers))
 
 
-def streaming_detect(samples, gray_frames, *, duration, valid_mask=None, config=None):
+def streaming_detect(samples, gray_frames, *, duration, valid_mask=None, config=None,cancel_token=None,progress=None,profile=None):
     """Consume matching sample/image iterators, retaining at most three gray frames.
 
     Returns immutable transition/segment records and each segment's representative.
@@ -24,6 +24,10 @@ def streaming_detect(samples, gray_frames, *, duration, valid_mask=None, config=
     into PreparedSample arrays. Every sample belongs to exactly one segment.
     """
     cfg=config or DetectorConfig()
+    if cfg.algorithm=='spatial-groups-v1':
+        from .spatial_groups import spatial_detect
+        return spatial_detect(samples,gray_frames,duration=duration,valid_mask=valid_mask,
+                              config=cfg.spatial,cancel_token=cancel_token,progress=progress,profile=profile)
     samples=tuple(samples)
     if not samples:return (),()
     if any(a.actual_time >= b.actual_time for a,b in zip(samples,samples[1:])):

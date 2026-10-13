@@ -66,6 +66,8 @@ def test_prepare_vendor_checks_hash_before_restoring_executable_bits(tmp_path):
     manifest.write_text(json.dumps(payload))
     module['prepare'](tmp_path)
     assert (tmp_path/'ffmpeg').stat().st_mode & 0o100
+    helper=tmp_path/'slide-keyframe-decode'
+    helper.write_bytes((tmp_path/'ffmpeg').read_bytes());helper.chmod(0o755)
     observed=runpy.run_path(str(ROOT/'packaging/build_manifest.py'))['manifest'](tmp_path,'approved')
     assert 'approved version' in observed['tools']['ffmpeg']['version_output']
     (tmp_path/'ffprobe').write_bytes(b'tampered');(tmp_path/'ffmpeg').chmod(0o644)

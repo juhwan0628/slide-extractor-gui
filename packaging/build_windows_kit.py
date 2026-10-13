@@ -31,8 +31,9 @@ def build(output):
     output=Path(output);output.parent.mkdir(parents=True,exist_ok=True)
     files=['app.py','requirements.txt','LICENSE','LICENSE_AUDIT.md','THIRD_PARTY_NOTICES.md','INSTALL-WINDOWS.md',
            'packaging/SlideExtractor.spec','packaging/build_manifest.py','packaging/build_windows_personal.py',
-           'packaging/windows_media.py','packaging/desktop_entry.py','packaging/requirements-windows-x64.lock',
-           'scripts/validate-windows-portable.bat']
+           'packaging/windows_media.py','packaging/keyframe_release_contract.py','packaging/desktop_entry.py','packaging/requirements-windows-x64.lock',
+           'scripts/validate-windows-portable.bat','packaging/native_helper_contract.py',
+           'packaging/fixtures/native-half.mp4','packaging/fixtures/README.md']
     files.extend(p.relative_to(ROOT).as_posix() for folder in ('gui','slide_core') for p in sorted((ROOT/folder).glob('*.py')))
     launcher=(ROOT/'BUILD-WINDOWS.bat').read_bytes().decode('ascii')
     launcher=launcher.replace('cd /d "%~dp0"','set "SLIDE_WINDOWS_OUTPUT_DIR=%~dp0output"\r\ncd /d "%~dp0_app"')

@@ -4,6 +4,7 @@ from threading import Thread,Lock,Condition
 from pathlib import Path
 from PySide6.QtCore import QObject,Signal,QSize,QRect
 from PySide6.QtGui import QImage
+from slide_core.models import CancelToken
 
 class ImageUnavailable(RuntimeError):pass
 
@@ -28,7 +29,7 @@ class ImageLoader(QObject):
         super().__init__(parent)
         self.preview=ByteLRU(64*1024*1024);self.thumbs=ByteLRU(16*1024*1024)
         self._pending=deque();self._pending_keys=set();self._cv=Condition();self._closed=False
-        self._generation=None
+        self._generation=None;self._cancel_token=CancelToken()
         self._reading=False
         self._awaiting_delivery=0  # cap queued detached QImages at eight
         self._thread=Thread(target=self._run,name='slide-image-reader',daemon=False)
@@ -36,11 +37,12 @@ class ImageLoader(QObject):
 
     def switch(self,generation):
         with self._cv:
+            self._cancel_token.cancel();self._cancel_token=CancelToken()
             self._generation=generation;self._pending.clear();self._pending_keys.clear()
             self.preview.clear();self.thumbs.clear()
             self._cv.notify_all()
 
-    def request(self,key,path,kind='preview',size=None,crop=None,*,priority=False):
+    def request(self,key,path,kind='preview',size=None,crop=None,*,priority=False,resolver=None):
         with self._cv:
             lru=self.thumbs if kind=='thumb' else self.preview
             image=lru.get(key)
@@ -56,11 +58,11 @@ class ImageLoader(QObject):
                     if len(self._pending)>=16:
                         dropped=self._pending.pop()
                         self._pending_keys.discard(dropped[0])
-                    item=(key,Path(path),kind,size,crop,self._generation)
+                    item=(key,Path(path),kind,size,crop,self._generation,resolver,self._cancel_token)
                 self._pending.appendleft(item)
             else:
                 if len(self._pending)>=16 or key in self._pending_keys:return None
-                self._pending.append((key,Path(path),kind,size,crop,self._generation))
+                self._pending.append((key,Path(path),kind,size,crop,self._generation,resolver,self._cancel_token))
             self._pending_keys.add(key)
             self._cv.notify();return None
 
@@ -72,10 +74,12 @@ class ImageLoader(QObject):
             with self._cv:
                 while not self._closed and not self._pending:self._cv.wait()
                 if self._closed:return
-                key,path,kind,size,crop,generation=self._pending.popleft()
+                key,path,kind,size,crop,generation,resolver,cancel_token=self._pending.popleft()
                 self._pending_keys.discard(key)
                 self._reading=True
             try:
+                cancel_token.raise_if_cancelled()
+                if resolver is not None:resolver(cancel_token)
                 if path.is_symlink() or not path.is_file():raise ImageUnavailable(f'Missing sample image: {path}')
                 img=QImage(str(path))
                 if img.isNull():raise ImageUnavailable(f'Corrupt sample image: {path}')
@@ -113,6 +117,7 @@ class ImageLoader(QObject):
 
     def stop(self):
         with self._cv:
+            self._cancel_token.cancel()
             self._closed=True;self._pending.clear();self._pending_keys.clear();self._cv.notify_all()
         self._thread.join(timeout=10)
         if self._thread.is_alive():raise RuntimeError('Image loader failed to stop')

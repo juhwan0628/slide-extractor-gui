@@ -1,32 +1,32 @@
 import copy
 import pytest
 
-from slide_core.timeline_json import dumps, loads, validate
+from slide_core.keyframe_json import dumps, loads, validate
 
 
 def payload():
     zero = "0" * 64
-    samples = [dict(sample_id=f"s{i:06}", grid_index=i, nominal_timestamp_s=float(i), source_pts=i*10240,
+    samples = [dict(sample_id=f"s{i:06}", ordinal=i, source_pts=i*10240,
                     timestamp_s=float(i), cache_width=160, cache_height=90) for i in range(4)]
     metrics = dict(global_mad=.4, max_tile_mad=.7, changed_fraction=.6)
-    boundaries = [dict(boundary_id="b000001", left_sample_id="s000001", right_sample_id="s000002",
+    boundaries = [dict(boundary_id="b000000", left_sample_id="s000001", right_sample_id="s000002",
                        lower_s=1., upper_s=2., observed_at_s=2., true_boundary_s=None,
-                       uncertainty_kind="sampling_and_detector", status="confirmed", persistence_samples=2,
+                       uncertainty_kind="keyframe_and_detector", status="confirmed", persistence_samples=2,
                        adjacent_metrics=metrics, anchor_metrics=metrics)]
     segments = [dict(segment_id="g000000", start_s=0., end_s=2., first_sample_id="s000000", last_sample_id="s000001",
                      auto_representative_sample_id="s000001", start_boundary_id=None),
                 dict(segment_id="g000001", start_s=2., end_s=4., first_sample_id="s000002", last_sample_id="s000003",
-                     auto_representative_sample_id="s000003", start_boundary_id="b000001")]
+                     auto_representative_sample_id="s000003", start_boundary_id="b000000")]
     ids = ["11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"]
     pages = [dict(page_id=ids[i], pdf_page=i+1, representative_sample_id=f"s{i*2+1:06}",
                   representative_timestamp_s=float(i*2+1), origin="auto", origin_segment_id=f"g{i:06}",
                   derived_segment_id=f"g{i:06}", last_edit="auto") for i in range(2)]
-    return dict(schema_version=3, source=dict(basename="lecture.mp4", size_bytes=123456, mtime_ns=1,
+    return dict(schema_version=4, source=dict(basename="lecture.mp4", size_bytes=123456, mtime_ns=1,
          chunk_sha256=zero, stream_index=0, codec="h264", coded_width=160, coded_height=90,
          sar_num=1, sar_den=1, rotation_cw=0, display_width=160, display_height=90,
          time_base_num=1, time_base_den=10240, origin_pts=0, time_origin="first_display_frame"),
          duration_s=4., duration_kind="video_metadata",
-         sampling=dict(algorithm="bucket-first-v1", fps=1., cache_max_width=640, jpeg_quality=90),
+         sampling=dict(algorithm="decoder-keyframes-v1", cache_max_width=640, jpeg_quality=90),
          roi=dict(x=0,y=0,width=160,height=90), ignore_masks=[],
          detector=dict(algorithm="masked-anchor-tile-v1", image_max_width=320, debounce_samples=2,
            global_mad=.005,tile_mad=.025,pixel_delta=20,changed_fraction=.0002,tile_size=20,tile_stride=10,
@@ -183,9 +183,9 @@ def test_rfc3339_accepts_lowercase_t_and_z():
     validate(p)
 
 
-def test_sample_grid_is_derived_from_exact_source_pts_bucket():
+def test_observation_timestamp_is_derived_from_exact_source_pts():
     p=payload()
-    p["samples"][2].update(grid_index=1, nominal_timestamp_s=1.,
+    p["samples"][2].update(ordinal=1,
                             source_pts=20480, timestamp_s=1.99999)
     with pytest.raises(ValueError): validate(p)
 

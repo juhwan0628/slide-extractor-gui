@@ -1,0 +1,253 @@
+[
+  {
+    "clip": "sp",
+    "exact_pts_rgb": true,
+    "frames": 301,
+    "runs": [
+      {
+        "backend": "cpu-keyframes",
+        "prepare_s": 8.920661641051993,
+        "detect_s": 2.500957014039159,
+        "pages": 30,
+        "transitions": [
+          "39",
+          "49",
+          "63",
+          "65",
+          "75",
+          "81",
+          "89",
+          "93",
+          "105",
+          "115",
+          "129",
+          "143",
+          "157",
+          "159",
+          "182",
+          "195",
+          "224",
+          "226",
+          "230",
+          "238",
+          "240",
+          "245",
+          "255",
+          "261",
+          "266",
+          "271",
+          "274",
+          "288",
+          "293"
+        ],
+        "metadata": {
+          "status": "running",
+          "platform": "Linux",
+          "machine": "aarch64",
+          "sampling_algorithm": "decoder-keyframes-v1",
+          "decoder_backend": "cpu-keyframes",
+          "sample_count": 301
+        }
+      },
+      {
+        "backend": "native-idr",
+        "prepare_s": 7.392744955839589,
+        "detect_s": 2.7559627660084516,
+        "pages": 30,
+        "transitions": [
+          "39",
+          "49",
+          "63",
+          "65",
+          "75",
+          "81",
+          "89",
+          "93",
+          "105",
+          "115",
+          "129",
+          "143",
+          "157",
+          "159",
+          "182",
+          "195",
+          "224",
+          "226",
+          "230",
+          "238",
+          "240",
+          "245",
+          "255",
+          "261",
+          "266",
+          "271",
+          "274",
+          "288",
+          "293"
+        ],
+        "metadata": {
+          "status": "running",
+          "platform": "Linux",
+          "machine": "aarch64",
+          "sampling_algorithm": "decoder-keyframes-v1",
+          "decoder_backend": "native-idr",
+          "sample_count": 301
+        }
+      }
+    ],
+    "exact_jpeg": true,
+    "exact_transitions": true
+  },
+  {
+    "clip": "multicore",
+    "exact_pts_rgb": true,
+    "frames": 301,
+    "runs": [
+      {
+        "backend": "cpu-keyframes",
+        "prepare_s": 10.722762334160507,
+        "detect_s": 0.9495851309038699,
+        "pages": 28,
+        "transitions": [
+          "8",
+          "37",
+          "44",
+          "58",
+          "69",
+          "71",
+          "74",
+          "1289/15",
+          "1499/15",
+          "1619/15",
+          "1664/15",
+          "1859/15",
+          "1889/15",
+          "2084/15",
+          "2294/15",
+          "2399/15",
+          "2444/15",
+          "2711/15",
+          "3127/15",
+          "3307/15",
+          "3787/15",
+          "3847/15",
+          "3937/15",
+          "4027/15",
+          "4057/15",
+          "4207/15",
+          "4237/15"
+        ],
+        "metadata": {
+          "status": "running",
+          "platform": "Linux",
+          "machine": "aarch64",
+          "sampling_algorithm": "decoder-keyframes-v1",
+          "decoder_backend": "cpu-keyframes",
+          "sample_count": 301
+        }
+      },
+      {
+        "backend": "native-idr",
+        "prepare_s": 7.826241943053901,
+        "detect_s": 1.4867502220440656,
+        "pages": 28,
+        "transitions": [
+          "8",
+          "37",
+          "44",
+          "58",
+          "69",
+          "71",
+          "74",
+          "1289/15",
+          "1499/15",
+          "1619/15",
+          "1664/15",
+          "1859/15",
+          "1889/15",
+          "2084/15",
+          "2294/15",
+          "2399/15",
+          "2444/15",
+          "2711/15",
+          "3127/15",
+          "3307/15",
+          "3787/15",
+          "3847/15",
+          "3937/15",
+          "4027/15",
+          "4057/15",
+          "4207/15",
+          "4237/15"
+        ],
+        "metadata": {
+          "status": "running",
+          "platform": "Linux",
+          "machine": "aarch64",
+          "sampling_algorithm": "decoder-keyframes-v1",
+          "decoder_backend": "native-idr",
+          "sample_count": 301
+        }
+      }
+    ],
+    "exact_jpeg": true,
+    "exact_transitions": true
+  },
+  {
+    "clip": "ethics",
+    "exact_pts_rgb": true,
+    "frames": 304,
+    "runs": [
+      {
+        "backend": "cpu-keyframes",
+        "prepare_s": 10.883232580963522,
+        "detect_s": 1.4726758650504053,
+        "pages": 9,
+        "transitions": [
+          "252/5",
+          "277/5",
+          "367/5",
+          "392/5",
+          "81",
+          "248/3",
+          "99",
+          "3466/15"
+        ],
+        "metadata": {
+          "status": "running",
+          "platform": "Linux",
+          "machine": "aarch64",
+          "sampling_algorithm": "decoder-keyframes-v1",
+          "decoder_backend": "cpu-keyframes",
+          "sample_count": 304
+        }
+      },
+      {
+        "backend": "native-idr",
+        "prepare_s": 8.28208575793542,
+        "detect_s": 1.6616421800572425,
+        "pages": 9,
+        "transitions": [
+          "252/5",
+          "277/5",
+          "367/5",
+          "392/5",
+          "81",
+          "248/3",
+          "99",
+          "3466/15"
+        ],
+        "metadata": {
+          "status": "running",
+          "platform": "Linux",
+          "machine": "aarch64",
+          "sampling_algorithm": "decoder-keyframes-v1",
+          "decoder_backend": "native-idr",
+          "sample_count": 304
+        }
+      }
+    ],
+    "exact_jpeg": true,
+    "exact_transitions": true
+  }
+]

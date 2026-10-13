@@ -140,9 +140,10 @@ def _safe_owned_dir(root, directory, expected_id=None):
         raise UnsafeCache('Session directory/owner mismatch')
     for item in directory.iterdir():
         # These are the exact publication temporaries created by write_jpeg
-        # and _write_manifest/compact_samples, inside a verified owner session.
+        # and _write_manifest, inside a verified owner session.
         temporary=(item.name=='manifest.tmp' or
-                   re.fullmatch(r'[0-9]{8,}\.tmp',item.name) is not None)
+                   re.fullmatch(r'[0-9]{8,}\.tmp',item.name) is not None or
+                   re.fullmatch(r'skipped_[0-9]{6,}\.tmp',item.name) is not None)
         if (item.is_symlink() or not item.is_file() or
                 (item.name not in ('manifest.json','lease.lock') and
                  not item.name.endswith('.jpg') and not temporary) or
@@ -211,12 +212,19 @@ def discard_cache(root, directory):
 
 class CachePin:
     """Shared Project lifetime owns the original writer lock without a gap."""
-    def __init__(self, lease):
+    def __init__(self, lease, owner=None):
+        self._owner=owner
         import weakref
         self._finalizer = weakref.finalize(self, lease.__exit__, None, None, None)
 
+    def write_lazy_jpeg(self,index,content,cancel_token=None,*,directory=None):
+        if not self._finalizer.alive or self._owner is None:raise ValueError('Closed or unknown cache owner')
+        if directory is not None and Path(directory)!=self._owner[1]:raise UnsafeCache('Cache owner directory mismatch')
+        return _write_lazy_owned(self,index,content,cancel_token)
+
     def close(self):
         self._finalizer()
+        self._owner=None
 
 
 # Quotas are reserved in chunks by cooperating writers. The ledger is only
@@ -296,6 +304,51 @@ def _root_usage(root):
                 if file.name.endswith('.jpg'):own += size
         jpeg_bytes[directory.name] = own
     return total, jpeg_bytes
+
+
+def _write_lazy_owned(pin,index,content,cancel_token=None):
+    """Grow a completed, still-pinned generation under the shared quota lock."""
+    if type(index) is not int or index<0 or not isinstance(content,bytes) or not content.startswith(b'\xff\xd8') or not content.endswith(b'\xff\xd9'):
+        raise ValueError('Invalid lazy JPEG')
+    root,directory,owner,min_free,session_limit,root_limit,auto_prune=pin._owner
+    def check():
+        if cancel_token is not None:cancel_token.raise_if_cancelled()
+        if not pin._finalizer.alive:raise ValueError('Closed cache owner')
+    check()
+    with _budget_lock(root):
+        check();manifest=_safe_owned_dir(root,directory,owner)
+        if not manifest['complete']:raise UnsafeCache('Lazy images require completed cache')
+        path=directory/f'skipped_{index:06d}.jpg';temp=directory/f'skipped_{index:06d}.tmp'
+        if path.exists() or path.is_symlink():raise UnsafeCache('Sample already exists')
+        records=_read_reservations(root);_reclaim_reservations(root,records,owner)
+        def accounting():
+            usage,jpegs=_root_usage(root)
+            outstanding=sum(max(0,ceiling-jpegs.get('session-'+key,0)) for key,ceiling in records.items())
+            available=min(root_limit-usage-outstanding,shutil.disk_usage(root).free-min_free-outstanding)-256*(len(records)+1)
+            return jpegs.get(directory.name,0),available
+        own,available=accounting()
+        if own+len(content)>session_limit:raise CacheBudgetExceeded('Insufficient session cache budget')
+        if available<len(content) and auto_prune:
+            _prune_cache_locked(root,expired_only=False,exclude=(directory,))
+            _reclaim_reservations(root,records,owner);own,available=accounting()
+        if available<len(content):raise CacheBudgetExceeded('Insufficient root cache budget or free disk reserve')
+        _write_reservations(root,records)
+        fd=os.open(temp,os.O_WRONLY|os.O_CREAT|os.O_EXCL|getattr(os,'O_NOFOLLOW',0),0o600)
+        published=False;manifest_created=False
+        try:
+            with os.fdopen(fd,'wb') as file:file.write(content)
+            check();os.replace(temp,path);published=True
+            state=dict(manifest,bytes=own+len(content),updated_at=time.time())
+            with (directory/'manifest.tmp').open('x',encoding='utf-8') as file:
+                manifest_created=True;json.dump(state,file,sort_keys=True);file.flush()
+            os.replace(directory/'manifest.tmp',directory/'manifest.json')
+        except BaseException:
+            if published and not path.is_symlink():path.unlink(missing_ok=True)
+            raise
+        finally:
+            if temp.exists() and not temp.is_symlink():temp.unlink()
+            if manifest_created:(directory/'manifest.tmp').unlink(missing_ok=True)
+        return path
 
 
 class CacheSession:
@@ -426,7 +479,7 @@ class CacheSession:
         if self.closed:
             raise RuntimeError('Closed cache')
         if self._pin is None:
-            self._pin = CachePin(self._lease)
+            self._pin = CachePin(self._lease,(self.root,self.directory,self.owner_uuid,self.min_free_bytes,self.session_limit,self.root_limit,self.auto_prune))
         return self._pin
 
     def close(self):

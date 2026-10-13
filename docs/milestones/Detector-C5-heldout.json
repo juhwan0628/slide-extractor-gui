@@ -1,0 +1,520 @@
+[
+  {
+    "clip": "sp",
+    "source_name": "시스템프로그램_SWE2001_41(엄영익) · SP02-2-S01-12 [346031-63fd62842b2d2].mp4",
+    "requested_source_offset_s": 600,
+    "clip_sha256": "699f2aef202b84432c7dbfedec799d4eb5390018dd3624bdc70c5d8044541757",
+    "policies": [
+      {
+        "policy": "all",
+        "observations": 302,
+        "baseline_pages": 27,
+        "representatives": [
+          {
+            "supported_pixels": 0,
+            "retained_supported_pixels": 0,
+            "missing_supported_pixels": 0,
+            "transient_pixels": 1,
+            "missing_core_edges": 0,
+            "occlusion_tiles": 0,
+            "missing_supported_fraction": 0.0,
+            "single_observation": false,
+            "index": 1,
+            "time_s": 1.0,
+            "start_s": 0.0,
+            "end_s": 1.0
+          },
+          {
+            "supported_pixels": 67,
+            "retained_supported_pixels": 56,
+            "missing_supported_pixels": 11,
+            "transient_pixels": 10,
+            "missing_core_edges": 165,
+            "occlusion_tiles": 0,
+            "missing_supported_fraction": 0.00019097222222222223,
+            "single_observation": false,
+            "index": 9,
+            "time_s": 9.0,
+            "start_s": 2.0,
+            "end_s": 10.0
+          },
+          {
+            "supported_pixels": 9514,
+            "retained_supported_pixels": 3452,
+            "missing_supported_pixels": 6062,
+            "transient_pixels": 0,
+            "missing_core_edges": 603,
+            "occlusion_tiles": 0,
+            "missing_supported_fraction": 0.10524305555555556,
+            "single_observation": false,
+            "index": 211,
+            "time_s": 210.86666666666667,
+            "start_s": 10.866666666666667,
+            "end_s": 300.8666666666667
+          }
+        ],
+        "identities": [
+          {
+            "occurrence": 0,
+            "identity": 0,
+            "revisit_of": null,
+            "similar_candidate": null,
+            "candidate_distance": null,
+            "exact_hash": "29101db583c9ed4a6823d1305853095edb540a39a7f8e9d36f5d95b424823efe"
+          },
+          {
+            "occurrence": 1,
+            "identity": 1,
+            "revisit_of": null,
+            "similar_candidate": null,
+            "candidate_distance": 0.0606703431372549,
+            "exact_hash": "77fea62182c19096e1b8b702c64d754b1f0aa0a540be9c2dfafdd4359669483d"
+          },
+          {
+            "occurrence": 2,
+            "identity": 2,
+            "revisit_of": null,
+            "similar_candidate": null,
+            "candidate_distance": 0.032712690631808275,
+            "exact_hash": "6de7cb63e0d4f3cd214a2bf2febb4921dc6064e75772b6aac2ef4bddfb87b1d8"
+          }
+        ]
+      },
+      {
+        "policy": "half",
+        "observations": 151,
+        "baseline_pages": 24,
+        "representatives": [
+          {
+            "supported_pixels": 0,
+            "retained_supported_pixels": 0,
+            "missing_supported_pixels": 0,
+            "transient_pixels": 0,
+            "missing_core_edges": 0,
+            "occlusion_tiles": 0,
+            "missing_supported_fraction": 0.0,
+            "single_observation": true,
+            "index": 0,
+            "time_s": 0.0,
+            "start_s": 0.0,
+            "end_s": 0.0
+          },
+          {
+            "supported_pixels": 50,
+            "retained_supported_pixels": 49,
+            "missing_supported_pixels": 1,
+            "transient_pixels": 10,
+            "missing_core_edges": 244,
+            "occlusion_tiles": 0,
+            "missing_supported_fraction": 1.736111111111111e-05,
+            "single_observation": false,
+            "index": 4,
+            "time_s": 8.0,
+            "start_s": 2.0,
+            "end_s": 10.0
+          },
+          {
+            "supported_pixels": 9361,
+            "retained_supported_pixels": 3411,
+            "missing_supported_pixels": 5950,
+            "transient_pixels": 0,
+            "missing_core_edges": 618,
+            "occlusion_tiles": 0,
+            "missing_supported_fraction": 0.1032986111111111,
+            "single_observation": false,
+            "index": 104,
+            "time_s": 207.86666666666667,
+            "start_s": 11.866666666666667,
+            "end_s": 299.8666666666667
+          }
+        ],
+        "identities": [
+          {
+            "occurrence": 0,
+            "identity": 0,
+            "revisit_of": null,
+            "similar_candidate": null,
+            "candidate_distance": null,
+            "exact_hash": "0a325edb7dd1295856d7ad6b0d453ea948a7fa77e2c8548813d95f4ba37b7c5a"
+          },
+          {
+            "occurrence": 1,
+            "identity": 1,
+            "revisit_of": null,
+            "similar_candidate": null,
+            "candidate_distance": 0.060681781045751636,
+            "exact_hash": "6e2399411c3c8cf55e6924088e89514040a6c4f0e2f781f71d79c7de8684d370"
+          },
+          {
+            "occurrence": 2,
+            "identity": 2,
+            "revisit_of": null,
+            "similar_candidate": null,
+            "candidate_distance": 0.03269750816993464,
+            "exact_hash": "607494d657f7eab84d11a6646ed8efae36861383fe85934636c7968720330875"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "clip": "multicore",
+    "source_name": "멀티코어컴퓨팅_SWE3021_41(민동문) · Lec04 - OoO Part 4 - Issue (Memory) [384279-6ab21b8d56518].mp4",
+    "requested_source_offset_s": 600,
+    "clip_sha256": "920a24d1c540e850a7920a9e9a9497a830413973a64a5f28bc2a9aa6aaef9f48",
+    "policies": [
+      {
+        "policy": "all",
+        "observations": 301,
+        "baseline_pages": 37,
+        "representatives": [
+          {
+            "supported_pixels": 1034,
+            "retained_supported_pixels": 1024,
+            "missing_supported_pixels": 10,
+            "transient_pixels": 0,
+            "missing_core_edges": 21,
+            "occlusion_tiles": 0,
+            "missing_supported_fraction": 0.00017361111111111112,
+            "single_observation": false,
+            "index": 114,
+            "time_s": 114.0,
+            "start_s": 0.0,
+            "end_s": 133.0
+          },
+          {
+            "supported_pixels": 2426,
+            "retained_supported_pixels": 2388,
+            "missing_supported_pixels": 38,
+            "transient_pixels": 0,
+            "missing_core_edges": 118,
+            "occlusion_tiles": 0,
+            "missing_supported_fraction": 0.0006597222222222222,
+            "single_observation": false,
+            "index": 300,
+            "time_s": 299.93333333333334,
+            "start_s": 133.93333333333334,
+            "end_s": 299.93333333333334
+          }
+        ],
+        "identities": [
+          {
+            "occurrence": 0,
+            "identity": 0,
+            "revisit_of": null,
+            "similar_candidate": null,
+            "candidate_distance": null,
+            "exact_hash": "650c6f449463d007bc7e8e96c0ef2ac7cbef9fad01249dfcd4e3bbd21a80c94e"
+          },
+          {
+            "occurrence": 1,
+            "identity": 1,
+            "revisit_of": null,
+            "similar_candidate": null,
+            "candidate_distance": 0.12837220860566448,
+            "exact_hash": "01cc5d23267dd858e61a8c490ed5c207edc395d3d9e9f7a66868b34049753c20"
+          }
+        ]
+      },
+      {
+        "policy": "half",
+        "observations": 151,
+        "baseline_pages": 27,
+        "representatives": [
+          {
+            "supported_pixels": 1031,
+            "retained_supported_pixels": 1024,
+            "missing_supported_pixels": 7,
+            "transient_pixels": 0,
+            "missing_core_edges": 24,
+            "occlusion_tiles": 0,
+            "missing_supported_fraction": 0.00012152777777777777,
+            "single_observation": false,
+            "index": 57,
+            "time_s": 114.0,
+            "start_s": 0.0,
+            "end_s": 132.0
+          },
+          {
+            "supported_pixels": 2396,
+            "retained_supported_pixels": 2363,
+            "missing_supported_pixels": 33,
+            "transient_pixels": 0,
+            "missing_core_edges": 122,
+            "occlusion_tiles": 0,
+            "missing_supported_fraction": 0.0005729166666666667,
+            "single_observation": false,
+            "index": 149,
+            "time_s": 297.93333333333334,
+            "start_s": 133.93333333333334,
+            "end_s": 299.93333333333334
+          }
+        ],
+        "identities": [
+          {
+            "occurrence": 0,
+            "identity": 0,
+            "revisit_of": null,
+            "similar_candidate": null,
+            "candidate_distance": null,
+            "exact_hash": "650c6f449463d007bc7e8e96c0ef2ac7cbef9fad01249dfcd4e3bbd21a80c94e"
+          },
+          {
+            "occurrence": 1,
+            "identity": 1,
+            "revisit_of": null,
+            "similar_candidate": null,
+            "candidate_distance": 0.12828717320261437,
+            "exact_hash": "cceb0640a506b464e3d6a7beefe9f5bf38ce4af5ddbd0e9bde9d010cd1eb6f3e"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "clip": "ethics",
+    "source_name": "지능정보사회와AI윤리_COE2001_01(기회성) · 제4장 인공지능 윤리 이슈 [385854-6ab3953c693ba].mp4",
+    "requested_source_offset_s": 600,
+    "clip_sha256": "91c1e22745b894784a791f89770b79e6576f11450f9ffe7bb15e042b5e128def",
+    "policies": [
+      {
+        "policy": "all",
+        "observations": 303,
+        "baseline_pages": 5,
+        "representatives": [
+          {
+            "supported_pixels": 0,
+            "retained_supported_pixels": 0,
+            "missing_supported_pixels": 0,
+            "transient_pixels": 0,
+            "missing_core_edges": 51,
+            "occlusion_tiles": 0,
+            "missing_supported_fraction": 0.0,
+            "single_observation": false,
+            "index": 8,
+            "time_s": 8.0,
+            "start_s": 0.0,
+            "end_s": 8.0
+          },
+          {
+            "supported_pixels": 0,
+            "retained_supported_pixels": 0,
+            "missing_supported_pixels": 0,
+            "transient_pixels": 0,
+            "missing_core_edges": 85,
+            "occlusion_tiles": 0,
+            "missing_supported_fraction": 0.0,
+            "single_observation": false,
+            "index": 63,
+            "time_s": 62.2,
+            "start_s": 8.2,
+            "end_s": 62.2
+          },
+          {
+            "supported_pixels": 1,
+            "retained_supported_pixels": 1,
+            "missing_supported_pixels": 0,
+            "transient_pixels": 0,
+            "missing_core_edges": 72,
+            "occlusion_tiles": 0,
+            "missing_supported_fraction": 0.0,
+            "single_observation": false,
+            "index": 78,
+            "time_s": 76.6,
+            "start_s": 62.6,
+            "end_s": 188.6
+          },
+          {
+            "supported_pixels": 0,
+            "retained_supported_pixels": 0,
+            "missing_supported_pixels": 0,
+            "transient_pixels": 0,
+            "missing_core_edges": 71,
+            "occlusion_tiles": 0,
+            "missing_supported_fraction": 0.0,
+            "single_observation": false,
+            "index": 278,
+            "time_s": 276.3333333333333,
+            "start_s": 189.33333333333334,
+            "end_s": 276.3333333333333
+          },
+          {
+            "supported_pixels": 0,
+            "retained_supported_pixels": 0,
+            "missing_supported_pixels": 0,
+            "transient_pixels": 0,
+            "missing_core_edges": 8,
+            "occlusion_tiles": 0,
+            "missing_supported_fraction": 0.0,
+            "single_observation": false,
+            "index": 302,
+            "time_s": 300.3333333333333,
+            "start_s": 277.3333333333333,
+            "end_s": 300.3333333333333
+          }
+        ],
+        "identities": [
+          {
+            "occurrence": 0,
+            "identity": 0,
+            "revisit_of": null,
+            "similar_candidate": null,
+            "candidate_distance": null,
+            "exact_hash": "23014a5bb19004b4af2f121a77891d7c4358a6aff3ac6b362de53986a4ac58a3"
+          },
+          {
+            "occurrence": 1,
+            "identity": 1,
+            "revisit_of": null,
+            "similar_candidate": null,
+            "candidate_distance": 0.10356345315904139,
+            "exact_hash": "5081a8342e3ea1c1cc5645da1e788f13aeb959290ccd3f4d5c61a256e91debb9"
+          },
+          {
+            "occurrence": 2,
+            "identity": 2,
+            "revisit_of": null,
+            "similar_candidate": null,
+            "candidate_distance": 0.08674863834422658,
+            "exact_hash": "a8d8e9384ad2b867b54a2b51e33a47e196abdbc8e7f0af124c9fee0ecf834196"
+          },
+          {
+            "occurrence": 3,
+            "identity": 3,
+            "revisit_of": null,
+            "similar_candidate": null,
+            "candidate_distance": 0.10250503812636166,
+            "exact_hash": "126b7171c2e2989614d047ddebf21f2217230a53d5bc1716a5f011b9dba645e3"
+          },
+          {
+            "occurrence": 4,
+            "identity": 4,
+            "revisit_of": null,
+            "similar_candidate": null,
+            "candidate_distance": 0.072453022875817,
+            "exact_hash": "1e4637ba230f9f9482e24edb47960ce1bb8b47f859ccdc2eccda1667815a9818"
+          }
+        ]
+      },
+      {
+        "policy": "half",
+        "observations": 152,
+        "baseline_pages": 5,
+        "representatives": [
+          {
+            "supported_pixels": 0,
+            "retained_supported_pixels": 0,
+            "missing_supported_pixels": 0,
+            "transient_pixels": 0,
+            "missing_core_edges": 53,
+            "occlusion_tiles": 0,
+            "missing_supported_fraction": 0.0,
+            "single_observation": false,
+            "index": 4,
+            "time_s": 8.0,
+            "start_s": 0.0,
+            "end_s": 8.0
+          },
+          {
+            "supported_pixels": 0,
+            "retained_supported_pixels": 0,
+            "missing_supported_pixels": 0,
+            "transient_pixels": 0,
+            "missing_core_edges": 69,
+            "occlusion_tiles": 0,
+            "missing_supported_fraction": 0.0,
+            "single_observation": false,
+            "index": 31,
+            "time_s": 61.2,
+            "start_s": 9.2,
+            "end_s": 61.2
+          },
+          {
+            "supported_pixels": 0,
+            "retained_supported_pixels": 0,
+            "missing_supported_pixels": 0,
+            "transient_pixels": 0,
+            "missing_core_edges": 29,
+            "occlusion_tiles": 0,
+            "missing_supported_fraction": 0.0,
+            "single_observation": false,
+            "index": 95,
+            "time_s": 188.6,
+            "start_s": 62.6,
+            "end_s": 188.6
+          },
+          {
+            "supported_pixels": 0,
+            "retained_supported_pixels": 0,
+            "missing_supported_pixels": 0,
+            "transient_pixels": 0,
+            "missing_core_edges": 77,
+            "occlusion_tiles": 0,
+            "missing_supported_fraction": 0.0,
+            "single_observation": false,
+            "index": 139,
+            "time_s": 276.3333333333333,
+            "start_s": 190.33333333333334,
+            "end_s": 276.3333333333333
+          },
+          {
+            "supported_pixels": 0,
+            "retained_supported_pixels": 0,
+            "missing_supported_pixels": 0,
+            "transient_pixels": 0,
+            "missing_core_edges": 8,
+            "occlusion_tiles": 0,
+            "missing_supported_fraction": 0.0,
+            "single_observation": false,
+            "index": 151,
+            "time_s": 300.3333333333333,
+            "start_s": 278.3333333333333,
+            "end_s": 300.3333333333333
+          }
+        ],
+        "identities": [
+          {
+            "occurrence": 0,
+            "identity": 0,
+            "revisit_of": null,
+            "similar_candidate": null,
+            "candidate_distance": null,
+            "exact_hash": "23014a5bb19004b4af2f121a77891d7c4358a6aff3ac6b362de53986a4ac58a3"
+          },
+          {
+            "occurrence": 1,
+            "identity": 1,
+            "revisit_of": null,
+            "similar_candidate": null,
+            "candidate_distance": 0.10362942538126362,
+            "exact_hash": "6e21d6c555b8c766b34ff209ed72f71bf746c06483aac86f8bdc9bc442729e3d"
+          },
+          {
+            "occurrence": 2,
+            "identity": 2,
+            "revisit_of": null,
+            "similar_candidate": null,
+            "candidate_distance": 0.0866567265795207,
+            "exact_hash": "457f2a3e9f4ee64c6d47c2d74d880c4c3dd15c132830f250d6cafa901d0e4863"
+          },
+          {
+            "occurrence": 3,
+            "identity": 3,
+            "revisit_of": null,
+            "similar_candidate": null,
+            "candidate_distance": 0.10251259531590413,
+            "exact_hash": "126b7171c2e2989614d047ddebf21f2217230a53d5bc1716a5f011b9dba645e3"
+          },
+          {
+            "occurrence": 4,
+            "identity": 4,
+            "revisit_of": null,
+            "similar_candidate": null,
+            "candidate_distance": 0.0723148148148148,
+            "exact_hash": "1e4637ba230f9f9482e24edb47960ce1bb8b47f859ccdc2eccda1667815a9818"
+          }
+        ]
+      }
+    ]
+  }
+]

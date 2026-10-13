@@ -3,12 +3,13 @@ import json
 import time
 from pathlib import Path
 from PySide6.QtWidgets import QApplication
+from tests.media_fixtures import make_scene_video
 from gui.window import Window
 from gui.state import State
 from slide_core.simple_json import simple_timeline
 from slide_core.pdf_only_export import export_pdf_only
-from slide_core.export_v3 import export_project
-from slide_core.timeline_json import loads
+from slide_core.keyframe_export import export_project
+from slide_core.keyframe_json import loads
 from pypdf import PdfReader
 
 VIDEO=Path('/tmp/slide-m1-fixtures/scene-change.mp4')
@@ -21,12 +22,12 @@ def wait(app,condition,timeout=20):
     raise AssertionError('GUI job timeout')
 
 def test_pdf_only_and_simple_json(tmp_path):
-    if not VIDEO.exists():return
+    video=make_scene_video(tmp_path/'scene.mp4')
     app=QApplication.instance() or QApplication([])
     w=Window();w.show()
     try:
         assert not w.json_enabled and w.json_format=='simple'
-        w.open_source(VIDEO);wait(app,lambda:w.controller.state==State.SOURCE_READY)
+        w.open_source(video);wait(app,lambda:w.controller.state==State.SOURCE_READY)
         w.analyze();wait(app,lambda:w.controller.state==State.REVIEW_READY)
         p=w.controller.project
         target=tmp_path/'slides.pdf'
@@ -50,8 +51,8 @@ def test_pdf_only_and_simple_json(tmp_path):
         assert len(PdfReader(pdf).pages)==len(p.pages)
         pdf,json_path=export_project(p,target,overwrite=True,sidecar_format='detailed')
         detailed=loads(json_path.read_bytes(),pdf_bytes=pdf.read_bytes())
-        assert detailed['schema_version']==3
+        assert detailed['schema_version']==6
         for x in detailed['detected_boundaries']:
-            assert any(v>0 for v in x['anchor_metrics'].values())
+            assert any(v>0 for v in x['spatial_metrics'].values())
     finally:
         w.close();wait(app,lambda:not w.isVisible())

@@ -1,0 +1,16 @@
+{
+  "clip": "multicore.mp4",
+  "source_key_packets": 301,
+  "indexed_keys": 301,
+  "selection_policy": "all",
+  "decoder_backend": "native-idr",
+  "automatic_pages": 4,
+  "edited_pages": 5,
+  "edited_odd_ordinal": 3,
+  "edited_source_pts": 48123,
+  "edited_time_s": 3.0,
+  "schema_version": 6,
+  "pdf_page_count": 5,
+  "cache_reused": true,
+  "reanalysis_reused_exact_index": true
+}
