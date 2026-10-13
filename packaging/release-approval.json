@@ -1,6 +1,6 @@
 {
-  "status": "VALIDATED_CANDIDATE",
-  "public_release_approved": false,
+  "status": "APPROVED",
+  "public_release_approved": true,
   "version": "0.5.0b1",
   "commit": "04849e137c198f619f851606014a667a814d4d40",
   "run_id": "38286090517",
@@ -39,5 +39,5 @@
       "manifest_sha256": "9487bcef49341537217f0f81ff0222e04474f2cebfd8e62422702cf3f0ab5b08"
     }
   },
-  "review_scope": "Keyframe-only candidate. Same-source native regressions, bundled/installed/modified QtCore test-copy empty-PATH workflows and v4/simple JSON; exact downloaded original installer, native inventory, corresponding source and notice audit passed. Independent final review completed with no remaining Critical/Important findings. Physical devices/security policies and broad input performance not qualified; public release not authorized."
+  "review_scope": "Keyframe-only candidate. Same-source native regressions, bundled/installed/modified QtCore test-copy empty-PATH workflows and v4/simple JSON; exact downloaded original installer, native inventory, corresponding source and notice audit passed. Independent final review completed with no remaining Critical/Important findings. Physical devices/security policies and broad input performance not qualified; public release not authorized. User confirmed normal operation on both physical operating systems on 2026-10-13 and explicitly authorized public release."
 }

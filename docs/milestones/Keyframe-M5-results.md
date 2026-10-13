@@ -109,3 +109,7 @@ DMG 이름의 approved는 기존 빌드 입력 명칭이며 공개 릴리스 승
 | `SlideExtractor-v0.5.0b1-Setup-Windows-x64.exe` | 69415169 | `0e63e6864f3ba2ec63eea0fac31901fc5f6a67523609e7e1bfdde5721858aa63` |
 | `SlideExtractor-v0.5.0b1-Sources-Licenses.zip` | 686543701 | `38250ec5b8cebd4be82bbb29f2c9107485310e3f75eed8b0ce2865405597f8b7` |
 | `SlideExtractor-v0.5.0b1-macOS-arm64.dmg` | 84815404 | `dc93248fa7954a6123daaafce7a0c494770735a772ac651db3bf1498104c4498` |
+
+## 사용자 실기기 확인 및 공개 승인 — 2026-10-13
+
+사용자가 0.5.0 베타를 두 운영체제에서 정상 동작 확인했다고 보고했고, 이어서 실제 공개 배포를 명시적으로 지시했습니다. 위의 "실기기 확인 전" 및 public_release_approved=false 기록은 당시 후보 준비 상태의 이력입니다. 현재 승인은 APPROVED/public_release_approved=true입니다. 기존 후보 DMG·EXE의 해시와 앱·빌드 입력은 유지하며 main 통합 후 공개 워크플로에서 다시 검증합니다. 특정 추가 기능별 실기기 검사를 별도로 수행했다는 주장은 하지 않습니다.

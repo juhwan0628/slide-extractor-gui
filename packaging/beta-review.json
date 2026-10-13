@@ -1,7 +1,7 @@
 {
   "version": "0.5.0b1",
   "source_ci_run_id": "38286090268",
-  "public_release_approved": false,
+  "public_release_approved": true,
   "license_audit_run_id": "38313742170",
   "audit_commit": "24941686671c1e76237ae634ac09997e5bc47d1e",
   "candidate_run_id": "38286090517",
