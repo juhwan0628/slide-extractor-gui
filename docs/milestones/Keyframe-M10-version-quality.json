@@ -1,0 +1,728 @@
+[
+  {
+    "dataset": "original",
+    "clip": "sp",
+    "indexed_keys": 301,
+    "observations": 151,
+    "groups_identical": true,
+    "groups": [
+      {
+        "start_s": 0.0,
+        "end_s": 92.0,
+        "old_s": 92.0,
+        "new_s": 90.0,
+        "old_score_on_v8": {
+          "retained": 1114,
+          "transient": 1,
+          "occlusion_tiles": 0,
+          "score": 1113.75
+        },
+        "new_score_on_v8": {
+          "retained": 1116,
+          "transient": 5,
+          "occlusion_tiles": 0,
+          "score": 1114.75
+        },
+        "new_diagnostics": {
+          "missing_supported_pixels": 491,
+          "retained_supported_pixels": 1116,
+          "occlusion_tiles": 0
+        },
+        "pair_changed_fraction": 3.472222222222222e-05,
+        "pair_changed_cell_fraction": 0.0,
+        "pair_structural_change": false,
+        "old_red_pixels": 4151,
+        "red_retention_with_1px_tolerance": 0.9997590941941701
+      },
+      {
+        "start_s": 94.0,
+        "end_s": 286.0,
+        "old_s": 284.0,
+        "new_s": 286.0,
+        "old_score_on_v8": {
+          "retained": 1064,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 1064.0
+        },
+        "new_score_on_v8": {
+          "retained": 1073,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 1073.0
+        },
+        "new_diagnostics": {
+          "missing_supported_pixels": 131,
+          "retained_supported_pixels": 1073,
+          "occlusion_tiles": 0
+        },
+        "pair_changed_fraction": 0.0,
+        "pair_changed_cell_fraction": 0.0,
+        "pair_structural_change": false,
+        "old_red_pixels": 6121,
+        "red_retention_with_1px_tolerance": 0.9988563960137232
+      },
+      {
+        "start_s": 288.0,
+        "end_s": 300.0,
+        "old_s": 296.0,
+        "new_s": 298.0,
+        "old_score_on_v8": {
+          "retained": 62,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 62.0
+        },
+        "new_score_on_v8": {
+          "retained": 63,
+          "transient": 1,
+          "occlusion_tiles": 0,
+          "score": 62.75
+        },
+        "new_diagnostics": {
+          "missing_supported_pixels": 1,
+          "retained_supported_pixels": 63,
+          "occlusion_tiles": 0
+        },
+        "pair_changed_fraction": 0.0,
+        "pair_changed_cell_fraction": 0.0,
+        "pair_structural_change": false,
+        "old_red_pixels": 1711,
+        "red_retention_with_1px_tolerance": 0.9988310929281122
+      }
+    ]
+  },
+  {
+    "dataset": "original",
+    "clip": "multicore",
+    "indexed_keys": 301,
+    "observations": 151,
+    "groups_identical": true,
+    "groups": [
+      {
+        "start_s": 0.0,
+        "end_s": 84.0,
+        "old_s": 78.0,
+        "new_s": 84.0,
+        "old_score_on_v8": {
+          "retained": 2095,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 2095.0
+        },
+        "new_score_on_v8": {
+          "retained": 2102,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 2102.0
+        },
+        "new_diagnostics": {
+          "missing_supported_pixels": 26,
+          "retained_supported_pixels": 2102,
+          "occlusion_tiles": 0
+        },
+        "pair_changed_fraction": 0.0,
+        "pair_changed_cell_fraction": 0.0,
+        "pair_structural_change": false,
+        "old_red_pixels": 9674,
+        "red_retention_with_1px_tolerance": 0.9936944387016746
+      },
+      {
+        "start_s": 85.93333333333334,
+        "end_s": 179.93333333333334,
+        "old_s": 177.93333333333334,
+        "new_s": 179.93333333333334,
+        "old_score_on_v8": {
+          "retained": 1212,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 1212.0
+        },
+        "new_score_on_v8": {
+          "retained": 1216,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 1216.0
+        },
+        "new_diagnostics": {
+          "missing_supported_pixels": 17,
+          "retained_supported_pixels": 1216,
+          "occlusion_tiles": 0
+        },
+        "pair_changed_fraction": 0.0,
+        "pair_changed_cell_fraction": 0.0,
+        "pair_structural_change": false,
+        "old_red_pixels": 1718,
+        "red_retention_with_1px_tolerance": 0.9889406286379511
+      },
+      {
+        "start_s": 181.73333333333332,
+        "end_s": 207.73333333333332,
+        "old_s": 207.73333333333332,
+        "new_s": 207.73333333333332,
+        "old_score_on_v8": {
+          "retained": 0,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 0.0
+        },
+        "new_score_on_v8": {
+          "retained": 0,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 0.0
+        },
+        "new_diagnostics": {
+          "missing_supported_pixels": 0,
+          "retained_supported_pixels": 0,
+          "occlusion_tiles": 0
+        },
+        "pair_changed_fraction": 0.0,
+        "pair_changed_cell_fraction": 0.0,
+        "pair_structural_change": false,
+        "old_red_pixels": 0,
+        "red_retention_with_1px_tolerance": 0.0
+      },
+      {
+        "start_s": 209.46666666666667,
+        "end_s": 299.46666666666664,
+        "old_s": 289.46666666666664,
+        "new_s": 295.46666666666664,
+        "old_score_on_v8": {
+          "retained": 855,
+          "transient": 1,
+          "occlusion_tiles": 0,
+          "score": 854.75
+        },
+        "new_score_on_v8": {
+          "retained": 855,
+          "transient": 1,
+          "occlusion_tiles": 0,
+          "score": 854.75
+        },
+        "new_diagnostics": {
+          "missing_supported_pixels": 11,
+          "retained_supported_pixels": 855,
+          "occlusion_tiles": 0
+        },
+        "pair_changed_fraction": 0.0,
+        "pair_changed_cell_fraction": 0.0,
+        "pair_structural_change": false,
+        "old_red_pixels": 1745,
+        "red_retention_with_1px_tolerance": 0.9954154727793696
+      }
+    ]
+  },
+  {
+    "dataset": "original",
+    "clip": "ethics",
+    "indexed_keys": 304,
+    "observations": 152,
+    "groups_identical": true,
+    "groups": [
+      {
+        "start_s": 0.0,
+        "end_s": 40.0,
+        "old_s": 40.0,
+        "new_s": 40.0,
+        "old_score_on_v8": {
+          "retained": 0,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 0.0
+        },
+        "new_score_on_v8": {
+          "retained": 0,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 0.0
+        },
+        "new_diagnostics": {
+          "missing_supported_pixels": 0,
+          "retained_supported_pixels": 0,
+          "occlusion_tiles": 0
+        },
+        "pair_changed_fraction": 0.0,
+        "pair_changed_cell_fraction": 0.0,
+        "pair_structural_change": false,
+        "old_red_pixels": 609,
+        "red_retention_with_1px_tolerance": 1.0
+      },
+      {
+        "start_s": 41.4,
+        "end_s": 79.4,
+        "old_s": 79.4,
+        "new_s": 79.4,
+        "old_score_on_v8": {
+          "retained": 818,
+          "transient": 8,
+          "occlusion_tiles": 0,
+          "score": 816.0
+        },
+        "new_score_on_v8": {
+          "retained": 818,
+          "transient": 8,
+          "occlusion_tiles": 0,
+          "score": 816.0
+        },
+        "new_diagnostics": {
+          "missing_supported_pixels": 743,
+          "retained_supported_pixels": 818,
+          "occlusion_tiles": 0
+        },
+        "pair_changed_fraction": 0.0,
+        "pair_changed_cell_fraction": 0.0,
+        "pair_structural_change": false,
+        "old_red_pixels": 7651,
+        "red_retention_with_1px_tolerance": 1.0
+      },
+      {
+        "start_s": 81.0,
+        "end_s": 81.0,
+        "old_s": 81.0,
+        "new_s": 81.0,
+        "old_score_on_v8": {
+          "retained": 0,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 0.0
+        },
+        "new_score_on_v8": {
+          "retained": 0,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 0.0
+        },
+        "new_diagnostics": {
+          "missing_supported_pixels": 0,
+          "retained_supported_pixels": 0,
+          "occlusion_tiles": 0
+        },
+        "pair_changed_fraction": 0.0,
+        "pair_changed_cell_fraction": 0.0,
+        "pair_structural_change": false,
+        "old_red_pixels": 10,
+        "red_retention_with_1px_tolerance": 1.0
+      },
+      {
+        "start_s": 82.66666666666667,
+        "end_s": 96.66666666666667,
+        "old_s": 96.66666666666667,
+        "new_s": 96.66666666666667,
+        "old_score_on_v8": {
+          "retained": 0,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 0.0
+        },
+        "new_score_on_v8": {
+          "retained": 0,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 0.0
+        },
+        "new_diagnostics": {
+          "missing_supported_pixels": 0,
+          "retained_supported_pixels": 0,
+          "occlusion_tiles": 0
+        },
+        "pair_changed_fraction": 0.0,
+        "pair_changed_cell_fraction": 0.0,
+        "pair_structural_change": false,
+        "old_red_pixels": 10,
+        "red_retention_with_1px_tolerance": 1.0
+      },
+      {
+        "start_s": 98.0,
+        "end_s": 230.0,
+        "old_s": 230.0,
+        "new_s": 230.0,
+        "old_score_on_v8": {
+          "retained": 0,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 0.0
+        },
+        "new_score_on_v8": {
+          "retained": 0,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 0.0
+        },
+        "new_diagnostics": {
+          "missing_supported_pixels": 0,
+          "retained_supported_pixels": 0,
+          "occlusion_tiles": 0
+        },
+        "pair_changed_fraction": 0.0,
+        "pair_changed_cell_fraction": 0.0,
+        "pair_structural_change": false,
+        "old_red_pixels": 8,
+        "red_retention_with_1px_tolerance": 1.0
+      },
+      {
+        "start_s": 231.06666666666666,
+        "end_s": 299.06666666666666,
+        "old_s": 299.06666666666666,
+        "new_s": 299.06666666666666,
+        "old_score_on_v8": {
+          "retained": 0,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 0.0
+        },
+        "new_score_on_v8": {
+          "retained": 0,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 0.0
+        },
+        "new_diagnostics": {
+          "missing_supported_pixels": 0,
+          "retained_supported_pixels": 0,
+          "occlusion_tiles": 0
+        },
+        "pair_changed_fraction": 0.0,
+        "pair_changed_cell_fraction": 0.0,
+        "pair_structural_change": false,
+        "old_red_pixels": 1384,
+        "red_retention_with_1px_tolerance": 1.0
+      }
+    ]
+  },
+  {
+    "dataset": "validation2",
+    "clip": "sp",
+    "indexed_keys": 304,
+    "observations": 152,
+    "groups_identical": true,
+    "groups": [
+      {
+        "start_s": 0.0,
+        "end_s": 152.0,
+        "old_s": 146.0,
+        "new_s": 114.0,
+        "old_score_on_v8": {
+          "retained": 671,
+          "transient": 1,
+          "occlusion_tiles": 0,
+          "score": 670.75
+        },
+        "new_score_on_v8": {
+          "retained": 681,
+          "transient": 3,
+          "occlusion_tiles": 0,
+          "score": 680.25
+        },
+        "new_diagnostics": {
+          "missing_supported_pixels": 281,
+          "retained_supported_pixels": 681,
+          "occlusion_tiles": 0
+        },
+        "pair_changed_fraction": 1.736111111111111e-05,
+        "pair_changed_cell_fraction": 0.0,
+        "pair_structural_change": false,
+        "old_red_pixels": 3510,
+        "red_retention_with_1px_tolerance": 0.9863247863247864
+      },
+      {
+        "start_s": 153.4,
+        "end_s": 209.4,
+        "old_s": 205.4,
+        "new_s": 205.4,
+        "old_score_on_v8": {
+          "retained": 1427,
+          "transient": 3,
+          "occlusion_tiles": 0,
+          "score": 1426.25
+        },
+        "new_score_on_v8": {
+          "retained": 1427,
+          "transient": 3,
+          "occlusion_tiles": 0,
+          "score": 1426.25
+        },
+        "new_diagnostics": {
+          "missing_supported_pixels": 89,
+          "retained_supported_pixels": 1427,
+          "occlusion_tiles": 0
+        },
+        "pair_changed_fraction": 0.0,
+        "pair_changed_cell_fraction": 0.0,
+        "pair_structural_change": false,
+        "old_red_pixels": 5103,
+        "red_retention_with_1px_tolerance": 1.0
+      },
+      {
+        "start_s": 210.8,
+        "end_s": 220.8,
+        "old_s": 214.8,
+        "new_s": 214.8,
+        "old_score_on_v8": {
+          "retained": 94,
+          "transient": 19,
+          "occlusion_tiles": 0,
+          "score": 89.25
+        },
+        "new_score_on_v8": {
+          "retained": 94,
+          "transient": 19,
+          "occlusion_tiles": 0,
+          "score": 89.25
+        },
+        "new_diagnostics": {
+          "missing_supported_pixels": 34,
+          "retained_supported_pixels": 94,
+          "occlusion_tiles": 0
+        },
+        "pair_changed_fraction": 0.0,
+        "pair_changed_cell_fraction": 0.0,
+        "pair_structural_change": false,
+        "old_red_pixels": 3486,
+        "red_retention_with_1px_tolerance": 1.0
+      },
+      {
+        "start_s": 222.46666666666667,
+        "end_s": 280.46666666666664,
+        "old_s": 266.46666666666664,
+        "new_s": 266.46666666666664,
+        "old_score_on_v8": {
+          "retained": 219,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 219.0
+        },
+        "new_score_on_v8": {
+          "retained": 219,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 219.0
+        },
+        "new_diagnostics": {
+          "missing_supported_pixels": 37,
+          "retained_supported_pixels": 219,
+          "occlusion_tiles": 0
+        },
+        "pair_changed_fraction": 0.0,
+        "pair_changed_cell_fraction": 0.0,
+        "pair_structural_change": false,
+        "old_red_pixels": 6885,
+        "red_retention_with_1px_tolerance": 1.0
+      },
+      {
+        "start_s": 282.0,
+        "end_s": 296.0,
+        "old_s": 296.0,
+        "new_s": 296.0,
+        "old_score_on_v8": {
+          "retained": 356,
+          "transient": 4,
+          "occlusion_tiles": 0,
+          "score": 355.0
+        },
+        "new_score_on_v8": {
+          "retained": 356,
+          "transient": 4,
+          "occlusion_tiles": 0,
+          "score": 355.0
+        },
+        "new_diagnostics": {
+          "missing_supported_pixels": 11,
+          "retained_supported_pixels": 356,
+          "occlusion_tiles": 0
+        },
+        "pair_changed_fraction": 0.0,
+        "pair_changed_cell_fraction": 0.0,
+        "pair_structural_change": false,
+        "old_red_pixels": 5103,
+        "red_retention_with_1px_tolerance": 1.0
+      },
+      {
+        "start_s": 297.3333333333333,
+        "end_s": 297.3333333333333,
+        "old_s": 297.3333333333333,
+        "new_s": 297.3333333333333,
+        "old_score_on_v8": {
+          "retained": 0,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 0.0
+        },
+        "new_score_on_v8": {
+          "retained": 0,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 0.0
+        },
+        "new_diagnostics": {
+          "missing_supported_pixels": 0,
+          "retained_supported_pixels": 0,
+          "occlusion_tiles": 0
+        },
+        "pair_changed_fraction": 0.0,
+        "pair_changed_cell_fraction": 0.0,
+        "pair_structural_change": false,
+        "old_red_pixels": 3370,
+        "red_retention_with_1px_tolerance": 1.0
+      },
+      {
+        "start_s": 298.6,
+        "end_s": 298.6,
+        "old_s": 298.6,
+        "new_s": 298.6,
+        "old_score_on_v8": {
+          "retained": 0,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 0.0
+        },
+        "new_score_on_v8": {
+          "retained": 0,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 0.0
+        },
+        "new_diagnostics": {
+          "missing_supported_pixels": 0,
+          "retained_supported_pixels": 0,
+          "occlusion_tiles": 0
+        },
+        "pair_changed_fraction": 0.0,
+        "pair_changed_cell_fraction": 0.0,
+        "pair_structural_change": false,
+        "old_red_pixels": 7235,
+        "red_retention_with_1px_tolerance": 1.0
+      }
+    ]
+  },
+  {
+    "dataset": "validation2",
+    "clip": "multicore",
+    "indexed_keys": 301,
+    "observations": 151,
+    "groups_identical": true,
+    "groups": [
+      {
+        "start_s": 0.0,
+        "end_s": 300.0,
+        "old_s": 270.0,
+        "new_s": 256.0,
+        "old_score_on_v8": {
+          "retained": 3500,
+          "transient": 0,
+          "occlusion_tiles": 5,
+          "score": 3500.0
+        },
+        "new_score_on_v8": {
+          "retained": 3100,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 3100.0
+        },
+        "new_diagnostics": {
+          "missing_supported_pixels": 535,
+          "retained_supported_pixels": 3100,
+          "occlusion_tiles": 0
+        },
+        "pair_changed_fraction": 0.00796875,
+        "pair_changed_cell_fraction": 0.06944444444444445,
+        "pair_structural_change": false,
+        "old_red_pixels": 11739,
+        "red_retention_with_1px_tolerance": 0.9055285799471846
+      }
+    ]
+  },
+  {
+    "dataset": "validation2",
+    "clip": "ethics",
+    "indexed_keys": 302,
+    "observations": 151,
+    "groups_identical": true,
+    "groups": [
+      {
+        "start_s": 0.0,
+        "end_s": 28.0,
+        "old_s": 28.0,
+        "new_s": 28.0,
+        "old_score_on_v8": {
+          "retained": 0,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 0.0
+        },
+        "new_score_on_v8": {
+          "retained": 0,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 0.0
+        },
+        "new_diagnostics": {
+          "missing_supported_pixels": 0,
+          "retained_supported_pixels": 0,
+          "occlusion_tiles": 0
+        },
+        "pair_changed_fraction": 0.0,
+        "pair_changed_cell_fraction": 0.0,
+        "pair_structural_change": false,
+        "old_red_pixels": 10,
+        "red_retention_with_1px_tolerance": 1.0
+      },
+      {
+        "start_s": 29.066666666666666,
+        "end_s": 227.06666666666666,
+        "old_s": 227.06666666666666,
+        "new_s": 227.06666666666666,
+        "old_score_on_v8": {
+          "retained": 0,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 0.0
+        },
+        "new_score_on_v8": {
+          "retained": 0,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 0.0
+        },
+        "new_diagnostics": {
+          "missing_supported_pixels": 0,
+          "retained_supported_pixels": 0,
+          "occlusion_tiles": 0
+        },
+        "pair_changed_fraction": 0.0,
+        "pair_changed_cell_fraction": 0.0,
+        "pair_structural_change": false,
+        "old_red_pixels": 516,
+        "red_retention_with_1px_tolerance": 1.0
+      },
+      {
+        "start_s": 229.06666666666666,
+        "end_s": 299.06666666666666,
+        "old_s": 299.06666666666666,
+        "new_s": 299.06666666666666,
+        "old_score_on_v8": {
+          "retained": 0,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 0.0
+        },
+        "new_score_on_v8": {
+          "retained": 0,
+          "transient": 0,
+          "occlusion_tiles": 0,
+          "score": 0.0
+        },
+        "new_diagnostics": {
+          "missing_supported_pixels": 0,
+          "retained_supported_pixels": 0,
+          "occlusion_tiles": 0
+        },
+        "pair_changed_fraction": 0.0,
+        "pair_changed_cell_fraction": 0.0,
+        "pair_structural_change": false,
+        "old_red_pixels": 11,
+        "red_retention_with_1px_tolerance": 1.0
+      }
+    ]
+  }
+]

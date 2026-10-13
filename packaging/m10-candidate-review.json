@@ -1,0 +1,14 @@
+{
+  "version": "0.5.0b1",
+  "status": "REVIEWED_M10_CANDIDATE",
+  "public_release_approved": false,
+  "native_inventory_reviewed": true,
+  "reviewed_native_inventory_sha256": {
+    "macOS-ARM64": "46c10541090c1c0ba7120c563b48548722e47d7e8d5669dbbaf5babc67a80186",
+    "Windows-X64": "c58cec3224d220df987c0396dc3b162dd3d1decf6e3c3eeab839be7744fcf112"
+  },
+  "candidate_run_id": "38451133692",
+  "candidate_commit": "a7c11ee2381e6cae41fc24f9d4f373eb1cdeeb71",
+  "source_ci_run_id": "38451133836",
+  "require_native": true
+}
