@@ -1,0 +1,1500 @@
+[
+  {
+    "clip": "sp",
+    "policy": "all",
+    "pixel_fraction": 0.03,
+    "tile_fraction": 0.1,
+    "baseline_pages": 30,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 29,
+    "broad_times": [
+      93.0,
+      288.0
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 30
+  },
+  {
+    "clip": "sp",
+    "policy": "all",
+    "pixel_fraction": 0.03,
+    "tile_fraction": 0.25,
+    "baseline_pages": 30,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 29,
+    "broad_times": [
+      93.0,
+      288.0
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 30
+  },
+  {
+    "clip": "sp",
+    "policy": "all",
+    "pixel_fraction": 0.03,
+    "tile_fraction": 0.4,
+    "baseline_pages": 30,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 29,
+    "broad_times": [
+      93.0,
+      288.0
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 30
+  },
+  {
+    "clip": "sp",
+    "policy": "all",
+    "pixel_fraction": 0.03,
+    "tile_fraction": 0.55,
+    "baseline_pages": 30,
+    "broad_only_candidate_count": 0,
+    "combined_candidate_count": 29,
+    "broad_times": [],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 30
+  },
+  {
+    "clip": "sp",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.1,
+    "baseline_pages": 30,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 29,
+    "broad_times": [
+      93.0,
+      288.0
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 30
+  },
+  {
+    "clip": "sp",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.25,
+    "baseline_pages": 30,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 29,
+    "broad_times": [
+      93.0,
+      288.0
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 30
+  },
+  {
+    "clip": "sp",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.4,
+    "baseline_pages": 30,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 29,
+    "broad_times": [
+      93.0,
+      288.0
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 30
+  },
+  {
+    "clip": "sp",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.55,
+    "baseline_pages": 30,
+    "broad_only_candidate_count": 0,
+    "combined_candidate_count": 29,
+    "broad_times": [],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 30
+  },
+  {
+    "clip": "sp",
+    "policy": "all",
+    "pixel_fraction": 0.12,
+    "tile_fraction": 0.1,
+    "baseline_pages": 30,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 29,
+    "broad_times": [
+      93.0,
+      288.0
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 30
+  },
+  {
+    "clip": "sp",
+    "policy": "all",
+    "pixel_fraction": 0.12,
+    "tile_fraction": 0.25,
+    "baseline_pages": 30,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 29,
+    "broad_times": [
+      93.0,
+      288.0
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 30
+  },
+  {
+    "clip": "sp",
+    "policy": "all",
+    "pixel_fraction": 0.12,
+    "tile_fraction": 0.4,
+    "baseline_pages": 30,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 29,
+    "broad_times": [
+      93.0,
+      288.0
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 30
+  },
+  {
+    "clip": "sp",
+    "policy": "all",
+    "pixel_fraction": 0.12,
+    "tile_fraction": 0.55,
+    "baseline_pages": 30,
+    "broad_only_candidate_count": 0,
+    "combined_candidate_count": 29,
+    "broad_times": [],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 30
+  },
+  {
+    "clip": "sp",
+    "policy": "all",
+    "pixel_fraction": 0.2,
+    "tile_fraction": 0.1,
+    "baseline_pages": 30,
+    "broad_only_candidate_count": 0,
+    "combined_candidate_count": 29,
+    "broad_times": [],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 30
+  },
+  {
+    "clip": "sp",
+    "policy": "all",
+    "pixel_fraction": 0.2,
+    "tile_fraction": 0.25,
+    "baseline_pages": 30,
+    "broad_only_candidate_count": 0,
+    "combined_candidate_count": 29,
+    "broad_times": [],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 30
+  },
+  {
+    "clip": "sp",
+    "policy": "all",
+    "pixel_fraction": 0.2,
+    "tile_fraction": 0.4,
+    "baseline_pages": 30,
+    "broad_only_candidate_count": 0,
+    "combined_candidate_count": 29,
+    "broad_times": [],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 30
+  },
+  {
+    "clip": "sp",
+    "policy": "all",
+    "pixel_fraction": 0.2,
+    "tile_fraction": 0.55,
+    "baseline_pages": 30,
+    "broad_only_candidate_count": 0,
+    "combined_candidate_count": 29,
+    "broad_times": [],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 30
+  },
+  {
+    "clip": "sp",
+    "policy": "half",
+    "pixel_fraction": 0.03,
+    "tile_fraction": 0.1,
+    "baseline_pages": 24,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 23,
+    "broad_times": [
+      94.0,
+      288.0
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 24
+  },
+  {
+    "clip": "sp",
+    "policy": "half",
+    "pixel_fraction": 0.03,
+    "tile_fraction": 0.25,
+    "baseline_pages": 24,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 23,
+    "broad_times": [
+      94.0,
+      288.0
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 24
+  },
+  {
+    "clip": "sp",
+    "policy": "half",
+    "pixel_fraction": 0.03,
+    "tile_fraction": 0.4,
+    "baseline_pages": 24,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 23,
+    "broad_times": [
+      94.0,
+      288.0
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 24
+  },
+  {
+    "clip": "sp",
+    "policy": "half",
+    "pixel_fraction": 0.03,
+    "tile_fraction": 0.55,
+    "baseline_pages": 24,
+    "broad_only_candidate_count": 0,
+    "combined_candidate_count": 23,
+    "broad_times": [],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 24
+  },
+  {
+    "clip": "sp",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.1,
+    "baseline_pages": 24,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 23,
+    "broad_times": [
+      94.0,
+      288.0
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 24
+  },
+  {
+    "clip": "sp",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.25,
+    "baseline_pages": 24,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 23,
+    "broad_times": [
+      94.0,
+      288.0
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 24
+  },
+  {
+    "clip": "sp",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.4,
+    "baseline_pages": 24,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 23,
+    "broad_times": [
+      94.0,
+      288.0
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 24
+  },
+  {
+    "clip": "sp",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.55,
+    "baseline_pages": 24,
+    "broad_only_candidate_count": 0,
+    "combined_candidate_count": 23,
+    "broad_times": [],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 24
+  },
+  {
+    "clip": "sp",
+    "policy": "half",
+    "pixel_fraction": 0.12,
+    "tile_fraction": 0.1,
+    "baseline_pages": 24,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 23,
+    "broad_times": [
+      94.0,
+      288.0
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 24
+  },
+  {
+    "clip": "sp",
+    "policy": "half",
+    "pixel_fraction": 0.12,
+    "tile_fraction": 0.25,
+    "baseline_pages": 24,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 23,
+    "broad_times": [
+      94.0,
+      288.0
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 24
+  },
+  {
+    "clip": "sp",
+    "policy": "half",
+    "pixel_fraction": 0.12,
+    "tile_fraction": 0.4,
+    "baseline_pages": 24,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 23,
+    "broad_times": [
+      94.0,
+      288.0
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 24
+  },
+  {
+    "clip": "sp",
+    "policy": "half",
+    "pixel_fraction": 0.12,
+    "tile_fraction": 0.55,
+    "baseline_pages": 24,
+    "broad_only_candidate_count": 0,
+    "combined_candidate_count": 23,
+    "broad_times": [],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 24
+  },
+  {
+    "clip": "sp",
+    "policy": "half",
+    "pixel_fraction": 0.2,
+    "tile_fraction": 0.1,
+    "baseline_pages": 24,
+    "broad_only_candidate_count": 0,
+    "combined_candidate_count": 23,
+    "broad_times": [],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 24
+  },
+  {
+    "clip": "sp",
+    "policy": "half",
+    "pixel_fraction": 0.2,
+    "tile_fraction": 0.25,
+    "baseline_pages": 24,
+    "broad_only_candidate_count": 0,
+    "combined_candidate_count": 23,
+    "broad_times": [],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 24
+  },
+  {
+    "clip": "sp",
+    "policy": "half",
+    "pixel_fraction": 0.2,
+    "tile_fraction": 0.4,
+    "baseline_pages": 24,
+    "broad_only_candidate_count": 0,
+    "combined_candidate_count": 23,
+    "broad_times": [],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 24
+  },
+  {
+    "clip": "sp",
+    "policy": "half",
+    "pixel_fraction": 0.2,
+    "tile_fraction": 0.55,
+    "baseline_pages": 24,
+    "broad_only_candidate_count": 0,
+    "combined_candidate_count": 23,
+    "broad_times": [],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 24
+  },
+  {
+    "clip": "multicore",
+    "policy": "all",
+    "pixel_fraction": 0.03,
+    "tile_fraction": 0.1,
+    "baseline_pages": 28,
+    "broad_only_candidate_count": 3,
+    "combined_candidate_count": 27,
+    "broad_times": [
+      85.93333333333334,
+      180.73333333333332,
+      208.46666666666667
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 28
+  },
+  {
+    "clip": "multicore",
+    "policy": "all",
+    "pixel_fraction": 0.03,
+    "tile_fraction": 0.25,
+    "baseline_pages": 28,
+    "broad_only_candidate_count": 3,
+    "combined_candidate_count": 27,
+    "broad_times": [
+      85.93333333333334,
+      180.73333333333332,
+      208.46666666666667
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 28
+  },
+  {
+    "clip": "multicore",
+    "policy": "all",
+    "pixel_fraction": 0.03,
+    "tile_fraction": 0.4,
+    "baseline_pages": 28,
+    "broad_only_candidate_count": 3,
+    "combined_candidate_count": 27,
+    "broad_times": [
+      85.93333333333334,
+      180.73333333333332,
+      208.46666666666667
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 28
+  },
+  {
+    "clip": "multicore",
+    "policy": "all",
+    "pixel_fraction": 0.03,
+    "tile_fraction": 0.55,
+    "baseline_pages": 28,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 27,
+    "broad_times": [
+      85.93333333333334,
+      180.73333333333332
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 28
+  },
+  {
+    "clip": "multicore",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.1,
+    "baseline_pages": 28,
+    "broad_only_candidate_count": 3,
+    "combined_candidate_count": 27,
+    "broad_times": [
+      85.93333333333334,
+      180.73333333333332,
+      208.46666666666667
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 28
+  },
+  {
+    "clip": "multicore",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.25,
+    "baseline_pages": 28,
+    "broad_only_candidate_count": 3,
+    "combined_candidate_count": 27,
+    "broad_times": [
+      85.93333333333334,
+      180.73333333333332,
+      208.46666666666667
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 28
+  },
+  {
+    "clip": "multicore",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.4,
+    "baseline_pages": 28,
+    "broad_only_candidate_count": 3,
+    "combined_candidate_count": 27,
+    "broad_times": [
+      85.93333333333334,
+      180.73333333333332,
+      208.46666666666667
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 28
+  },
+  {
+    "clip": "multicore",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.55,
+    "baseline_pages": 28,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 27,
+    "broad_times": [
+      85.93333333333334,
+      180.73333333333332
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 28
+  },
+  {
+    "clip": "multicore",
+    "policy": "all",
+    "pixel_fraction": 0.12,
+    "tile_fraction": 0.1,
+    "baseline_pages": 28,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 27,
+    "broad_times": [
+      85.93333333333334,
+      180.73333333333332
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 28
+  },
+  {
+    "clip": "multicore",
+    "policy": "all",
+    "pixel_fraction": 0.12,
+    "tile_fraction": 0.25,
+    "baseline_pages": 28,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 27,
+    "broad_times": [
+      85.93333333333334,
+      180.73333333333332
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 28
+  },
+  {
+    "clip": "multicore",
+    "policy": "all",
+    "pixel_fraction": 0.12,
+    "tile_fraction": 0.4,
+    "baseline_pages": 28,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 27,
+    "broad_times": [
+      85.93333333333334,
+      180.73333333333332
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 28
+  },
+  {
+    "clip": "multicore",
+    "policy": "all",
+    "pixel_fraction": 0.12,
+    "tile_fraction": 0.55,
+    "baseline_pages": 28,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 27,
+    "broad_times": [
+      85.93333333333334,
+      180.73333333333332
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 28
+  },
+  {
+    "clip": "multicore",
+    "policy": "all",
+    "pixel_fraction": 0.2,
+    "tile_fraction": 0.1,
+    "baseline_pages": 28,
+    "broad_only_candidate_count": 1,
+    "combined_candidate_count": 27,
+    "broad_times": [
+      85.93333333333334
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 28
+  },
+  {
+    "clip": "multicore",
+    "policy": "all",
+    "pixel_fraction": 0.2,
+    "tile_fraction": 0.25,
+    "baseline_pages": 28,
+    "broad_only_candidate_count": 1,
+    "combined_candidate_count": 27,
+    "broad_times": [
+      85.93333333333334
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 28
+  },
+  {
+    "clip": "multicore",
+    "policy": "all",
+    "pixel_fraction": 0.2,
+    "tile_fraction": 0.4,
+    "baseline_pages": 28,
+    "broad_only_candidate_count": 1,
+    "combined_candidate_count": 27,
+    "broad_times": [
+      85.93333333333334
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 28
+  },
+  {
+    "clip": "multicore",
+    "policy": "all",
+    "pixel_fraction": 0.2,
+    "tile_fraction": 0.55,
+    "baseline_pages": 28,
+    "broad_only_candidate_count": 1,
+    "combined_candidate_count": 27,
+    "broad_times": [
+      85.93333333333334
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 28
+  },
+  {
+    "clip": "multicore",
+    "policy": "half",
+    "pixel_fraction": 0.03,
+    "tile_fraction": 0.1,
+    "baseline_pages": 21,
+    "broad_only_candidate_count": 3,
+    "combined_candidate_count": 20,
+    "broad_times": [
+      85.93333333333334,
+      181.73333333333332,
+      209.46666666666667
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 21
+  },
+  {
+    "clip": "multicore",
+    "policy": "half",
+    "pixel_fraction": 0.03,
+    "tile_fraction": 0.25,
+    "baseline_pages": 21,
+    "broad_only_candidate_count": 3,
+    "combined_candidate_count": 20,
+    "broad_times": [
+      85.93333333333334,
+      181.73333333333332,
+      209.46666666666667
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 21
+  },
+  {
+    "clip": "multicore",
+    "policy": "half",
+    "pixel_fraction": 0.03,
+    "tile_fraction": 0.4,
+    "baseline_pages": 21,
+    "broad_only_candidate_count": 3,
+    "combined_candidate_count": 20,
+    "broad_times": [
+      85.93333333333334,
+      181.73333333333332,
+      209.46666666666667
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 21
+  },
+  {
+    "clip": "multicore",
+    "policy": "half",
+    "pixel_fraction": 0.03,
+    "tile_fraction": 0.55,
+    "baseline_pages": 21,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 20,
+    "broad_times": [
+      85.93333333333334,
+      181.73333333333332
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 21
+  },
+  {
+    "clip": "multicore",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.1,
+    "baseline_pages": 21,
+    "broad_only_candidate_count": 3,
+    "combined_candidate_count": 20,
+    "broad_times": [
+      85.93333333333334,
+      181.73333333333332,
+      209.46666666666667
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 21
+  },
+  {
+    "clip": "multicore",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.25,
+    "baseline_pages": 21,
+    "broad_only_candidate_count": 3,
+    "combined_candidate_count": 20,
+    "broad_times": [
+      85.93333333333334,
+      181.73333333333332,
+      209.46666666666667
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 21
+  },
+  {
+    "clip": "multicore",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.4,
+    "baseline_pages": 21,
+    "broad_only_candidate_count": 3,
+    "combined_candidate_count": 20,
+    "broad_times": [
+      85.93333333333334,
+      181.73333333333332,
+      209.46666666666667
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 21
+  },
+  {
+    "clip": "multicore",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.55,
+    "baseline_pages": 21,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 20,
+    "broad_times": [
+      85.93333333333334,
+      181.73333333333332
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 21
+  },
+  {
+    "clip": "multicore",
+    "policy": "half",
+    "pixel_fraction": 0.12,
+    "tile_fraction": 0.1,
+    "baseline_pages": 21,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 20,
+    "broad_times": [
+      85.93333333333334,
+      181.73333333333332
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 21
+  },
+  {
+    "clip": "multicore",
+    "policy": "half",
+    "pixel_fraction": 0.12,
+    "tile_fraction": 0.25,
+    "baseline_pages": 21,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 20,
+    "broad_times": [
+      85.93333333333334,
+      181.73333333333332
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 21
+  },
+  {
+    "clip": "multicore",
+    "policy": "half",
+    "pixel_fraction": 0.12,
+    "tile_fraction": 0.4,
+    "baseline_pages": 21,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 20,
+    "broad_times": [
+      85.93333333333334,
+      181.73333333333332
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 21
+  },
+  {
+    "clip": "multicore",
+    "policy": "half",
+    "pixel_fraction": 0.12,
+    "tile_fraction": 0.55,
+    "baseline_pages": 21,
+    "broad_only_candidate_count": 2,
+    "combined_candidate_count": 20,
+    "broad_times": [
+      85.93333333333334,
+      181.73333333333332
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 21
+  },
+  {
+    "clip": "multicore",
+    "policy": "half",
+    "pixel_fraction": 0.2,
+    "tile_fraction": 0.1,
+    "baseline_pages": 21,
+    "broad_only_candidate_count": 1,
+    "combined_candidate_count": 20,
+    "broad_times": [
+      85.93333333333334
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 21
+  },
+  {
+    "clip": "multicore",
+    "policy": "half",
+    "pixel_fraction": 0.2,
+    "tile_fraction": 0.25,
+    "baseline_pages": 21,
+    "broad_only_candidate_count": 1,
+    "combined_candidate_count": 20,
+    "broad_times": [
+      85.93333333333334
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 21
+  },
+  {
+    "clip": "multicore",
+    "policy": "half",
+    "pixel_fraction": 0.2,
+    "tile_fraction": 0.4,
+    "baseline_pages": 21,
+    "broad_only_candidate_count": 1,
+    "combined_candidate_count": 20,
+    "broad_times": [
+      85.93333333333334
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 21
+  },
+  {
+    "clip": "multicore",
+    "policy": "half",
+    "pixel_fraction": 0.2,
+    "tile_fraction": 0.55,
+    "baseline_pages": 21,
+    "broad_only_candidate_count": 1,
+    "combined_candidate_count": 20,
+    "broad_times": [
+      85.93333333333334
+    ],
+    "ethics_brief_onset_candidate": null,
+    "combined_candidate_page_count": 21
+  },
+  {
+    "clip": "ethics",
+    "policy": "all",
+    "pixel_fraction": 0.03,
+    "tile_fraction": 0.1,
+    "baseline_pages": 9,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 12,
+    "broad_times": [
+      40.4,
+      80.0,
+      82.66666666666667,
+      98.0,
+      230.06666666666666
+    ],
+    "ethics_brief_onset_candidate": false,
+    "combined_candidate_page_count": 13
+  },
+  {
+    "clip": "ethics",
+    "policy": "all",
+    "pixel_fraction": 0.03,
+    "tile_fraction": 0.25,
+    "baseline_pages": 9,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 12,
+    "broad_times": [
+      40.4,
+      80.0,
+      82.66666666666667,
+      98.0,
+      230.06666666666666
+    ],
+    "ethics_brief_onset_candidate": false,
+    "combined_candidate_page_count": 13
+  },
+  {
+    "clip": "ethics",
+    "policy": "all",
+    "pixel_fraction": 0.03,
+    "tile_fraction": 0.4,
+    "baseline_pages": 9,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 12,
+    "broad_times": [
+      40.4,
+      80.0,
+      82.66666666666667,
+      98.0,
+      230.06666666666666
+    ],
+    "ethics_brief_onset_candidate": false,
+    "combined_candidate_page_count": 13
+  },
+  {
+    "clip": "ethics",
+    "policy": "all",
+    "pixel_fraction": 0.03,
+    "tile_fraction": 0.55,
+    "baseline_pages": 9,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 12,
+    "broad_times": [
+      40.4,
+      80.0,
+      82.66666666666667,
+      98.0,
+      230.06666666666666
+    ],
+    "ethics_brief_onset_candidate": false,
+    "combined_candidate_page_count": 13
+  },
+  {
+    "clip": "ethics",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.1,
+    "baseline_pages": 9,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 12,
+    "broad_times": [
+      40.4,
+      80.0,
+      82.66666666666667,
+      98.0,
+      230.06666666666666
+    ],
+    "ethics_brief_onset_candidate": false,
+    "combined_candidate_page_count": 13
+  },
+  {
+    "clip": "ethics",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.25,
+    "baseline_pages": 9,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 12,
+    "broad_times": [
+      40.4,
+      80.0,
+      82.66666666666667,
+      98.0,
+      230.06666666666666
+    ],
+    "ethics_brief_onset_candidate": false,
+    "combined_candidate_page_count": 13
+  },
+  {
+    "clip": "ethics",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.4,
+    "baseline_pages": 9,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 12,
+    "broad_times": [
+      40.4,
+      80.0,
+      82.66666666666667,
+      98.0,
+      230.06666666666666
+    ],
+    "ethics_brief_onset_candidate": false,
+    "combined_candidate_page_count": 13
+  },
+  {
+    "clip": "ethics",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.55,
+    "baseline_pages": 9,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 12,
+    "broad_times": [
+      40.4,
+      80.0,
+      82.66666666666667,
+      98.0,
+      230.06666666666666
+    ],
+    "ethics_brief_onset_candidate": false,
+    "combined_candidate_page_count": 13
+  },
+  {
+    "clip": "ethics",
+    "policy": "all",
+    "pixel_fraction": 0.12,
+    "tile_fraction": 0.1,
+    "baseline_pages": 9,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 12,
+    "broad_times": [
+      40.4,
+      80.0,
+      82.66666666666667,
+      98.0,
+      230.06666666666666
+    ],
+    "ethics_brief_onset_candidate": false,
+    "combined_candidate_page_count": 13
+  },
+  {
+    "clip": "ethics",
+    "policy": "all",
+    "pixel_fraction": 0.12,
+    "tile_fraction": 0.25,
+    "baseline_pages": 9,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 12,
+    "broad_times": [
+      40.4,
+      80.0,
+      82.66666666666667,
+      98.0,
+      230.06666666666666
+    ],
+    "ethics_brief_onset_candidate": false,
+    "combined_candidate_page_count": 13
+  },
+  {
+    "clip": "ethics",
+    "policy": "all",
+    "pixel_fraction": 0.12,
+    "tile_fraction": 0.4,
+    "baseline_pages": 9,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 12,
+    "broad_times": [
+      40.4,
+      80.0,
+      82.66666666666667,
+      98.0,
+      230.06666666666666
+    ],
+    "ethics_brief_onset_candidate": false,
+    "combined_candidate_page_count": 13
+  },
+  {
+    "clip": "ethics",
+    "policy": "all",
+    "pixel_fraction": 0.12,
+    "tile_fraction": 0.55,
+    "baseline_pages": 9,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 12,
+    "broad_times": [
+      40.4,
+      80.0,
+      82.66666666666667,
+      98.0,
+      230.06666666666666
+    ],
+    "ethics_brief_onset_candidate": false,
+    "combined_candidate_page_count": 13
+  },
+  {
+    "clip": "ethics",
+    "policy": "all",
+    "pixel_fraction": 0.2,
+    "tile_fraction": 0.1,
+    "baseline_pages": 9,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 12,
+    "broad_times": [
+      40.4,
+      80.0,
+      82.66666666666667,
+      98.0,
+      230.06666666666666
+    ],
+    "ethics_brief_onset_candidate": false,
+    "combined_candidate_page_count": 13
+  },
+  {
+    "clip": "ethics",
+    "policy": "all",
+    "pixel_fraction": 0.2,
+    "tile_fraction": 0.25,
+    "baseline_pages": 9,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 12,
+    "broad_times": [
+      40.4,
+      80.0,
+      82.66666666666667,
+      98.0,
+      230.06666666666666
+    ],
+    "ethics_brief_onset_candidate": false,
+    "combined_candidate_page_count": 13
+  },
+  {
+    "clip": "ethics",
+    "policy": "all",
+    "pixel_fraction": 0.2,
+    "tile_fraction": 0.4,
+    "baseline_pages": 9,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 12,
+    "broad_times": [
+      40.4,
+      80.0,
+      82.66666666666667,
+      98.0,
+      230.06666666666666
+    ],
+    "ethics_brief_onset_candidate": false,
+    "combined_candidate_page_count": 13
+  },
+  {
+    "clip": "ethics",
+    "policy": "all",
+    "pixel_fraction": 0.2,
+    "tile_fraction": 0.55,
+    "baseline_pages": 9,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 12,
+    "broad_times": [
+      40.4,
+      80.0,
+      82.66666666666667,
+      98.0,
+      230.06666666666666
+    ],
+    "ethics_brief_onset_candidate": false,
+    "combined_candidate_page_count": 13
+  },
+  {
+    "clip": "ethics",
+    "policy": "half",
+    "pixel_fraction": 0.03,
+    "tile_fraction": 0.1,
+    "baseline_pages": 4,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 6,
+    "broad_times": [
+      41.4,
+      81.0,
+      82.66666666666667,
+      98.0,
+      231.06666666666666
+    ],
+    "ethics_brief_onset_candidate": true,
+    "combined_candidate_page_count": 7
+  },
+  {
+    "clip": "ethics",
+    "policy": "half",
+    "pixel_fraction": 0.03,
+    "tile_fraction": 0.25,
+    "baseline_pages": 4,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 6,
+    "broad_times": [
+      41.4,
+      81.0,
+      82.66666666666667,
+      98.0,
+      231.06666666666666
+    ],
+    "ethics_brief_onset_candidate": true,
+    "combined_candidate_page_count": 7
+  },
+  {
+    "clip": "ethics",
+    "policy": "half",
+    "pixel_fraction": 0.03,
+    "tile_fraction": 0.4,
+    "baseline_pages": 4,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 6,
+    "broad_times": [
+      41.4,
+      81.0,
+      82.66666666666667,
+      98.0,
+      231.06666666666666
+    ],
+    "ethics_brief_onset_candidate": true,
+    "combined_candidate_page_count": 7
+  },
+  {
+    "clip": "ethics",
+    "policy": "half",
+    "pixel_fraction": 0.03,
+    "tile_fraction": 0.55,
+    "baseline_pages": 4,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 6,
+    "broad_times": [
+      41.4,
+      81.0,
+      82.66666666666667,
+      98.0,
+      231.06666666666666
+    ],
+    "ethics_brief_onset_candidate": true,
+    "combined_candidate_page_count": 7
+  },
+  {
+    "clip": "ethics",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.1,
+    "baseline_pages": 4,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 6,
+    "broad_times": [
+      41.4,
+      81.0,
+      82.66666666666667,
+      98.0,
+      231.06666666666666
+    ],
+    "ethics_brief_onset_candidate": true,
+    "combined_candidate_page_count": 7
+  },
+  {
+    "clip": "ethics",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.25,
+    "baseline_pages": 4,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 6,
+    "broad_times": [
+      41.4,
+      81.0,
+      82.66666666666667,
+      98.0,
+      231.06666666666666
+    ],
+    "ethics_brief_onset_candidate": true,
+    "combined_candidate_page_count": 7
+  },
+  {
+    "clip": "ethics",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.4,
+    "baseline_pages": 4,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 6,
+    "broad_times": [
+      41.4,
+      81.0,
+      82.66666666666667,
+      98.0,
+      231.06666666666666
+    ],
+    "ethics_brief_onset_candidate": true,
+    "combined_candidate_page_count": 7
+  },
+  {
+    "clip": "ethics",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.55,
+    "baseline_pages": 4,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 6,
+    "broad_times": [
+      41.4,
+      81.0,
+      82.66666666666667,
+      98.0,
+      231.06666666666666
+    ],
+    "ethics_brief_onset_candidate": true,
+    "combined_candidate_page_count": 7
+  },
+  {
+    "clip": "ethics",
+    "policy": "half",
+    "pixel_fraction": 0.12,
+    "tile_fraction": 0.1,
+    "baseline_pages": 4,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 6,
+    "broad_times": [
+      41.4,
+      81.0,
+      82.66666666666667,
+      98.0,
+      231.06666666666666
+    ],
+    "ethics_brief_onset_candidate": true,
+    "combined_candidate_page_count": 7
+  },
+  {
+    "clip": "ethics",
+    "policy": "half",
+    "pixel_fraction": 0.12,
+    "tile_fraction": 0.25,
+    "baseline_pages": 4,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 6,
+    "broad_times": [
+      41.4,
+      81.0,
+      82.66666666666667,
+      98.0,
+      231.06666666666666
+    ],
+    "ethics_brief_onset_candidate": true,
+    "combined_candidate_page_count": 7
+  },
+  {
+    "clip": "ethics",
+    "policy": "half",
+    "pixel_fraction": 0.12,
+    "tile_fraction": 0.4,
+    "baseline_pages": 4,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 6,
+    "broad_times": [
+      41.4,
+      81.0,
+      82.66666666666667,
+      98.0,
+      231.06666666666666
+    ],
+    "ethics_brief_onset_candidate": true,
+    "combined_candidate_page_count": 7
+  },
+  {
+    "clip": "ethics",
+    "policy": "half",
+    "pixel_fraction": 0.12,
+    "tile_fraction": 0.55,
+    "baseline_pages": 4,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 6,
+    "broad_times": [
+      41.4,
+      81.0,
+      82.66666666666667,
+      98.0,
+      231.06666666666666
+    ],
+    "ethics_brief_onset_candidate": true,
+    "combined_candidate_page_count": 7
+  },
+  {
+    "clip": "ethics",
+    "policy": "half",
+    "pixel_fraction": 0.2,
+    "tile_fraction": 0.1,
+    "baseline_pages": 4,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 6,
+    "broad_times": [
+      41.4,
+      81.0,
+      82.66666666666667,
+      98.0,
+      231.06666666666666
+    ],
+    "ethics_brief_onset_candidate": true,
+    "combined_candidate_page_count": 7
+  },
+  {
+    "clip": "ethics",
+    "policy": "half",
+    "pixel_fraction": 0.2,
+    "tile_fraction": 0.25,
+    "baseline_pages": 4,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 6,
+    "broad_times": [
+      41.4,
+      81.0,
+      82.66666666666667,
+      98.0,
+      231.06666666666666
+    ],
+    "ethics_brief_onset_candidate": true,
+    "combined_candidate_page_count": 7
+  },
+  {
+    "clip": "ethics",
+    "policy": "half",
+    "pixel_fraction": 0.2,
+    "tile_fraction": 0.4,
+    "baseline_pages": 4,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 6,
+    "broad_times": [
+      41.4,
+      81.0,
+      82.66666666666667,
+      98.0,
+      231.06666666666666
+    ],
+    "ethics_brief_onset_candidate": true,
+    "combined_candidate_page_count": 7
+  },
+  {
+    "clip": "ethics",
+    "policy": "half",
+    "pixel_fraction": 0.2,
+    "tile_fraction": 0.55,
+    "baseline_pages": 4,
+    "broad_only_candidate_count": 5,
+    "combined_candidate_count": 6,
+    "broad_times": [
+      41.4,
+      81.0,
+      82.66666666666667,
+      98.0,
+      231.06666666666666
+    ],
+    "ethics_brief_onset_candidate": true,
+    "combined_candidate_page_count": 7
+  }
+]

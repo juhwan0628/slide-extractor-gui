@@ -12,12 +12,12 @@ if sys.platform not in ('win32', 'darwin'):
 vendor = Path(os.environ.get('PERSONAL_FFMPEG_DIR' if mode=='personal' else 'APPROVED_FFMPEG_DIR',
                              str(root/'vendor/approved'))).resolve()
 extension = '.exe' if sys.platform=='win32' else ''
-binaries = [(str(vendor/(name+extension)), 'tools') for name in ('ffmpeg', 'ffprobe')]
+binaries = runpy.run_path(str(root/'packaging/native_helper_contract.py'))['bundle_tools'](vendor,extension,approved=mode=='approved')
 if not all(Path(path).is_file() for path, _ in binaries):
     raise RuntimeError(f'Missing {mode} FFmpeg inputs: {vendor}')
-datas = [(str(root/name), '.') for name in ('LICENSE', 'THIRD_PARTY_NOTICES.md', 'LICENSE_AUDIT.md')]
+datas = [(str(root/'packaging/fixtures/native-half.mp4'), 'fixtures')] + [(str(root/name), '.') for name in ('LICENSE', 'THIRD_PARTY_NOTICES.md', 'LICENSE_AUDIT.md')]
 # Required approved distribution materials; personal builds have a different contract.
-for name in ('licenses', 'SBOM.json', 'SOURCE_AND_REPLACEMENT.md'):
+for name in ('licenses', 'SBOM.json', 'SOURCE_AND_REPLACEMENT.md', 'native-helper-build.json'):
     item=vendor/name
     if mode=='approved' and not item.exists():
         raise RuntimeError(f'Missing approved distribution material: {name}')

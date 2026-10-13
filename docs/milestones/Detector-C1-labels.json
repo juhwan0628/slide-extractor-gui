@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "provenance": "Owner review in current conversation; semantic page labels are not a full video annotation.",
+  "cases": [
+    {
+      "clip": "ethics",
+      "distinct_content_groups": [
+        {
+          "id": "ethics-required-a",
+          "full_pages": [
+            2,
+            3,
+            4,
+            5
+          ],
+          "reference_times_s": [
+            51.4,
+            56.4,
+            74.4,
+            79.4
+          ],
+          "required": true
+        },
+        {
+          "id": "ethics-required-b",
+          "full_pages": [
+            6
+          ],
+          "reference_times_s": [
+            82
+          ],
+          "required": true,
+          "brief": true
+        }
+      ],
+      "temporal_bounds": "Detected onset 50.4s and 81.0s are diagnostic references, not manually verified exact source boundaries.",
+      "half_observation_evidence": "51.4s,79.4s and81.0s observed; current/future similarity suppresses confirmations."
+    },
+    {
+      "clip": "sp",
+      "full_only_pages": [
+        4,
+        11,
+        15,
+        18,
+        21,
+        27
+      ],
+      "classification": "All six reviewed by owner as duplicates",
+      "scope": "Other pages not exhaustively labeled"
+    },
+    {
+      "clip": "multicore",
+      "full_only_pages": [
+        6,
+        7,
+        13,
+        17,
+        23,
+        25,
+        28
+      ],
+      "classification": "All seven reviewed by owner as duplicates",
+      "scope": "Other pages not exhaustively labeled"
+    }
+  ],
+  "missing_coverage": [
+    "real pointer-only intervals",
+    "small meaningful content revision",
+    "held-out lectures",
+    "occlusion/slide return"
+  ],
+  "acceptance": [
+    "retain both ethics required content groups",
+    "group ethics pages2/3/4/5 rather than emit four states",
+    "do not remove reviewed real content elsewhere",
+    "measure candidate review burden separately from final duplicate output"
+  ],
+  "owner_reviews": [
+    {
+      "time_kst": "2026-10-13 20:04",
+      "review": "C3 displayed candidate bundles",
+      "multicore_split_from_s": 219,
+      "policies": [
+        "all",
+        "half"
+      ],
+      "other_displayed_groupings": "Owner accepted remaining groupings",
+      "scope": "Displayed candidates only; not exhaustive frame-level recall labels"
+    },
+    {
+      "time_kst": "2026-10-13 20:26",
+      "review": "C4 all representative selections accepted",
+      "policies": [
+        "all",
+        "half"
+      ],
+      "reference_file": "Detector-C4-representatives.json",
+      "counts": {
+        "sp": 3,
+        "multicore": 4,
+        "ethics": 6
+      },
+      "scope": "Displayed representatives; does not establish exhaustive held-out recall"
+    }
+  ]
+}

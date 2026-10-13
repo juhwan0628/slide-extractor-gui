@@ -1,0 +1,113 @@
+{
+  "adjacent_changes": [
+    {
+      "time_s": 2.0,
+      "pixels": 0.18522569444444445,
+      "tiles": 0.4861111111111111
+    },
+    {
+      "time_s": 10.866666666666667,
+      "pixels": 0.18578125,
+      "tiles": 0.4861111111111111
+    },
+    {
+      "time_s": 34.86666666666667,
+      "pixels": 0.06694444444444445,
+      "tiles": 0.3611111111111111
+    },
+    {
+      "time_s": 200.86666666666667,
+      "pixels": 0.08265625,
+      "tiles": 0.3888888888888889
+    },
+    {
+      "time_s": 217.86666666666667,
+      "pixels": 0.01934027777777778,
+      "tiles": 0.08333333333333333
+    },
+    {
+      "time_s": 218.86666666666667,
+      "pixels": 0.019375,
+      "tiles": 0.08333333333333333
+    },
+    {
+      "time_s": 279.8666666666667,
+      "pixels": 0.018663194444444444,
+      "tiles": 0.08333333333333333
+    },
+    {
+      "time_s": 280.8666666666667,
+      "pixels": 0.018993055555555555,
+      "tiles": 0.08333333333333333
+    },
+    {
+      "time_s": 291.8666666666667,
+      "pixels": 0.02017361111111111,
+      "tiles": 0.08333333333333333
+    },
+    {
+      "time_s": 292.8666666666667,
+      "pixels": 0.02078125,
+      "tiles": 0.08333333333333333
+    },
+    {
+      "time_s": 294.8666666666667,
+      "pixels": 0.021493055555555557,
+      "tiles": 0.08333333333333333
+    },
+    {
+      "time_s": 295.8666666666667,
+      "pixels": 0.019288194444444445,
+      "tiles": 0.08333333333333333
+    }
+  ],
+  "sampled_times_s": [
+    1.0,
+    9.0,
+    19.866666666666667,
+    39.86666666666667,
+    210.86666666666667
+  ],
+  "sampled_identity": [
+    {
+      "occurrence": 0,
+      "identity": 0,
+      "revisit_of": null,
+      "similar_candidate": null,
+      "candidate_distance": null,
+      "exact_hash": "29101db583c9ed4a6823d1305853095edb540a39a7f8e9d36f5d95b424823efe"
+    },
+    {
+      "occurrence": 1,
+      "identity": 1,
+      "revisit_of": null,
+      "similar_candidate": null,
+      "candidate_distance": 0.0606703431372549,
+      "exact_hash": "77fea62182c19096e1b8b702c64d754b1f0aa0a540be9c2dfafdd4359669483d"
+    },
+    {
+      "occurrence": 2,
+      "identity": 2,
+      "revisit_of": null,
+      "similar_candidate": 0,
+      "candidate_distance": 0.0030778867102396515,
+      "exact_hash": "d93926437f4d163ce25eac4b634e4f1777e4dfb5e7042121a7fc0d94cc749a00"
+    },
+    {
+      "occurrence": 3,
+      "identity": 3,
+      "revisit_of": null,
+      "similar_candidate": null,
+      "candidate_distance": 0.0232619825708061,
+      "exact_hash": "23e3a061aad83d93761c06348392c554adcc782ec06393a6b77352b9f60f5f81"
+    },
+    {
+      "occurrence": 4,
+      "identity": 4,
+      "revisit_of": null,
+      "similar_candidate": null,
+      "candidate_distance": 0.02318695533769063,
+      "exact_hash": "6de7cb63e0d4f3cd214a2bf2febb4921dc6064e75772b6aac2ef4bddfb87b1d8"
+    }
+  ]
+}

@@ -51,8 +51,8 @@ def test_pdf_only_and_simple_json(tmp_path):
         assert len(PdfReader(pdf).pages)==len(p.pages)
         pdf,json_path=export_project(p,target,overwrite=True,sidecar_format='detailed')
         detailed=loads(json_path.read_bytes(),pdf_bytes=pdf.read_bytes())
-        assert detailed['schema_version']==4
+        assert detailed['schema_version']==6
         for x in detailed['detected_boundaries']:
-            assert any(v>0 for v in x['anchor_metrics'].values())
+            assert any(v>0 for v in x['spatial_metrics'].values())
     finally:
         w.close();wait(app,lambda:not w.isVisible())

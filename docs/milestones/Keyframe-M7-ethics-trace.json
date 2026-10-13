@@ -1,0 +1,448 @@
+[
+  {
+    "policy": "all",
+    "pages": 9,
+    "rows": [
+      {
+        "time": 45.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 46.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 47.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 48.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 49.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 50.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": true,
+        "committed": true
+      },
+      {
+        "time": 51.4,
+        "anchor_change": false,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 52.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 53.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 54.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 55.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": true,
+        "committed": true
+      },
+      {
+        "time": 56.4,
+        "anchor_change": false,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 57.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 58.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 59.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 60.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 61.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 62.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 63.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 64.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 65.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 66.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 67.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 68.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 69.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 70.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 71.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 72.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 73.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": true,
+        "committed": true
+      },
+      {
+        "time": 74.4,
+        "anchor_change": false,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 75.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 76.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 77.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 78.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": true,
+        "committed": true
+      },
+      {
+        "time": 79.4,
+        "anchor_change": false,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 80.0,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": true,
+        "committed": false
+      },
+      {
+        "time": 81.0,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": true,
+        "committed": true
+      },
+      {
+        "time": 82.0,
+        "anchor_change": false,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 82.66666666666667,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": true,
+        "committed": true
+      },
+      {
+        "time": 83.66666666666667,
+        "anchor_change": false,
+        "future_change": false,
+        "pair_stable": true,
+        "committed": false
+      },
+      {
+        "time": 84.66666666666667,
+        "anchor_change": false,
+        "future_change": false,
+        "pair_stable": true,
+        "committed": false
+      }
+    ]
+  },
+  {
+    "policy": "half",
+    "pages": 4,
+    "rows": [
+      {
+        "time": 45.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 47.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 49.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 51.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 53.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 55.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 57.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 59.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 61.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 63.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 65.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 67.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 69.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 71.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 73.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 75.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 77.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 79.4,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 81.0,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": false,
+        "committed": false
+      },
+      {
+        "time": 82.66666666666667,
+        "anchor_change": true,
+        "future_change": true,
+        "pair_stable": true,
+        "committed": true
+      },
+      {
+        "time": 84.66666666666667,
+        "anchor_change": false,
+        "future_change": false,
+        "pair_stable": true,
+        "committed": false
+      }
+    ]
+  }
+]

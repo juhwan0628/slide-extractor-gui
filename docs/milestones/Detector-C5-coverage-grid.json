@@ -1,0 +1,472 @@
+[
+  {
+    "dataset": "build/detector-core",
+    "clip": "sp",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.2,
+    "starts_s": [
+      0.0,
+      93.0,
+      288.0
+    ]
+  },
+  {
+    "dataset": "build/detector-core",
+    "clip": "sp",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.3,
+    "starts_s": [
+      0.0,
+      93.0,
+      288.0
+    ]
+  },
+  {
+    "dataset": "build/detector-core",
+    "clip": "sp",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.4,
+    "starts_s": [
+      0.0,
+      93.0,
+      288.0
+    ]
+  },
+  {
+    "dataset": "build/detector-core",
+    "clip": "sp",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.2,
+    "starts_s": [
+      0.0,
+      94.0,
+      288.0
+    ]
+  },
+  {
+    "dataset": "build/detector-core",
+    "clip": "sp",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.3,
+    "starts_s": [
+      0.0,
+      94.0,
+      288.0
+    ]
+  },
+  {
+    "dataset": "build/detector-core",
+    "clip": "sp",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.4,
+    "starts_s": [
+      0.0,
+      94.0,
+      288.0
+    ]
+  },
+  {
+    "dataset": "build/detector-core",
+    "clip": "multicore",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.2,
+    "starts_s": [
+      0.0,
+      85.93333333333334,
+      180.73333333333332,
+      208.46666666666667
+    ]
+  },
+  {
+    "dataset": "build/detector-core",
+    "clip": "multicore",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.3,
+    "starts_s": [
+      0.0,
+      85.93333333333334,
+      180.73333333333332,
+      208.46666666666667
+    ]
+  },
+  {
+    "dataset": "build/detector-core",
+    "clip": "multicore",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.4,
+    "starts_s": [
+      0.0,
+      85.93333333333334,
+      180.73333333333332,
+      208.46666666666667
+    ]
+  },
+  {
+    "dataset": "build/detector-core",
+    "clip": "multicore",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.2,
+    "starts_s": [
+      0.0,
+      85.93333333333334,
+      181.73333333333332,
+      209.46666666666667
+    ]
+  },
+  {
+    "dataset": "build/detector-core",
+    "clip": "multicore",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.3,
+    "starts_s": [
+      0.0,
+      85.93333333333334,
+      181.73333333333332,
+      209.46666666666667
+    ]
+  },
+  {
+    "dataset": "build/detector-core",
+    "clip": "multicore",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.4,
+    "starts_s": [
+      0.0,
+      85.93333333333334,
+      181.73333333333332,
+      209.46666666666667
+    ]
+  },
+  {
+    "dataset": "build/detector-core",
+    "clip": "ethics",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.2,
+    "starts_s": [
+      0.0,
+      40.4,
+      80.0,
+      82.66666666666667,
+      98.0,
+      230.06666666666666
+    ]
+  },
+  {
+    "dataset": "build/detector-core",
+    "clip": "ethics",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.3,
+    "starts_s": [
+      0.0,
+      40.4,
+      80.0,
+      82.66666666666667,
+      98.0,
+      230.06666666666666
+    ]
+  },
+  {
+    "dataset": "build/detector-core",
+    "clip": "ethics",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.4,
+    "starts_s": [
+      0.0,
+      40.4,
+      80.0,
+      82.66666666666667,
+      98.0,
+      230.06666666666666
+    ]
+  },
+  {
+    "dataset": "build/detector-core",
+    "clip": "ethics",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.2,
+    "starts_s": [
+      0.0,
+      41.4,
+      81.0,
+      82.66666666666667,
+      98.0,
+      231.06666666666666
+    ]
+  },
+  {
+    "dataset": "build/detector-core",
+    "clip": "ethics",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.3,
+    "starts_s": [
+      0.0,
+      41.4,
+      81.0,
+      82.66666666666667,
+      98.0,
+      231.06666666666666
+    ]
+  },
+  {
+    "dataset": "build/detector-core",
+    "clip": "ethics",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.4,
+    "starts_s": [
+      0.0,
+      41.4,
+      81.0,
+      82.66666666666667,
+      98.0,
+      231.06666666666666
+    ]
+  },
+  {
+    "dataset": "build/detector-heldout",
+    "clip": "sp",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.2,
+    "starts_s": [
+      0.0,
+      2.0,
+      10.866666666666667,
+      34.86666666666667,
+      200.86666666666667
+    ]
+  },
+  {
+    "dataset": "build/detector-heldout",
+    "clip": "sp",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.3,
+    "starts_s": [
+      0.0,
+      2.0,
+      10.866666666666667,
+      34.86666666666667,
+      200.86666666666667
+    ]
+  },
+  {
+    "dataset": "build/detector-heldout",
+    "clip": "sp",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.4,
+    "starts_s": [
+      0.0,
+      2.0,
+      10.866666666666667
+    ]
+  },
+  {
+    "dataset": "build/detector-heldout",
+    "clip": "sp",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.2,
+    "starts_s": [
+      0.0,
+      2.0,
+      11.866666666666667,
+      35.86666666666667,
+      201.86666666666667
+    ]
+  },
+  {
+    "dataset": "build/detector-heldout",
+    "clip": "sp",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.3,
+    "starts_s": [
+      0.0,
+      2.0,
+      11.866666666666667,
+      35.86666666666667,
+      201.86666666666667
+    ]
+  },
+  {
+    "dataset": "build/detector-heldout",
+    "clip": "sp",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.4,
+    "starts_s": [
+      0.0,
+      2.0,
+      11.866666666666667
+    ]
+  },
+  {
+    "dataset": "build/detector-heldout",
+    "clip": "multicore",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.2,
+    "starts_s": [
+      0.0,
+      133.93333333333334
+    ]
+  },
+  {
+    "dataset": "build/detector-heldout",
+    "clip": "multicore",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.3,
+    "starts_s": [
+      0.0,
+      133.93333333333334
+    ]
+  },
+  {
+    "dataset": "build/detector-heldout",
+    "clip": "multicore",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.4,
+    "starts_s": [
+      0.0,
+      133.93333333333334
+    ]
+  },
+  {
+    "dataset": "build/detector-heldout",
+    "clip": "multicore",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.2,
+    "starts_s": [
+      0.0,
+      133.93333333333334
+    ]
+  },
+  {
+    "dataset": "build/detector-heldout",
+    "clip": "multicore",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.3,
+    "starts_s": [
+      0.0,
+      133.93333333333334
+    ]
+  },
+  {
+    "dataset": "build/detector-heldout",
+    "clip": "multicore",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.4,
+    "starts_s": [
+      0.0,
+      133.93333333333334
+    ]
+  },
+  {
+    "dataset": "build/detector-heldout",
+    "clip": "ethics",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.2,
+    "starts_s": [
+      0.0,
+      8.2,
+      62.6,
+      189.33333333333334,
+      277.3333333333333
+    ]
+  },
+  {
+    "dataset": "build/detector-heldout",
+    "clip": "ethics",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.3,
+    "starts_s": [
+      0.0,
+      8.2,
+      62.6,
+      189.33333333333334,
+      277.3333333333333
+    ]
+  },
+  {
+    "dataset": "build/detector-heldout",
+    "clip": "ethics",
+    "policy": "all",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.4,
+    "starts_s": [
+      0.0,
+      8.2,
+      62.6,
+      189.33333333333334,
+      277.3333333333333
+    ]
+  },
+  {
+    "dataset": "build/detector-heldout",
+    "clip": "ethics",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.2,
+    "starts_s": [
+      0.0,
+      9.2,
+      62.6,
+      190.33333333333334,
+      278.3333333333333
+    ]
+  },
+  {
+    "dataset": "build/detector-heldout",
+    "clip": "ethics",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.3,
+    "starts_s": [
+      0.0,
+      9.2,
+      62.6,
+      190.33333333333334,
+      278.3333333333333
+    ]
+  },
+  {
+    "dataset": "build/detector-heldout",
+    "clip": "ethics",
+    "policy": "half",
+    "pixel_fraction": 0.06,
+    "tile_fraction": 0.4,
+    "starts_s": [
+      0.0,
+      9.2,
+      62.6,
+      190.33333333333334,
+      278.3333333333333
+    ]
+  }
+]

@@ -11,7 +11,7 @@ def verify_modules(module_names):
     if forbidden:
         raise ValueError('Legacy modules in keyframe candidate: '+', '.join(sorted(forbidden)))
 
-def validate_smoke(report, version, *, require_frozen=True):
+def validate_smoke(report, version, *, require_frozen=True, require_native=False):
     if report.get('status')!='success' or report.get('version')!=version:
         raise ValueError('Smoke status/version does not match candidate')
     if report.get('decoder_backend')!='cpu-keyframes':
@@ -19,6 +19,11 @@ def validate_smoke(report, version, *, require_frozen=True):
     for name in CHECKS:
         if report.get(name) is not True:
             raise ValueError('Missing verified smoke evidence: '+name)
+    if require_native:
+        for name in ('native_half_checked','native_lazy_edit_checked','native_json_v7_checked'):
+            if report.get(name) is not True:raise ValueError('Missing native smoke evidence: '+name)
+        if report.get('native_half_backend')!='native-idr' or report.get('native_half_policy')!='half':
+            raise ValueError('Native half policy/backend mismatch')
     expected=True if require_frozen else False
     for name in ('frozen','bundled_tools_checked'):
         if report.get(name) is not expected:

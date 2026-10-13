@@ -291,7 +291,30 @@ def extract_selected(source:SourceRef,pages,output_root:Path,*,cancelled=None,ro
 
 
 def keyframe_stream(source:SourceRef,cache_root:Path,*,cancelled=None,timeout=120,
-                    progress=None,profile=None,cache_owner=None):
+                    progress=None,profile=None,cache_owner=None,backend='cpu-keyframes',selection_policy='all'):
+    """Shipped FFmpeg default; explicit native all-IDR validation with clean fallback."""
+    if backend not in ('cpu-keyframes','native-idr'):
+        raise ValueError('Unknown keyframe backend')
+    if selection_policy not in ('all','half') or (selection_policy=='half' and backend!='native-idr'):
+        raise ValueError('Half selection requires the native IDR backend')
+    if profile is not None:
+        profile.metadata['requested_selection_policy']=selection_policy
+    from .native_keyframes import NativeUnsupported
+    common=dict(cancelled=cancelled,timeout=timeout,progress=progress,
+                profile=profile,cache_owner=cache_owner)
+    try:
+        return _cache_keyframe_stream(source,cache_root,backend=backend,selection_policy=selection_policy,**common)
+    except NativeUnsupported:
+        if backend != 'native-idr':
+            raise
+        # The CacheSession context has already discarded the failed generation.
+        if profile is not None:
+            profile.metadata['native_fallback']=True
+        return _cache_keyframe_stream(source,cache_root,backend='cpu-keyframes',**common)
+
+
+def _cache_keyframe_stream(source:SourceRef,cache_root:Path,*,cancelled=None,timeout=120,
+                    progress=None,profile=None,cache_owner=None,backend='cpu-keyframes',selection_policy='all'):
     """Cache decoder-flagged keyframes at their original integer PTS.
 
     ordinal is the observation order; actual_time is derived only from original PTS.
@@ -311,9 +334,13 @@ def keyframe_stream(source:SourceRef,cache_root:Path,*,cancelled=None,timeout=12
     samples=[]
     if progress:progress('sampling',None,None)
     with CacheSession(cache_root,auto_prune=True,discard_on_error=True) as session:
-        decoded=_decode_stream(source,vf,pipe.cache_width,pipe.cache_height,
-                               timeout=None,stall_timeout=timeout,cancelled=cancelled,
-                               decode_options={'backend':'cpu-keyframes','threads':0})
+        if backend == 'native-idr':
+            from .native_keyframes import decode_native
+            decoded=decode_native(source,pipe,cancelled=cancelled,stall_timeout=timeout,selection_policy=selection_policy)
+        else:
+            decoded=_decode_stream(source,vf,pipe.cache_width,pipe.cache_height,
+                                   timeout=None,stall_timeout=timeout,cancelled=cancelled,
+                                   decode_options={'backend':'cpu-keyframes','threads':0})
         try:
             while True:
                 with measured(profile,'decode_wait'):
@@ -344,5 +371,5 @@ def keyframe_stream(source:SourceRef,cache_root:Path,*,cancelled=None,timeout=12
         if cache_owner is not None:cache_owner(session.retain())
         if profile is not None:
             profile.metadata.update(sampling_algorithm='decoder-keyframes-v1',
-                                    decoder_backend='cpu-keyframes',sample_count=len(samples))
+                                    decoder_backend=backend,selection_policy=selection_policy,sample_count=len(samples))
         return tuple(samples),session.directory

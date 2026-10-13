@@ -336,7 +336,9 @@ class Window(QMainWindow):
         sidecar=QCheckBox('Save timestamps as JSON alongside PDF')
         sidecar.setChecked(self.json_enabled)
         form.addRow(sidecar)
-        fmt=QComboBox();fmt.addItems(['Simple slide times','Detailed keyframe JSON v4'])
+        from slide_core.keyframe_json import timeline_version
+        version=timeline_version(self.controller.project)
+        fmt=QComboBox();fmt.addItems(['Simple slide times',f'Detailed keyframe JSON v{version}'])
         fmt.setCurrentIndex(0 if self.json_format=='simple' else 1)
         fmt.setEnabled(sidecar.isChecked());sidecar.toggled.connect(fmt.setEnabled)
         form.addRow('JSON format',fmt)
@@ -466,7 +468,7 @@ class Window(QMainWindow):
             key=self._image_key(0)
             img=self.images.cached(key)
             if img is None:
-                self.images.request(key,project.samples[0].cache_path)
+                self._request_cached_image(key,project,project.samples[0])
                 self.info.setText('Loading preview; retry region editor shortly.')
                 return
         if img is None:
@@ -582,6 +584,7 @@ class Window(QMainWindow):
         if job_id!=self._job_id or self.stage not in ('analyzing','exporting'):return
         stage,done,total=payload
         labels={'sampling':'Sampling video frames','detecting':'Detecting slide changes',
+                'grouping':'Grouping slide changes','representative_selection':'Selecting representative slides',
                 'assembling':'Building slide list','extracting':'Extracting original frames',
                 'writing':'Writing PDF','verifying':'Verifying output',
                 'publishing':'Saving files'}
@@ -705,7 +708,7 @@ class Window(QMainWindow):
         for p in project.pages[max(0,start-1):min(len(project.pages),start+4)]:
             sample=lookup[p.representative_sample_id]
             key=(project.analysis_generation,sample.sample_id,'thumb',1)
-            image=self.images.request(key,sample.cache_path,kind='thumb',size=QSize(150,85),
+            image=self._request_cached_image(key,project,sample,kind='thumb',size=QSize(150,85),
                                       crop=self._cache_roi(project,sample))
             if image is not None:self.page_model.set_thumbnail(sample.sample_id,QIcon(QPixmap.fromImage(image)))
 
@@ -729,9 +732,14 @@ class Window(QMainWindow):
                 continue
             # The loader may already have this key queued; delivery triggers
             # the next pump. Keep the cursor here until the icon is visible.
-            self.images.request(key,sample.cache_path,kind='thumb',
+            self._request_cached_image(key,project,sample,kind='thumb',
                                 size=QSize(150,85),crop=self._cache_roi(project,sample))
             return
+
+    def _request_cached_image(self,key,project,sample,**kwargs):
+        from slide_core.lazy_frames import ensure_sample_image
+        resolver=(lambda token:ensure_sample_image(project,sample,token)) if sample.sample_id not in project.observation_sample_ids else None
+        return self.images.request(key,sample.cache_path,resolver=resolver,**kwargs)
 
     def _image_key(self,index,kind='preview'):
         p=self.controller.project
@@ -769,7 +777,7 @@ class Window(QMainWindow):
         self.current_index=max(0,min(index,len(project.samples)-1))
         sample=project.samples[self.current_index]
         key=self._image_key(self.current_index)
-        image=self.images.request(key,sample.cache_path,crop=self._cache_roi(project,sample),priority=True)
+        image=self._request_cached_image(key,project,sample,crop=self._cache_roi(project,sample),priority=True)
         if image is not None:self._paint(image)
         else:
             self._current_image=None
@@ -777,7 +785,7 @@ class Window(QMainWindow):
         for i in [self.current_index-1,*range(self.current_index+1,self.current_index+4)]:
             if 0<=i<len(project.samples):
                 other=project.samples[i]
-                self.images.request(self._image_key(i),other.cache_path,crop=self._cache_roi(project,other))
+                self._request_cached_image(self._image_key(i),project,other,crop=self._cache_roi(project,other))
         with QSignalBlocker(self.slider):self.slider.setValue(self.current_index)
         t=float(sample.actual_time);d=float(dict(project.source.metadata)['duration_s'])
         self.time_label.setText(f'{int(t//60):02d}:{int(t%60):02d} / {int(d//60):02d}:{int(d%60):02d}')
@@ -895,7 +903,8 @@ class Window(QMainWindow):
         old_ids=[p.page_id for p in project.pages]
         Project(project.source,project.settings,project.samples,project.transitions,
                 project.segments,list(snapshot.pages),project.revision+1,
-                project.cache_generation,project.analysis_generation)
+                project.cache_generation,project.analysis_generation,project.sampling_algorithm,
+                project.selection_policy,project.decoder_backend,project.observation_sample_ids,project.keyframe_index_complete)
         project.pages=list(snapshot.pages)
         project.revision+=1
         self._update_after_edit(EditResult('changed',snapshot.focus,()),old_ids)

@@ -1,11 +1,11 @@
 # Windows 설치
 
-**0.5.0b1 키프레임 전용 베타**입니다. Python·FFmpeg 준비 없이 설치할 수 있습니다. [검증 기록](docs/milestones/Keyframe-M5-results.md)
+**0.5.0b2 키프레임 전용 베타**입니다. Python·FFmpeg 준비 없이 설치할 수 있습니다. [검증 기록](docs/milestones/Keyframe-M5-results.md)
 
 지원 대상: Windows x64. Windows ARM은 현재 검증 대상이 아닙니다.
 
-1. [베타 설치 파일](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.5.0b1/SlideExtractor-v0.5.0b1-Setup-Windows-x64.exe)을 다운로드합니다.
-2. `SlideExtractor-v0.5.0b1-Setup-Windows-x64.exe`를 실행합니다.
+1. [베타 설치 파일](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.5.0b2/SlideExtractor-v0.5.0b2-Setup-Windows-x64.exe)을 다운로드합니다.
+2. `SlideExtractor-v0.5.0b2-Setup-Windows-x64.exe`를 실행합니다.
 3. 설치가 끝나면 시작 메뉴의 Slide Extractor를 엽니다. 기본 설치는 사용자 계정 폴더이며 관리자 권한을 요구하지 않습니다.
 
 Python·Qt·FFmpeg·FFprobe를 포함합니다. 빌드 배치 파일 실행이나 vendor 폴더 준비는 필요하지 않습니다.

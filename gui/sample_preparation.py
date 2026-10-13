@@ -40,6 +40,9 @@ class BackgroundSamples:
                 profile.seconds['preparation_total']=self.finished_at-self.started_at
                 profile.metadata.update(status='failed' if self.error is not None else 'success',
                     sampling_algorithm=self.sampling_algorithm,timing_scope='Background preparation including predecessor drain; overlaps GUI idle time')
+                if self.result is not None:
+                    profile.metadata.update(selection_policy=self.result.selection_policy,decoder_backend=self.result.decoder_backend,
+                        sample_count=len(self.result.samples),keyframe_count=len(self.result.keyframe_index),requested_selection_policy='auto')
                 if self.error is not None:profile.metadata['error_type']=type(self.error).__name__
                 try:profile.save(self.profile_path)
                 except OSError as exc:print('Could not save preparation profile:',type(exc).__name__,flush=True)

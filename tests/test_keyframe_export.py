@@ -58,7 +58,7 @@ def test_cancel_before_publish_preserves_previous_pair(tmp_path,monkeypatch):
 @pytest.mark.parametrize('format',['detailed','simple'])
 def test_cancel_after_publication_is_recorded_as_saved(tmp_path,monkeypatch,format):
  from slide_core import keyframe_export as engine
- p=make_project(tmp_path);monkeypatch.setattr(engine,'extract_selected',extract_stub(p))
+ p=make_project(tmp_path);p.decoder_backend='native-idr';p.keyframe_index_complete=False;monkeypatch.setattr(engine,'extract_selected',extract_stub(p))
  token=CancelToken();real=engine._recover_one
  def cancel(*a,**kw):token.cancel();return real(*a,**kw)
  monkeypatch.setattr(engine,'_recover_one',cancel)
@@ -84,13 +84,13 @@ def test_forged_nonkeyframe_pts_are_not_substituted(tmp_path):
 
 
 @pytest.mark.parametrize('format',['detailed','simple'])
-@pytest.mark.parametrize('change',['project','cancel'])
+@pytest.mark.parametrize('change',['project','cancel','policy','backend'])
 @pytest.mark.parametrize('existing',[False,True])
 def test_publication_guard_rechecks_after_output_lock_before_any_output_changes(tmp_path,monkeypatch,format,change,existing):
  from contextlib import contextmanager
  from slide_core import keyframe_export as engine,export as core
  from slide_core.models import CancelledError
- p=make_project(tmp_path);monkeypatch.setattr(engine,'extract_selected',extract_stub(p))
+ p=make_project(tmp_path);p.decoder_backend='native-idr';p.keyframe_index_complete=False;monkeypatch.setattr(engine,'extract_selected',extract_stub(p))
  target=tmp_path/'out.pdf';side=target.with_suffix('.json');token=CancelToken()
  if existing:target.write_bytes(b'old pdf');side.write_bytes(b'old json')
  real=core.export_file_lease;fired=[]
@@ -100,10 +100,12 @@ def test_publication_guard_rechecks_after_output_lock_before_any_output_changes(
    if Path(path)==core.output_lock_path(target) and not fired:
     fired.append(True)
     if change=='project':p.pages=[];p.revision+=1
+    elif change=='policy':p.selection_policy='half';p.validate()
+    elif change=='backend':p.decoder_backend='cpu-keyframes';p.validate()
     else:token.cancel()
    yield handle
  monkeypatch.setattr(core,'export_file_lease',delayed)
- error=RuntimeError if change=='project' else CancelledError
+ error=CancelledError if change=='cancel' else RuntimeError
  with pytest.raises(error):
   engine.export_project(p,target,overwrite=existing,sidecar_format=format,cancel_token=token)
  assert fired and not token.committed

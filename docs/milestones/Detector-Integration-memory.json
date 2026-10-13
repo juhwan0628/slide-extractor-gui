@@ -1,0 +1,12 @@
+[
+  {
+    "observations": 2000,
+    "peak_rss_kib": 30768,
+    "seconds": 3.3436531741172075
+  },
+  {
+    "observations": 20000,
+    "peak_rss_kib": 30620,
+    "seconds": 33.84494334785268
+  }
+]

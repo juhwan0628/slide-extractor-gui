@@ -17,7 +17,7 @@ def verify_manual_editing(app,project,temp):
     from slide_core.editing import add_page
     from slide_core.pdf_only_export import export_pdf_only
     from slide_core.keyframe_export import export_project
-    from slide_core.keyframe_json import loads
+    from slide_core.keyframe_json import loads,timeline_version
     from pypdf import PdfReader
     for sample in project.samples:add_page(project,sample.actual_time)
     original=tuple(project.pages)
@@ -43,7 +43,7 @@ def verify_manual_editing(app,project,temp):
             QTest.keyClick(window.page_view,key,modifiers);app.processEvents()
         key(Qt.Key.Key_M,Qt.KeyboardModifier.ControlModifier)
         assert project.pages==[original[-1]]
-        assert window.current_index==len(project.samples)-1
+        assert window.current_index==next(i for i,s in enumerate(project.samples) if s.sample_id==original[-1].representative_sample_id)
         key(Qt.Key.Key_Z,Qt.KeyboardModifier.ControlModifier)
         assert tuple(project.pages)==original and len(window.selected_page_ids())==len(original)
         key(Qt.Key.Key_Up,Qt.KeyboardModifier.ShiftModifier)
@@ -58,7 +58,7 @@ def verify_manual_editing(app,project,temp):
         assert project.pages==[original[-1]]
         pdf,side=export_project(project,temp/'edited.pdf')
         value=loads(side.read_bytes(),pdf_bytes=pdf.read_bytes(),pdf_page_count=1)
-        assert len(PdfReader(pdf).pages)==1 and value['schema_version']==4
+        assert len(PdfReader(pdf).pages)==1 and value['schema_version']==timeline_version(project)
         assert value['pages'][0]['page_id']==original[-1].page_id
         assert value['pages'][0]['representative_timestamp_s']==float(project.sample_time(original[-1].representative_sample_id))
         export_pdf_only(project,temp/'edited-only.pdf')
@@ -125,6 +125,46 @@ def verify_background_workflow(app,video):
         window.close();wait(lambda:not window.isVisible())
 
 
+def verify_native_half(temp, *, frozen):
+    """Prove auto half and lazy export using synthetic media, with no fallback."""
+    from slide_core.preparation import prepare_samples
+    from slide_core.analysis import analyze_project
+    from slide_core.config import AnalysisSettings
+    from slide_core.lazy_frames import ensure_sample_image
+    from slide_core.editing import add_page
+    from slide_core.keyframe_export import export_project
+    from slide_core.keyframe_json import loads
+    fixture=(Path(sys._MEIPASS)/'fixtures/native-half.mp4' if frozen else Path(__file__).resolve().parent/'fixtures/native-half.mp4')
+    import shutil
+    unicode_input=Path(temp)/'H264 한글 경로 영상.mp4'
+    shutil.copyfile(fixture,unicode_input)
+    with tempfile.TemporaryDirectory(dir=temp,prefix='native-half-') as cache:
+        prep=prepare_samples(unicode_input,cache)
+        try:
+            assert prep.decoder_backend=='native-idr' and prep.selection_policy=='half', 'Native half silently fell back'
+            assert len(prep.keyframe_index)==6 and len(prep.samples)==3
+            assert len(list(prep.directory.glob('*.jpg')))==3
+            if frozen:
+                # An environment override must never conceal a missing bundled worker.
+                helper=Path(os.environ.get('SLIDE_NATIVE_KEYFRAME_HELPER',''))
+                if str(helper)!='.':assert helper.resolve().is_relative_to(Path(sys._MEIPASS)/'tools')
+                name='slide-keyframe-decode'+('.exe' if sys.platform=='win32' else '')
+                assert (Path(sys._MEIPASS)/'tools'/name).is_file()
+            project,_=analyze_project(prep.source,AnalysisSettings(roi_mode='full'),cache,prepared=prep)
+            skipped=project.samples[1]
+            assert skipped.sample_id not in project.observation_sample_ids and not Path(skipped.cache_path).exists()
+            ensure_sample_image(project,skipped)
+            change=add_page(project,skipped.actual_time)
+            assert change.status=='changed'
+            pdf,side=export_project(project,Path(cache)/'half-edited.pdf')
+            value=loads(side.read_bytes(),pdf_bytes=pdf.read_bytes())
+            assert value['schema_version']==7 and value['detector']['input_policy']=='half'
+            assert any(p['representative_timestamp_s']==float(skipped.actual_time) for p in value['pages'])
+            return dict(native_half_checked=True,native_lazy_edit_checked=True,native_json_v7_checked=True,
+                        native_half_backend=prep.decoder_backend,native_half_policy=prep.selection_policy)
+        finally:prep.discard()
+
+
 def smoke(target):
     os.environ.setdefault('QT_QPA_PLATFORM','offscreen')
     from PySide6.QtCore import qVersion
@@ -137,7 +177,7 @@ def smoke(target):
     from slide_core.profiling import AnalysisProfile
     from slide_core.pdf_only_export import export_pdf_only
     from slide_core.keyframe_export import export_project
-    from slide_core.keyframe_json import loads
+    from slide_core.keyframe_json import loads,timeline_version
     from pypdf import PdfReader
     from slide_core.version import VERSION
     result={'version':VERSION,'frozen':bool(getattr(sys,'frozen',False)),'status':'failed'}
@@ -158,7 +198,7 @@ def smoke(target):
             cleanup.callback(project._cache_pin.close)
             pdf,side=export_project(project,temp/'test.pdf')
             value=loads(side.read_bytes(),pdf_bytes=pdf.read_bytes(),pdf_page_count=len(project.pages))
-            assert value['schema_version']==4
+            assert value['schema_version']==timeline_version(project)
             simple_pdf,simple_side=export_project(project,temp/'simple.pdf',sidecar_format='simple')
             from slide_core.simple_json import simple_timeline
             assert json.loads(simple_side.read_bytes())==simple_timeline(project)
@@ -182,6 +222,10 @@ def smoke(target):
             forbidden=('legacy_fps','slide_core.export_v3','slide_core.timeline_json')
             assert not any(name==prefix or name.startswith(prefix+'.') for name in sys.modules for prefix in forbidden)
             result.update(keyframe_only_checked=True,legacy_modules_absent_checked=True)
+            native_name='slide-keyframe-decode'+('.exe' if sys.platform=='win32' else '')
+            bundled_native=result['frozen'] and (Path(sys._MEIPASS)/'tools'/native_name).is_file()
+            if bundled_native or os.environ.get('SLIDE_REQUIRE_NATIVE_SMOKE')=='1':
+                result.update(verify_native_half(temp,frozen=result['frozen']))
             result.update(status='success',qt_runtime_version=qVersion(),sample_count=len(project.samples),page_count=len(project.pages),
                           decoder_backend='cpu-keyframes',bundled_tools_checked=result['frozen'],
                           pdf_only_checked=True,output_lock_cleanup_checked=True,

@@ -10,7 +10,8 @@ def test_shared_spec_uses_entrypoint_data_and_version(tmp_path,monkeypatch):
     import sys
     monkeypatch.setattr(sys,'platform','darwin')
     monkeypatch.setenv('APPROVED_FFMPEG_DIR',str(tmp_path))
-    for name in ('ffmpeg','ffprobe'):(tmp_path/name).write_bytes(b'tool')
+    from tests.test_m10_native_package import evidence_fixture
+    evidence_fixture(tmp_path)
     (tmp_path/'licenses').mkdir()
     (tmp_path/'licenses/COPYING').write_text('license')
     (tmp_path/'SBOM.json').write_text('{}')
@@ -27,7 +28,7 @@ def test_shared_spec_uses_entrypoint_data_and_version(tmp_path,monkeypatch):
         'EXE':lambda *a,**kw:None,'COLLECT':lambda *a,**kw:None,'BUNDLE':bundle})
     from slide_core.version import VERSION,BUNDLE_VERSION
     assert calls['scripts']==[str(ROOT/'packaging/desktop_entry.py')]
-    assert all(Path(p).name in ('ffmpeg','ffprobe') for p,_ in calls['binaries'])
+    assert all(Path(p).name in ('ffmpeg','ffprobe','slide-keyframe-decode') for p,_ in calls['binaries'])
     assert {Path(p).name for p,_ in calls['datas']} >= {'THIRD_PARTY_NOTICES.md','LICENSE_AUDIT.md'}
     assert calls['bundle']['version']==BUNDLE_VERSION
     assert VERSION.startswith(BUNDLE_VERSION)

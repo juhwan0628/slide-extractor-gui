@@ -1,10 +1,10 @@
 # Mac 설치
 
-**0.5.0b1 키프레임 전용 베타**입니다. Python·FFmpeg 준비 없이 설치할 수 있습니다. [검증 기록](docs/milestones/Keyframe-M5-results.md)
+**0.5.0b2 키프레임 전용 베타**입니다. Python·FFmpeg 준비 없이 설치할 수 있습니다. [검증 기록](docs/milestones/Keyframe-M5-results.md)
 
 지원 대상: Apple Silicon Mac (arm64). Intel Mac은 현재 지원하지 않습니다.
 
-1. [베타 설치 파일](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.5.0b1/SlideExtractor-v0.5.0b1-macOS-arm64.dmg)을 다운로드합니다.
+1. [베타 설치 파일](https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.5.0b2/SlideExtractor-v0.5.0b2-macOS-arm64.dmg)을 다운로드합니다.
 2. DMG를 엽니다.
 3. `SlideExtractor.app`을 Applications 폴더로 복사합니다.
 4. Applications에서 앱을 실행합니다. Python·Qt·FFmpeg는 앱에 포함돼 있습니다.

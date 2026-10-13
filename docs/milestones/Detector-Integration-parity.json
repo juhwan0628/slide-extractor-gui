@@ -1,0 +1,132 @@
+[
+  {
+    "dataset": "original",
+    "clip": "sp",
+    "pages": 3,
+    "representatives_s": [
+      91.0,
+      281.0,
+      299.0
+    ],
+    "prepare_s": 4.417637540027499,
+    "analysis_s": 1.505245050881058,
+    "peak_rss_kib": 90196
+  },
+  {
+    "dataset": "original",
+    "clip": "multicore",
+    "pages": 4,
+    "representatives_s": [
+      79.0,
+      176.93333333333334,
+      207.73333333333332,
+      289.46666666666664
+    ],
+    "prepare_s": 4.6550416899845,
+    "analysis_s": 1.5065180228557438,
+    "peak_rss_kib": 104212
+  },
+  {
+    "dataset": "original",
+    "clip": "ethics",
+    "pages": 6,
+    "representatives_s": [
+      40.0,
+      79.4,
+      82.0,
+      97.66666666666667,
+      230.0,
+      300.06666666666666
+    ],
+    "prepare_s": 4.964536550920457,
+    "analysis_s": 1.5030865129083395,
+    "peak_rss_kib": 112660
+  },
+  {
+    "dataset": "validation1",
+    "clip": "sp",
+    "pages": 5,
+    "representatives_s": [
+      1.0,
+      9.0,
+      33.86666666666667,
+      192.86666666666667,
+      300.8666666666667
+    ],
+    "prepare_s": 4.232035681139678,
+    "analysis_s": 1.4576696769800037,
+    "peak_rss_kib": 112660
+  },
+  {
+    "dataset": "validation1",
+    "clip": "multicore",
+    "pages": 2,
+    "representatives_s": [
+      114.0,
+      299.93333333333334
+    ],
+    "prepare_s": 5.740044396836311,
+    "analysis_s": 1.5663509850855917,
+    "peak_rss_kib": 112660
+  },
+  {
+    "dataset": "validation1",
+    "clip": "ethics",
+    "pages": 5,
+    "representatives_s": [
+      8.0,
+      62.2,
+      76.6,
+      276.3333333333333,
+      300.3333333333333
+    ],
+    "prepare_s": 4.840743551962078,
+    "analysis_s": 1.5632494778838009,
+    "peak_rss_kib": 112660
+  },
+  {
+    "dataset": "validation2",
+    "clip": "sp",
+    "pages": 11,
+    "representatives_s": [
+      94.0,
+      152.46666666666667,
+      205.4,
+      210.4,
+      213.8,
+      266.46666666666664,
+      281.1333333333333,
+      296.0,
+      297.0,
+      298.3333333333333,
+      298.6
+    ],
+    "prepare_s": 4.490073531866074,
+    "analysis_s": 1.6369986420031637,
+    "peak_rss_kib": 112660
+  },
+  {
+    "dataset": "validation2",
+    "clip": "multicore",
+    "pages": 1,
+    "representatives_s": [
+      270.0
+    ],
+    "prepare_s": 5.515114716021344,
+    "analysis_s": 1.614882848924026,
+    "peak_rss_kib": 112660
+  },
+  {
+    "dataset": "validation2",
+    "clip": "ethics",
+    "pages": 3,
+    "representatives_s": [
+      28.0,
+      227.06666666666666,
+      300.06666666666666
+    ],
+    "prepare_s": 4.915543044917285,
+    "analysis_s": 1.509748092154041,
+    "peak_rss_kib": 112660
+  }
+]

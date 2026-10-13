@@ -35,6 +35,8 @@ def export_pdf_only(project,destination,*,overwrite=False,cancel_token=None,prog
     ids={s.sample_id:s for s in snap.samples}
     selections=[ids[p.representative_sample_id] for p in snap.pages]
     for sample in selections:
+        from .lazy_frames import ensure_sample_image
+        ensure_sample_image(snap,sample,cancel_token,cache_pin=getattr(project,'_cache_pin',None))
         path=Path(sample.cache_path)
         if path.is_symlink() or not path.is_file():
             raise MediaError('CacheUnavailable',code='CacheUnavailable')

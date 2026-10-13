@@ -70,11 +70,19 @@ def _resolve_roi(samples,settings,source,cancel_token=None):
     return roi,region
 
 
-def _settings_key(settings):
+def effective_detector(settings,previous=None):
+    """New analyses use spatial groups; unspecified reanalysis preserves its algorithm."""
+    if settings.detector is not None:return settings.detector
+    if previous is not None:
+        return previous.settings.detector or DetectorConfig()
+    return DetectorConfig(algorithm='spatial-groups-v1')
+
+
+def _settings_key(settings,previous=None):
     """Canonical identity independent of transient GUI settings revision."""
     return (settings.roi_mode,
             settings.effective_roi if settings.roi_mode=='manual' else None,
-            tuple(settings.masks),settings.detector or DetectorConfig())
+            tuple(settings.masks),effective_detector(settings,previous))
 
 
 def _analyze_project(source,settings:AnalysisSettings,cache_root,*,previous:Project|None=None,
@@ -88,6 +96,12 @@ def _analyze_project(source,settings:AnalysisSettings,cache_root,*,previous:Proj
     if cancel_token is not None:cancel_token.raise_if_cancelled()
     source=probe_source(Path(source),cancel_token=cancel_token) if not hasattr(source,'fingerprint') else source
     if not source_matches(source):raise MediaError('SourceChanged',code='SourceChanged')
+    detector=effective_detector(settings,previous)
+    selection_policy=(prepared.selection_policy if prepared is not None else getattr(previous,'selection_policy','all'))
+    if previous is not None:previous.validate()
+    if prepared is not None and previous is not None and prepared.selection_policy!=previous.selection_policy:
+        raise MediaError('SelectionPolicyMismatch',code='SelectionPolicyMismatch')
+    decoder_backend=(prepared.decoder_backend if prepared is not None else getattr(previous,'decoder_backend','cpu-keyframes'))
     prepared_cache=prepared
     cache_generation=str(uuid4())
     reused=False
@@ -96,7 +110,9 @@ def _analyze_project(source,settings:AnalysisSettings,cache_root,*,previous:Proj
     if previous is not None and previous.source==source and previous.settings is not None:
         if previous.sampling_algorithm!=KEYFRAME_ALGORITHM:raise ValueError('Previous sampling algorithm mismatch')
         if not isinstance(previous.settings,AnalysisSettings):raise ValueError('Previous algorithm/settings mismatch')
-        samples=previous.samples
+        full_index=previous.samples
+        ids=set(previous.observation_sample_ids)
+        samples=tuple(s for s in full_index if s.sample_id in ids)
         if not samples:raise MediaError('CacheUnavailable',code='CacheUnavailable')
         cache_generation=previous.cache_generation
         reused=True
@@ -106,26 +122,29 @@ def _analyze_project(source,settings:AnalysisSettings,cache_root,*,previous:Proj
         if prepared.sampling_algorithm!=KEYFRAME_ALGORITHM:
             raise ValueError('Prepared sampling algorithm does not match analysis')
         if not prepared.samples:raise MediaError('CacheUnavailable',code='CacheUnavailable')
-        samples=prepared.samples;cache_generation=prepared.cache_generation;reused=True
+        samples=prepared.samples;full_index=prepared.keyframe_index or prepared.samples;cache_generation=prepared.cache_generation;reused=True
     created_cache=None
     cache_pins=[]
     if progress:progress('sampling',None,None)
     try:
         if not reused:
             with measured(profile,'sampling'):
-                samples,created_cache=keyframe_stream(source,Path(cache_root),cancelled=cancel_token,
-                    profile=profile,cache_owner=cache_pins.append)
-                samples=tuple(samples)
+                from .preparation import prepare_samples
+                prepared_cache=prepare_samples(source,Path(cache_root),cancel_token=cancel_token,progress=progress,profile=profile)
+                samples=prepared_cache.samples;full_index=prepared_cache.keyframe_index
+                created_cache=prepared_cache.directory;cache_pins.append(prepared_cache.cache_pin)
+                cache_generation=prepared_cache.cache_generation
+                selection_policy=prepared_cache.selection_policy;decoder_backend=prepared_cache.decoder_backend
         if not source_matches(source):raise MediaError('SourceChanged',code='SourceChanged')
         if progress:progress('detecting',0,len(samples))
         if profile is not None:
             profile.metadata.update(cache_reused=reused,sample_count=len(samples),
-                                    sampling_algorithm=KEYFRAME_ALGORITHM,
+                                    sampling_algorithm=KEYFRAME_ALGORITHM,selection_policy=selection_policy,decoder_backend=decoder_backend,decoder_threads=1 if decoder_backend=='native-idr' else 0,keyframe_count=len(full_index),
                                     width=source.width,height=source.height,duration_s=float(dict(source.metadata)['duration_s']))
         with measured(profile,'roi'):
             roi,region=_resolve_roi(samples,settings,source,cancel_token)
         prepared=_prepared(samples,region,profile,cancel_token)
-        if progress:
+        if progress and detector.algorithm!='spatial-groups-v1':
             original_prepared=prepared
             def observed():
                 for i,image in enumerate(original_prepared):
@@ -134,20 +153,20 @@ def _analyze_project(source,settings:AnalysisSettings,cache_root,*,previous:Proj
             prepared=observed()
         metadata=dict(source.metadata)
         duration=Fraction(str(metadata['duration_s']))
-        detector=settings.detector or DetectorConfig()
         with measured(profile,'detection'):
             transitions,segments=streaming_detect(samples,prepared,duration=duration,
-                                                  valid_mask=region.valid,config=detector)
+                                                  valid_mask=region.valid,config=detector,cancel_token=cancel_token,
+                                                  progress=progress if detector.algorithm=='spatial-groups-v1' else None,profile=profile)
         if cancel_token is not None:cancel_token.raise_if_cancelled()
         if not source_matches(source):raise MediaError('SourceChanged',code='SourceChanged')
         if progress:progress('detecting',len(samples),len(samples));progress('assembling',None,None)
         with measured(profile,'assembly'):
-            complete_settings=replace(settings,effective_roi=roi)
+            complete_settings=replace(settings,effective_roi=roi,detector=detector)
             pages=[Page(str(uuid4()),seg.representative_sample_id,'auto',seg.segment_id,
                         seg.segment_id,'auto') for seg in segments]
-            project=Project(source,complete_settings,tuple(samples),transitions,segments,pages,
+            project=Project(source,complete_settings,tuple(full_index),transitions,segments,pages,
                             revision=0,cache_generation=cache_generation,
-                            analysis_generation=str(uuid4()))
+                            analysis_generation=str(uuid4()),selection_policy=selection_policy,decoder_backend=decoder_backend,observation_sample_ids=tuple(s.sample_id for s in samples),keyframe_index_complete=bool(prepared_cache.keyframe_index) if prepared_cache is not None else previous.keyframe_index_complete)
             project._cache_pin = prepared_cache.cache_pin if prepared_cache is not None else (getattr(previous, '_cache_pin', None) if reused else (cache_pins[0] if cache_pins else None))
             result=AnalysisResult(project.samples,project.transitions,project.segments,
                                   project.analysis_generation)
@@ -165,14 +184,15 @@ def _analyze_project(source,settings:AnalysisSettings,cache_root,*,previous:Proj
 
 
 def requires_reanalysis(project:Project,settings:AnalysisSettings):
-    return _settings_key(project.settings)!=_settings_key(settings)
+    return _settings_key(project.settings,project)!=_settings_key(settings,project)
 
 
 def analyze_project(source,settings,cache_root,*,previous=None,cancel_token=None,
                     progress=None,profile=None,profile_path=None,prepared=None):
     profile=profile if profile is not None else (AnalysisProfile() if profile_path else None)
     if profile is not None:
-        profile.metadata.update(decoder_backend='cpu-keyframes',decoder_threads=0)
+        backend=getattr(prepared if prepared is not None else previous,'decoder_backend','cpu-keyframes')
+        profile.metadata.update(decoder_backend=backend,decoder_threads=1 if backend=='native-idr' else 0)
     try:
         with measured(profile,'total'):
             outcome=_analyze_project(source,settings,cache_root,previous=previous,

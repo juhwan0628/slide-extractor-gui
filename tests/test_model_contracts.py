@@ -50,6 +50,7 @@ def build(builder, *, samples=(), transitions=(), segments=(), revision=0):
         # Validate edited state, without letting Project construction mask bugs.
         project = Project(source(), revision=7)
         project.samples, project.transitions, project.segments = samples, transitions, segments
+        project.observation_sample_ids=None
         project.revision = revision
         return make_export_snapshot(project)
     return ExportSnapshot(source(), None, samples, transitions, segments, (),

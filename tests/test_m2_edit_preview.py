@@ -26,6 +26,7 @@ def editor(tmp_path):
         samples.append(replace(project.samples[0],sample_id=f's{i}',source_pts=i,ordinal=i,
                                cache_path=str(path)))
     project.samples=tuple(samples)
+    project.observation_sample_ids=tuple(s.sample_id for s in samples)
     project.pages=[replace(project.pages[0],page_id={0:P0,2:P2,4:P4}[i],representative_sample_id=f's{i}') for i in (0,2,4)]
     project.source=replace(project.source,metadata=tuple((k,80 if k=='duration_s' else v) for k,v in project.source.metadata))
     w=Window();w.show()

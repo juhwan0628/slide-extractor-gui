@@ -16,7 +16,11 @@ BASE=('app.py','requirements.txt','README.md','LICENSE',
       'packaging/binary-manifest.example.json','packaging/build-macos-dmg.sh','packaging/windows.iss',
       'packaging/build_manifest.py','packaging/prepare_vendor.py','packaging/build_source_zip.py',
       'packaging/requirements-macos-arm64.lock','packaging/requirements-windows-x64.lock',
-      'packaging/requirements-linux-aarch64-validation.lock')
+      'packaging/requirements-linux-aarch64-validation.lock',
+      'packaging/native_helper_contract.py','packaging/fixtures/native-half.mp4','packaging/fixtures/README.md',
+      'packaging/build-native-helper.sh','packaging/record_native_helper.py',
+      'packaging/build-ffmpeg.sh','packaging/native-sources.lock.json','packaging/native_inputs.py',
+      'native/keyframe_decode.cpp','native/CMakeLists.txt','native/README.md')
 
 def build(output:Path, *, include_tests=False):
     files=[ROOT/name for name in BASE]

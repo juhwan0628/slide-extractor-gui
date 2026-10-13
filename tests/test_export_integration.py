@@ -9,7 +9,7 @@ from slide_core.models import Rect
 from slide_core.keyframe_export import export_project
 from slide_core.export import OutputOverwriteRequired,RecoveryRequired
 from slide_core.keyframe_json import loads
-from slide_core.editing import add_page,delete_page,replace_page
+from slide_core.editing import add_page,delete_page,replace_page,merge_pages
 from tests.media_fixtures import make_video
 
 def prepare(tmp_path, settings=None):
@@ -30,15 +30,22 @@ def test_roundtrip_m5_real_video(tmp_path):
     before=video.path.read_bytes()
     out,side=export_project(project,tmp_path/'lecture.slides.pdf')
     value=inspect(out,side)
-    assert value['schema_version']==4
+    assert value['schema_version']==6
     assert len(value['pages'])==len(project.pages)
     assert video.path.read_bytes()==before
     assert not list(tmp_path.glob('.slide-export-*.journal.json'))
 
 def test_manual_edit_keeps_ids_and_order(tmp_path):
     _,project=prepare(tmp_path)
+    # Spatial detection may select every observation of this moving test pattern.
+    # Free a real sample, preserving the duplicate-sample guard during replacement.
+    used={p.representative_sample_id for p in project.pages}
+    if len(used)==len(project.samples):
+        assert merge_pages(project,[p.page_id for p in project.pages[:2]]).status=='changed'
+        used={p.representative_sample_id for p in project.pages}
+    free=next(s for s in project.samples if s.sample_id not in used)
     page=project.pages[0]
-    result=replace_page(project,page.page_id,project.samples[1].actual_time)
+    result=replace_page(project,page.page_id,free.actual_time)
     assert result.status=='changed'
     new=add_page(project,project.samples[-1].actual_time)
     assert new.status in ('changed','no_op')

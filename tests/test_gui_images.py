@@ -113,3 +113,19 @@ def test_switch_discards_inflight_visible_request(tmp_path,monkeypatch):
         assert results==['new-visible']
         assert loader.cached('old-visible') is None
     finally:release.set();loader.stop()
+
+
+def test_lazy_resolver_is_cancelled_when_loader_stops(tmp_path):
+    from threading import Event
+    from PySide6.QtWidgets import QApplication
+    from gui.images import ImageLoader
+    app=QApplication.instance() or QApplication([])
+    entered=Event();cancelled=Event();loader=ImageLoader()
+    def resolve(token):
+        entered.set()
+        while not token.cancelled:cancelled.wait(.01)
+        cancelled.set();token.raise_if_cancelled()
+    loader.request('lazy',tmp_path/'missing.jpg',resolver=resolve)
+    assert entered.wait(2)
+    loader.stop()
+    assert cancelled.is_set() and not loader._thread.is_alive()

@@ -8,4 +8,4 @@ def inventory(root,version,extension):
     root=Path(root)
     return {'candidate_version':version,
             'build_manifest_sha256':hashed(next(root.rglob('build-manifest.json'))),
-            'tools':{name:{'bundle_sha256':hashed(next(path for path in root.rglob(name+extension) if path.is_file() and 'tools' in path.relative_to(root).parts))} for name in ('ffmpeg','ffprobe')}}
+            'tools':{name:{'bundle_sha256':hashed(next(path for path in root.rglob(name+extension) if path.is_file() and 'tools' in path.relative_to(root).parts))} for name in ('ffmpeg','ffprobe','slide-keyframe-decode') if name!='slide-keyframe-decode' or any(root.rglob(name+extension))}}

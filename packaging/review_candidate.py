@@ -30,7 +30,28 @@ def openssl_license_evidence(root):
     result['license_basis']='Repository original OpenSSL-LICENSE.txt and RUNTIME-NOTICES.md; OpenSSL 3.x runtime version verified separately'
     return result
 
-def review(root,inputs,candidate,config,platform,output):
+def review_native_materials(root,inputs,inventory,extension):
+    """Bind unsigned relink inputs and signed installed bytes separately."""
+    if 'slide-keyframe-decode' not in inventory.get('tools',{}):raise ValueError('Missing native helper inventory')
+    contract=runpy.run_path(str(ROOT/'packaging/native_helper_contract.py'))
+    evidence=contract['validate_helper_evidence'](inputs,extension)
+    import hashlib
+    def canonical(paths):
+        resolved=set();base=root.resolve()
+        for path in paths:
+            target=path.resolve()
+            if not target.is_relative_to(base):raise ValueError('Unsafe native material alias outside installed bundle')
+            resolved.add(target)
+        return sorted(resolved)
+    tools=canonical(p for p in root.rglob('slide-keyframe-decode'+extension) if p.is_file() and 'tools' in p.relative_to(root).parts)
+    records=canonical(p for p in root.rglob('native-helper-build.json') if p.is_file())
+    if len(tools)!=1 or len(records)!=1:raise ValueError('Missing/ambiguous native installed material')
+    if hashlib.sha256(tools[0].read_bytes()).hexdigest()!=inventory['tools']['slide-keyframe-decode']['bundle_sha256']:
+        raise ValueError('Installed native helper differs from candidate')
+    if json.loads(records[0].read_text())!=evidence:raise ValueError('Installed native helper evidence differs')
+    return evidence
+
+def review(root,inputs,candidate,config,platform,output,*,require_native=False):
     assert config['native_inventory_reviewed'] is True
     audit_module=runpy.run_path(str(ROOT/'packaging/audit_release.py'))
     digest=audit_module['sha256']
@@ -40,6 +61,7 @@ def review(root,inputs,candidate,config,platform,output):
         if not matches:raise ValueError('Installed material missing: '+name)
         return matches[0]
     build=json.loads(one('build-manifest.json').read_text())
+    require_native=require_native or 'slide-keyframe-decode' in build.get('tools',{})
     assert build['version']==config['version']
     assert build['provenance']['GITHUB_SHA']==config['candidate_commit']
     assert str(build['provenance']['GITHUB_RUN_ID'])==str(config['candidate_run_id'])
@@ -55,7 +77,7 @@ def review(root,inputs,candidate,config,platform,output):
     runpy.run_path(str(ROOT/'packaging/native_codec_policy.py'))['verify_no_extra_codecs'](root)
     for name in ('installed-smoke.json','installer-smoke.json','qt-replacement-smoke.json'):
         r=json.loads((candidate/'build'/name).read_text())
-        runpy.run_path(str(ROOT/'packaging/keyframe_release_contract.py'))['validate_smoke'](r,config['version'])
+        runpy.run_path(str(ROOT/'packaging/keyframe_release_contract.py'))['validate_smoke'](r,config['version'],require_native=require_native)
         assert r['status']=='success' and r['frozen'] and r['bundled_tools_checked']
         assert r['version']==config['version'] and r['pdf_only_checked'] and r['output_lock_cleanup_checked']
     replacement=json.loads((candidate/'build/qt-replacement.json').read_text())
@@ -70,6 +92,8 @@ def review(root,inputs,candidate,config,platform,output):
     modules=sorted({p.name for p in files if p.name.startswith('Qt6') and p.suffix=='.dll'}|{p.name for p in files if p.parent.name=='A' and p.name.startswith('Qt')})
     assert modules
     data=json.loads((inputs/'binary-manifest.json').read_text())
+    if require_native:
+        data['native_helper']=review_native_materials(root,inputs,inventory,'.exe' if sys.platform=='win32' else '')
     for name in ('ffmpeg','ffprobe'):
         tool=one(name+('.exe' if sys.platform=='win32' else ''))
         assert digest(tool)==inventory['tools'][name]['bundle_sha256']
@@ -111,5 +135,6 @@ def review(root,inputs,candidate,config,platform,output):
 if __name__=='__main__':
     p=argparse.ArgumentParser()
     for name in ('root','inputs','candidate','config','output'):p.add_argument('--'+name,type=Path,required=True)
-    p.add_argument('--platform',required=True);a=p.parse_args()
-    review(a.root,a.inputs,a.candidate,json.loads(a.config.read_text()),a.platform,a.output)
+    p.add_argument('--platform',required=True)
+    p.add_argument('--require-native',action='store_true');a=p.parse_args()
+    review(a.root,a.inputs,a.candidate,json.loads(a.config.read_text()),a.platform,a.output,require_native=a.require_native)

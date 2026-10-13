@@ -9,7 +9,8 @@ OUTPUT_DIR="$PWD/vendor/approved"
 mkdir -p "$BUILD_DIR" "$OUTPUT_DIR"
 tar -xf "$SOURCE_ARCHIVE" -C "$BUILD_DIR" --strip-components=1
 cd "$BUILD_DIR"
-FLAGS=(--disable-autodetect --disable-gpl --disable-nonfree --disable-version3 --disable-shared --enable-static --disable-doc --disable-debug --disable-ffplay)
+SDK_DIR="$PWD/../../build/ffmpeg-sdk"
+FLAGS=(--prefix="$SDK_DIR" --disable-autodetect --disable-gpl --disable-nonfree --disable-version3 --disable-shared --enable-static --disable-doc --disable-debug --disable-ffplay)
 case "$(uname -s)" in
   MINGW*|MSYS*) FLAGS+=(--target-os=mingw32 --arch=x86_64 --cc=gcc --extra-ldflags=-static); EXT=.exe ;;
   Darwin) FLAGS+=(--arch=arm64 --cc=clang); EXT= ;;
@@ -18,5 +19,6 @@ case "$(uname -s)" in
 esac
 ./configure "${FLAGS[@]}"
 make -j "${SLIDE_BUILD_JOBS:-$(getconf _NPROCESSORS_ONLN)}" ffmpeg$EXT ffprobe$EXT
+make install-libs install-headers
 cp "ffmpeg$EXT" "ffprobe$EXT" "$OUTPUT_DIR/"
 cp config.h ffbuild/config.log ffbuild/config.mak "$OUTPUT_DIR/"

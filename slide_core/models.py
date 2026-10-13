@@ -139,9 +139,10 @@ class Transition:
         for name in ("lower_time", "upper_time", "observed_time"):
             object.__setattr__(self, name, _fraction(getattr(self, name)))
         object.__setattr__(self, "scores", tuple((k, float(v)) for k, v in self.scores))
-        if (self.reason not in ("confirmed", "eof_unconfirmed") or self.lower_time < 0
+        if (self.reason not in ("confirmed", "eof_unconfirmed", "spatial_change") or self.lower_time < 0
                 or not self.lower_time <= self.observed_time <= self.upper_time
                 or type(self.persistence_samples) is not int or self.persistence_samples < 0
+                or (self.reason=="spatial_change" and self.persistence_samples!=1)
                 or any(not math.isfinite(v) for _, v in self.scores)):
             raise ValueError("invalid transition")
 
@@ -243,6 +244,13 @@ def _validate_source_samples(source,samples):
         raise ValueError("sample must precede source duration")
 
 
+def validate_preparation_provenance(selection_policy,decoder_backend):
+    if selection_policy not in ('all','half') or decoder_backend not in ('cpu-keyframes','native-idr'):
+        raise ValueError('Invalid preparation provenance')
+    if selection_policy=='half' and decoder_backend!='native-idr':
+        raise ValueError('Half preparation requires native IDR backend')
+
+
 @dataclass
 class Project:
     source: SourceRef
@@ -255,6 +263,10 @@ class Project:
     cache_generation: str = field(default_factory=lambda: str(uuid.uuid4()))
     analysis_generation: str = field(default_factory=lambda: str(uuid.uuid4()))
     sampling_algorithm: str = KEYFRAME_ALGORITHM
+    selection_policy: str = "all"
+    decoder_backend: str = "cpu-keyframes"
+    observation_sample_ids: tuple[str,...] | None = None
+    keyframe_index_complete: bool | None = None
 
     def __post_init__(self):
         self.samples = tuple(self.samples)
@@ -264,6 +276,20 @@ class Project:
         self.validate()
 
     def validate(self):
+        if self.observation_sample_ids is None:self.observation_sample_ids=tuple(s.sample_id for s in self.samples)
+        else:self.observation_sample_ids=tuple(self.observation_sample_ids)
+        if self.keyframe_index_complete is None:self.keyframe_index_complete=self.selection_policy=='all'
+        if type(self.keyframe_index_complete) is not bool:raise ValueError('Invalid complete index flag')
+        sample_ids=tuple(s.sample_id for s in self.samples)
+        observations=self.observation_sample_ids;observed_set=set(observations)
+        if len(observed_set)!=len(observations) or tuple(x for x in sample_ids if x in observed_set)!=observations:
+            raise ValueError('Invalid analysis observation membership')
+        if self.samples and not observations:raise ValueError('Missing analysis observations')
+        if self.keyframe_index_complete and observations!=sample_ids[::2 if self.selection_policy=='half' else 1]:
+            raise ValueError('Observation selection does not match policy')
+        if any(t.left_sample_id not in observed_set or t.right_sample_id not in observed_set for t in self.transitions):raise ValueError('Boundary uses unobserved frame')
+        if any(not {g.first_sample_id,g.last_sample_id,g.representative_sample_id}<=observed_set for g in self.segments):raise ValueError('Segment uses unobserved frame')
+        validate_preparation_provenance(self.selection_policy,self.decoder_backend)
         if self.sampling_algorithm!=KEYFRAME_ALGORITHM:raise ValueError("Unsupported sampling algorithm")
         _validate_source_samples(self.source,self.samples)
         sample_times = _validate_analysis_records(self.samples, self.transitions, self.segments)
@@ -286,6 +312,17 @@ class Project:
             raise ValueError("revision must be a nonnegative integer")
         self._sample_times = sample_times
         self._indexed_samples = self.samples
+
+    @property
+    def keyframe_index(self):
+        """Complete edit index, including uncached keys skipped by half analysis."""
+        if not self.keyframe_index_complete:raise ValueError('FullKeyframesRequired')
+        return self.samples
+
+    @property
+    def _selection_policy(self):
+        # Compatibility with detector-integration diagnostics.
+        return self.selection_policy
 
     def sample_time(self, sample_id: str) -> Fraction:
         if self._indexed_samples is not self.samples or not isinstance(self.samples, tuple):
@@ -310,13 +347,19 @@ class ExportSnapshot:
     cache_generation: str
     analysis_generation: str
     sampling_algorithm: str = KEYFRAME_ALGORITHM
+    selection_policy: str = "all"
+    decoder_backend: str = "cpu-keyframes"
+    observation_sample_ids: tuple[str,...] | None = None
+    keyframe_index_complete: bool | None = None
 
     def __post_init__(self):
         object.__setattr__(self, "settings", _freeze(self.settings))
         for name in ("samples", "transitions", "segments", "pages"):
             object.__setattr__(self, name, tuple(getattr(self, name)))
-        Project(self.source, self.settings, self.samples, self.transitions, self.segments,
-                self.pages, self.revision, self.cache_generation, self.analysis_generation,self.sampling_algorithm)
+        candidate=Project(self.source, self.settings, self.samples, self.transitions, self.segments,
+                self.pages, self.revision, self.cache_generation, self.analysis_generation,self.sampling_algorithm,self.selection_policy,self.decoder_backend,self.observation_sample_ids,self.keyframe_index_complete)
+        object.__setattr__(self,'observation_sample_ids',candidate.observation_sample_ids)
+        object.__setattr__(self,'keyframe_index_complete',candidate.keyframe_index_complete)
 
 
 def make_export_snapshot(project: Project) -> ExportSnapshot:
@@ -324,7 +367,8 @@ def make_export_snapshot(project: Project) -> ExportSnapshot:
     return ExportSnapshot(project.source, _freeze(project.settings), tuple(project.samples),
                           tuple(project.transitions), tuple(project.segments),
                           tuple(project.pages), project.revision, str(uuid.uuid4()),
-                          project.cache_generation, project.analysis_generation,project.sampling_algorithm)
+                          project.cache_generation, project.analysis_generation,project.sampling_algorithm,
+                          project.selection_policy,project.decoder_backend,project.observation_sample_ids,project.keyframe_index_complete)
 
 
 @dataclass(frozen=True)

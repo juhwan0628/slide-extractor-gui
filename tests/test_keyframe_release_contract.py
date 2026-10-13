@@ -45,8 +45,12 @@ def test_spec_rejects_legacy_module_in_actual_analysis_toc(tmp_path,monkeypatch)
  import sys
  monkeypatch.setattr(sys,'platform','darwin')
  monkeypatch.setenv('APPROVED_FFMPEG_DIR',str(tmp_path))
- for name in ('ffmpeg','ffprobe','SBOM.json','SOURCE_AND_REPLACEMENT.md'):
+ monkeypatch.setenv('PERSONAL_FFMPEG_DIR',str(tmp_path))
+ monkeypatch.setenv('SLIDE_BUILD_MODE','personal')
+ for name in ('ffmpeg','ffprobe','slide-keyframe-decode','SBOM.json','SOURCE_AND_REPLACEMENT.md'):
   (tmp_path/name).write_text('fixture')
+ import json,hashlib
+ (tmp_path/'native-helper-build.json').write_text(json.dumps({'helper_sha256':hashlib.sha256(b'fixture').hexdigest()}))
  (tmp_path/'licenses').mkdir()
  manifest=tmp_path/'build-manifest.json';manifest.write_text('{}')
  monkeypatch.setenv('SLIDE_BUILD_MANIFEST',str(manifest))

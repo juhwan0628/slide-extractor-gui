@@ -14,13 +14,15 @@ from .export import snapshot_export,ExportTransaction,_recover_one,OutputOverwri
 def _unchanged(project,snap):
     if any(getattr(project,name)!=getattr(snap,name) for name in
            ("source","settings","samples","transitions","segments","revision",
-            "cache_generation","analysis_generation","sampling_algorithm")) or tuple(project.pages)!=snap.pages:
+            "cache_generation","analysis_generation","sampling_algorithm","selection_policy","decoder_backend","observation_sample_ids","keyframe_index_complete")) or tuple(project.pages)!=snap.pages:
         raise RuntimeError("Project changed during export")
 
-def _representative_images(snap):
+def _representative_images(snap,cancel_token=None,cache_pin=None):
     samples={s.sample_id:s for s in snap.samples}
     selected=[samples[p.representative_sample_id] for p in snap.pages]
     for sample in selected:
+        from .lazy_frames import ensure_sample_image
+        ensure_sample_image(snap,sample,cancel_token,cache_pin=cache_pin)
         path=Path(sample.cache_path)
         if path.is_symlink() or not path.is_file():
             raise MediaError("CacheUnavailable: representative image missing",code="CacheUnavailable")
@@ -48,7 +50,7 @@ def export_project(project,destination,*,overwrite=False,sidecar_format="detaile
         if paths.paths!=snapshot.paths or paths.states!=snapshot.states:
             raise OutputOverwriteRequired("Output paths changed after approval; approve current files")
         paths=snapshot
-    selections=_representative_images(snap)
+    selections=_representative_images(snap,cancel_token,getattr(project,'_cache_pin',None))
     def publication_guard():
         _unchanged(project,snap)
         if cancel_token is not None:cancel_token.raise_if_cancelled()

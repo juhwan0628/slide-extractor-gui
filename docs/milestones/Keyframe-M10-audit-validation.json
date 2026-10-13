@@ -1,0 +1,84 @@
+[
+  {
+    "platform": "macos",
+    "audit_run_id": 38457216611,
+    "audit_commit": "e5791656781329af8a94cfade268b07e3b679aee",
+    "artifact_id": 11842907528,
+    "artifact_sha256": "566b843e7bbc840fe88477880ede372df04e8c463ea8f5981459312492f3d99c",
+    "audit_report": {
+      "status": "PASSED",
+      "errors": [],
+      "version": "0.5.0b1",
+      "commit": "a7c11ee2381e6cae41fc24f9d4f373eb1cdeeb71",
+      "run_id": "38451133692",
+      "platform": "macOS-ARM64",
+      "installer_sha256": "de9919c4e968aa8df2629d7bfbe93e170b74cc1923c2a00280fdc8bb04bce2a6",
+      "manifest_sha256": "403afbb04917823fcccaf49f865a752bb3ea4a59dc1b9ffea68267418bca8d36"
+    },
+    "native_helper": {
+      "schema_version": 1,
+      "platform": "macOS-15.7.9-arm64-arm-64bit",
+      "helper_sha256": "feb0ec91c9afbb48deaaa7f7971bfde3d08dbfe34f6b55fadc50ce97c51f55ea",
+      "helper_source_sha256": "9a4f7b272903997ec506db627de107c7721368de61a63bc8cb6de9698812a977",
+      "ffmpeg_source": {
+        "version": "8.1.2",
+        "url": "https://ffmpeg.org/releases/ffmpeg-8.1.2.tar.xz",
+        "sha256": "464beb5e7bf0c311e68b45ae2f04e9cc2af88851abb4082231742a74d97b524c"
+      },
+      "ffmpeg_libraries": {
+        "libavcodec.a": "5e36e4f08b723a472c204a0f1d8e3c9115dee1ab89b376b6df57905a725e5cc4",
+        "libavdevice.a": "fc9252988b86b105ac0ef69e0a4d495540b203a72a4599e92200dd84decb6d0b",
+        "libavfilter.a": "fca6ef7abd5db164185471110b7196e6a9afc82e59ab98d1ebaa110cf0b02fbf",
+        "libavformat.a": "fa4f6ddfc7e3efe89a7bfa77f6882326406bd17db3a8e6b7126bca2a4ae291a1",
+        "libavutil.a": "88ef691193a718698ea2f06b8be696900e0cce43545fbb5d04f48611fe9d0155",
+        "libswresample.a": "7accf29094ae61fd021d4d208e6fbf95dd1c3b4ea0db0bd98c331957a8278209",
+        "libswscale.a": "6ff514b7b7c17791d4324ed524ee60de5c2b5b91c00025b18a5ef4901c9f0e7e"
+      },
+      "link_command": "clang++ keyframe_decode.o -L/Users/runner/work/slide-extractor-gui/slide-extractor-gui/build/ffmpeg-source/../../build/ffmpeg-sdk/lib /Users/runner/work/slide-extractor-gui/slide-extractor-gui/build/ffmpeg-sdk/lib/libavfilter.a /Users/runner/work/slide-extractor-gui/slide-extractor-gui/build/ffmpeg-sdk/lib/libswscale.a -lm /Users/runner/work/slide-extractor-gui/slide-extractor-gui/build/ffmpeg-sdk/lib/libavformat.a -lm /Users/runner/work/slide-extractor-gui/slide-extractor-gui/build/ffmpeg-sdk/lib/libavcodec.a -lm /Users/runner/work/slide-extractor-gui/slide-extractor-gui/build/ffmpeg-sdk/lib/libswresample.a /Users/runner/work/slide-extractor-gui/slide-extractor-gui/build/ffmpeg-sdk/lib/libavutil.a -lm -framework CoreFoundation -framework CoreVideo -framework CoreMedia -pthread -o slide-keyframe-decode \n",
+      "relink_object_sha256": "e921735bc077626d90d41e8d8cedfeadf3f9c0b9e3dd5e9374f6a417e38ce747",
+      "public_release_approved": false
+    },
+    "public_release_approved": false
+  },
+  {
+    "platform": "windows",
+    "audit_run_id": 38457216611,
+    "audit_commit": "e5791656781329af8a94cfade268b07e3b679aee",
+    "artifact_id": 11842352696,
+    "artifact_sha256": "7490b6a276139296af87d9aad4c50cdd8a014dd92683d67511a3ca775544de24",
+    "audit_report": {
+      "status": "PASSED",
+      "errors": [],
+      "version": "0.5.0b1",
+      "commit": "a7c11ee2381e6cae41fc24f9d4f373eb1cdeeb71",
+      "run_id": "38451133692",
+      "platform": "Windows-X64",
+      "installer_sha256": "b3953c7615ddccfa212188c8df79824e223798f8ae3ed90b3f47d08bf88ee055",
+      "manifest_sha256": "b67084989fd31109f2405fbd3f7c88055934577489ba7a83eef9438d9f904aeb"
+    },
+    "native_helper": {
+      "schema_version": 1,
+      "platform": "Windows-2025Server-10.0.26100-SP0",
+      "helper_sha256": "5e1fc3d00806c7b4089d6986e862558aab572bf6094937bddeddd62fd2fc09c5",
+      "helper_source_sha256": "e82b5bac9f62fc0280b8cfc704bcae5c43a615cf65fdeb0940d1ec68c972ba96",
+      "ffmpeg_source": {
+        "version": "8.1.2",
+        "url": "https://ffmpeg.org/releases/ffmpeg-8.1.2.tar.xz",
+        "sha256": "464beb5e7bf0c311e68b45ae2f04e9cc2af88851abb4082231742a74d97b524c"
+      },
+      "ffmpeg_libraries": {
+        "libavcodec.a": "f5bb94299dadbe2ec1453a3d1b567b44d366c7ed516902895e20d23920898bd8",
+        "libavdevice.a": "aa2c1938d0b858cff1ae223f627c8626185ca35a4cfc757aff9de12cba2597c2",
+        "libavfilter.a": "0b96b8a5558b54816454d1d13f141142ccb4c9b37ff04ddb0bb2e8000b6193ae",
+        "libavformat.a": "9d2c4f954b539e3d3ccd5c0f1b7776ba2b9eba61ad61c6221312ae5215a4a61a",
+        "libavutil.a": "58a47e629c4bebb40011911ff09146423dc0567324b663e03fe8ef6aae94560c",
+        "libswresample.a": "d34ab447693bce1507c78221ae8a69533dca662ba44175ff3d01aef6115cdc9c",
+        "libswscale.a": "5d240b528b63da53e512d5c62a07757c730a29c02eb0d76f09288fec81c98315"
+      },
+      "link_command": "g++ keyframe_decode.o -LD:/a/slide-extractor-gui/slide-extractor-gui/build/ffmpeg-sdk/lib /d/a/slide-extractor-gui/slide-extractor-gui/build/ffmpeg-sdk/lib/libavfilter.a /d/a/slide-extractor-gui/slide-extractor-gui/build/ffmpeg-sdk/lib/libswscale.a /d/a/slide-extractor-gui/slide-extractor-gui/build/ffmpeg-sdk/lib/libavformat.a -lws2_32 /d/a/slide-extractor-gui/slide-extractor-gui/build/ffmpeg-sdk/lib/libavcodec.a -lole32 /d/a/slide-extractor-gui/slide-extractor-gui/build/ffmpeg-sdk/lib/libswresample.a /d/a/slide-extractor-gui/slide-extractor-gui/build/ffmpeg-sdk/lib/libavutil.a -lm -luser32 -lbcrypt -latomic -static -lshell32 -o slide-keyframe-decode.exe \n",
+      "relink_object_sha256": "4d622ec5338bd84cf2a602240552442484ab23558d59be152fa81f8d2e2cd430",
+      "public_release_approved": false
+    },
+    "public_release_approved": false
+  }
+]

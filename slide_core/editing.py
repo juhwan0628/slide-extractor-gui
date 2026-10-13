@@ -15,8 +15,8 @@ def nearest_sample(project:Project, timestamp):
     try:target=Fraction(timestamp)
     except (ValueError,TypeError,OverflowError,ZeroDivisionError) as exc:
         raise ValueError('Invalid timestamp') from exc
-    if not project.samples:raise ValueError('No samples')
-    samples=project.samples
+    samples=project.keyframe_index
+    if not samples:raise ValueError('No samples')
     times=[s.actual_time for s in samples]
     index=bisect_left(times,target)
     if index==0:return samples[0]
@@ -34,7 +34,7 @@ def _publish(project,proposed,focus,changed_rows):
     # Validate an isolated provisional Project; publish only when valid.
     candidate=Project(project.source,project.settings,project.samples,project.transitions,
          project.segments,proposed,project.revision+1,project.cache_generation,
-         project.analysis_generation,project.sampling_algorithm)
+         project.analysis_generation,project.sampling_algorithm,project.selection_policy,project.decoder_backend,project.observation_sample_ids,project.keyframe_index_complete)
     project.pages=candidate.pages
     project.revision=candidate.revision
     return EditResult('changed',focus,tuple(changed_rows))

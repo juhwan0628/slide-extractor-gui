@@ -17,7 +17,9 @@ def manifest(tools, mode):
             'packages':dict(sorted((d.metadata['Name'],d.version) for d in importlib.metadata.distributions())),
             'tools':{},'provenance':{key:os.environ[key] for key in ('GITHUB_RUN_ID','GITHUB_RUN_ATTEMPT','GITHUB_SHA') if key in os.environ}}
     extension='.exe' if sys.platform=='win32' else ''
-    for name in ('ffmpeg','ffprobe'):
+    names=['ffmpeg','ffprobe']
+    if mode=='approved' or (Path(tools)/('slide-keyframe-decode'+extension)).is_file():names.append('slide-keyframe-decode')
+    for name in names:
         path=(Path(tools)/(name+extension)).resolve()
         result['tools'][name]={'path':str(path),
             'sha256':hashlib.sha256(path.read_bytes()).hexdigest(),

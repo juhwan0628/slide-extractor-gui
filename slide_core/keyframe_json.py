@@ -1,4 +1,4 @@
-"""Strict, Qt-free validation and JSON encoding for keyframe timeline v4 payloads."""
+"""Strict, Qt-free validation and JSON encoding for keyframe timeline v4/v5/v6 payloads."""
 from __future__ import annotations
 
 from datetime import datetime
@@ -103,14 +103,24 @@ def _validate_information(roi,masks,source,cache):
     except ValueError as exc:raise InvalidTimeline(str(exc)) from exc
 
 
+def timeline_version(project):
+    """Legacy all remains v4; new spatial/experimental half exports carry policy."""
+    detector=getattr(project.settings,'detector',None)
+    if project.selection_policy=='half' and (project.keyframe_index_complete or getattr(detector,'algorithm',None)=='spatial-groups-v1'):return 7
+    return 6 if getattr(detector,'algorithm',None)=='spatial-groups-v1' or project.selection_policy=='half' else 4
+
+
 def validate(payload, *, pdf_bytes=None, pdf_page_count=None, pdf_export_id=None):
-    """Validate and return a v4 payload; optional PDF facts verify artifact identity."""
+    """Validate and return a v4/v5/v6 payload; optional PDF facts verify artifact identity."""
     try:
         _types(payload); _schema_fields(payload)
         _finite_tree(payload)
         top={"schema_version","source","duration_s","duration_kind","sampling","roi","ignore_masks","detector","samples","detected_boundaries","detected_segments","pages","navigation_ranges","artifact"}
         _obj(payload,top,"payload")
-        if type(payload["schema_version"]) is not int or payload["schema_version"] != 4: raise InvalidTimeline("schema_version must be 4")
+        if type(payload["schema_version"]) is not int or payload["schema_version"] not in (4,5,6,7): raise InvalidTimeline("schema_version must be 4, 5, 6 or 7")
+        index_version=payload["schema_version"]==7
+        policy_version=payload["schema_version"] in (6,7)
+        spatial_version=payload["schema_version"]==5 or (policy_version and isinstance(payload["detector"],dict) and payload["detector"].get("algorithm")=="spatial-groups-v1")
         for key in ("samples","detected_boundaries","detected_segments","pages","navigation_ranges"):
             if not isinstance(payload[key],list): raise InvalidTimeline(f"{key} must be an array")
         s=payload["source"]; _obj(s,_FIELDS["source"],"source")
@@ -125,17 +135,32 @@ def validate(payload, *, pdf_bytes=None, pdf_page_count=None, pdf_export_id=None
         if (s["display_width"],s["display_height"]) != (round(dw),round(dh)): raise InvalidTimeline("display dimensions mismatch transform")
         duration=payload["duration_s"]
         if type(duration) not in (float,int) or duration<=0 or payload["duration_kind"] not in ("video_metadata","container_estimate"): raise InvalidTimeline("invalid duration")
-        _obj(payload["sampling"],_FIELDS["sampling"],"sampling"); sm=payload["sampling"]
-        if sm != {"algorithm":"decoder-keyframes-v1","cache_max_width":640,"jpeg_quality":90}: raise InvalidTimeline("invalid sampling settings")
-        _obj(payload["detector"],_FIELDS["detector"],"detector")
+        _obj(payload["sampling"],_FIELDS["sampling"]|({'selection_policy'} if policy_version else set())|({'keyframe_index_complete'} if index_version else set()),"sampling"); sm=payload["sampling"]
+        expected_sampling={"algorithm":"decoder-keyframes-v1","cache_max_width":640,"jpeg_quality":90}
+        if policy_version:
+            if sm['selection_policy'] not in ('all','half'):raise InvalidTimeline('invalid selection policy')
+            if spatial_version and not index_version and sm['selection_policy']!='all':raise InvalidTimeline('spatial detector requires all keyframes')
+            expected_sampling['selection_policy']=sm['selection_policy']
+        if index_version:
+            if type(sm['keyframe_index_complete']) is not bool:raise InvalidTimeline('Invalid complete keyframe index flag')
+            expected_sampling['keyframe_index_complete']=sm['keyframe_index_complete']
+        if sm != expected_sampling: raise InvalidTimeline("invalid sampling settings")
         detector=payload["detector"]
-        fixed={"algorithm":"masked-anchor-tile-v1","image_max_width":320,"debounce_samples":2,
-               "min_tile_valid_fraction":.5,"mask_dilation_px":1}
-        if any(detector[k]!=v for k,v in fixed.items()):raise InvalidTimeline("unsupported detector settings")
-        if any(not 0<=detector[k]<=1 for k in ("global_mad","tile_mad","changed_fraction")):
-            raise InvalidTimeline("invalid detector thresholds")
-        if not 0<=detector["pixel_delta"]<=255 or min(detector["tile_size"],detector["tile_stride"])<1:
-            raise InvalidTimeline("invalid detector geometry")
+        spatial_config=None
+        if spatial_version:
+            from .spatial_json import validate_detector
+            try:spatial_config=validate_detector(detector,sm['selection_policy'] if index_version else 'all')
+            except ValueError as exc:raise InvalidTimeline(str(exc)) from exc
+        else:
+            _obj(payload["detector"],_FIELDS["detector"],"detector")
+            detector=payload["detector"]
+            fixed={"algorithm":"masked-anchor-tile-v1","image_max_width":320,"debounce_samples":2,
+                   "min_tile_valid_fraction":.5,"mask_dilation_px":1}
+            if any(detector[k]!=v for k,v in fixed.items()):raise InvalidTimeline("unsupported detector settings")
+            if any(not 0<=detector[k]<=1 for k in ("global_mad","tile_mad","changed_fraction")):
+                raise InvalidTimeline("invalid detector thresholds")
+            if not 0<=detector["pixel_delta"]<=255 or min(detector["tile_size"],detector["tile_stride"])<1:
+                raise InvalidTimeline("invalid detector geometry")
         _rect(payload["roi"],s["display_width"],s["display_height"])
         if not isinstance(payload["ignore_masks"],list) or len(payload["ignore_masks"])>1: raise InvalidTimeline("at most one ignore mask")
         for r in payload["ignore_masks"]: _rect(r,s["display_width"],s["display_height"])
@@ -143,7 +168,8 @@ def validate(payload, *, pdf_bytes=None, pdf_page_count=None, pdf_export_id=None
         if not samples: raise InvalidTimeline("samples required")
         sample_map={}; prev_pts=None; dims=None; exact_times={}; tb=Fraction(s["time_base_num"],s["time_base_den"])
         for ordinal,x in enumerate(samples):
-            _obj(x,_FIELDS["sample"],"sample")
+            _obj(x,_FIELDS["sample"]|({"is_analysis_observation"} if index_version else set()),"sample")
+            if index_version and type(x["is_analysis_observation"]) is not bool:raise InvalidTimeline("Invalid analysis observation flag")
             if not isinstance(x["sample_id"],str) or not _SAMPLE.fullmatch(x["sample_id"]) or x["sample_id"] in sample_map: raise InvalidTimeline("invalid or duplicate sample id")
             if any(type(x[k]) is not int for k in ("ordinal","source_pts","cache_width","cache_height")) or x["ordinal"]<0 or not 1<=x["cache_width"]<=640 or x["cache_height"]<1: raise InvalidTimeline("invalid sample fields")
             if x["ordinal"]!=ordinal or x["sample_id"]!=f"s{ordinal:06d}":
@@ -163,24 +189,37 @@ def validate(payload, *, pdf_bytes=None, pdf_page_count=None, pdf_export_id=None
         expected_h=max(1,round(s["display_height"]*expected_w/s["display_width"]))
         if dims != (expected_w,expected_h): raise InvalidTimeline("cache must preserve full display aspect without enlargement")
         _validate_information(payload["roi"],payload["ignore_masks"],s,dims)
+        observed_samples=[x for x in samples if not index_version or x['is_analysis_observation']]
+        if not observed_samples:raise InvalidTimeline('No analysis observations')
+        if index_version and sm['keyframe_index_complete']:
+            wanted=samples[::2 if sm['selection_policy']=='half' else 1]
+            if observed_samples!=wanted:raise InvalidTimeline('Observation membership disagrees with selection policy')
+        if index_version and not sm['keyframe_index_complete'] and observed_samples!=samples:
+            raise InvalidTimeline('Incomplete keyframe index cannot contain skipped observations')
+        observed_order={x['sample_id']:i for i,x in enumerate(observed_samples)}
         boundaries=payload["detected_boundaries"]; bmap={}; prev=-1
         for bi,b in enumerate(boundaries):
-            _obj(b,_FIELDS["boundary"],"boundary")
+            from .spatial_json import BOUNDARY_FIELDS
+            _obj(b,BOUNDARY_FIELDS if spatial_version else _FIELDS["boundary"],"boundary")
             if not isinstance(b["boundary_id"],str) or not _BOUNDARY.fullmatch(b["boundary_id"]) or b["boundary_id"] in bmap: raise InvalidTimeline("invalid boundary id")
-            for key in ("adjacent_metrics","anchor_metrics"):
-                _obj(b[key],_FIELDS["metrics"],"metrics")
+            for key in (("spatial_metrics",) if spatial_version else ("adjacent_metrics","anchor_metrics")):
+                _obj(b[key],{"changed_fraction","changed_cell_fraction"} if spatial_version else _FIELDS["metrics"],"metrics")
                 if any(type(v) not in (int,float) or not math.isfinite(v) or not 0<=v<=1 for v in b[key].values()): raise InvalidTimeline("invalid metric")
             left=sample_map.get(b["left_sample_id"]); right=sample_map.get(b["right_sample_id"])
-            if (not left or not right or right["ordinal"]!=left["ordinal"]+1 or
+            if (not left or not right or left["sample_id"] not in observed_order or right["sample_id"] not in observed_order or observed_order[right["sample_id"]]!=observed_order[left["sample_id"]]+1 or
                     b["lower_s"]!=left["timestamp_s"] or b["upper_s"]!=right["timestamp_s"] or
                     b["observed_at_s"]!=right["timestamp_s"] or right["ordinal"]<=prev or
                     b["true_boundary_s"] is not None or b["uncertainty_kind"]!="keyframe_and_detector"):
                 raise InvalidTimeline("invalid keyframe boundary reference or interval")
             if b["boundary_id"]!=f"b{bi:06d}":raise InvalidTimeline("boundary ordinal mismatch")
-            if (b["status"] not in ("confirmed","eof_unconfirmed") or
-                    b["persistence_samples"] != (2 if b["status"]=="confirmed" else 1) or
-                    (b["status"]=="eof_unconfirmed" and (right is not samples[-1] or not detector["keep_unconfirmed"]))):
-                raise InvalidTimeline("invalid boundary status")
+            if spatial_version:
+                if b["status"]!="spatial_change" or b["persistence_samples"]!=1 or b["spatial_metrics"]["changed_fraction"]<spatial_config.changed_fraction or b["spatial_metrics"]["changed_cell_fraction"]<spatial_config.cell_fraction:
+                    raise InvalidTimeline("invalid spatial boundary evidence")
+            else:
+                if (b["status"] not in ("confirmed","eof_unconfirmed") or
+                        b["persistence_samples"] != (2 if b["status"]=="confirmed" else 1) or
+                        (b["status"]=="eof_unconfirmed" and (right is not observed_samples[-1] or not detector["keep_unconfirmed"]))):
+                    raise InvalidTimeline("invalid boundary status")
             prev=right["ordinal"]; bmap[b["boundary_id"]]=b
         segments=payload["detected_segments"]
         if len(segments)!=len(boundaries)+1:raise InvalidTimeline("segment/boundary count mismatch")
@@ -188,15 +227,15 @@ def validate(payload, *, pdf_bytes=None, pdf_page_count=None, pdf_export_id=None
         for i,g in enumerate(segments):
             _obj(g,_FIELDS["segment"],"segment")
             if g["segment_id"]!=f"g{i:06d}":raise InvalidTimeline("invalid segment ordinal/id")
-            begin=0 if i==0 else sample_map[boundaries[i-1]["right_sample_id"]]["ordinal"]
-            end=len(samples) if i==len(segments)-1 else sample_map[boundaries[i]["right_sample_id"]]["ordinal"]
-            start_time=Fraction(0) if i==0 else exact_times[samples[begin]["sample_id"]]
-            end_time=Fraction(str(duration)) if end==len(samples) else exact_times[samples[end]["sample_id"]]
+            begin=0 if i==0 else observed_order[boundaries[i-1]["right_sample_id"]]
+            end=len(observed_samples) if i==len(segments)-1 else observed_order[boundaries[i]["right_sample_id"]]
+            start_time=Fraction(0) if i==0 else exact_times[observed_samples[begin]["sample_id"]]
+            end_time=Fraction(str(duration)) if end==len(observed_samples) else exact_times[observed_samples[end]["sample_id"]]
             if (end<=begin or end_time<=start_time or g["start_s"]!=float(start_time) or
                     g["end_s"]!=float(end_time) or
                     g["start_boundary_id"]!=(None if i==0 else boundaries[i-1]["boundary_id"])):
                 raise InvalidTimeline("invalid segment interval")
-            selected=samples[begin:end]
+            selected=observed_samples[begin:end]
             if (g["first_sample_id"]!=selected[0]["sample_id"] or g["last_sample_id"]!=selected[-1]["sample_id"] or
                     g["auto_representative_sample_id"] not in {x["sample_id"] for x in selected}):
                 raise InvalidTimeline("invalid segment sample membership")
@@ -211,7 +250,7 @@ def validate(payload, *, pdf_bytes=None, pdf_page_count=None, pdf_export_id=None
             if p["page_id"] in ids or type(p["pdf_page"]) is not int or p["pdf_page"]!=i+1 or p["representative_sample_id"] in reps: raise InvalidTimeline("duplicate page or representative")
             sample=sample_map.get(p["representative_sample_id"]); group=segmap.get(p["derived_segment_id"])
             if (not sample or not group or p["representative_timestamp_s"]!=sample["timestamp_s"] or
-                    not group[1]<=sample["ordinal"]<group[2]):
+                    not group[0]["start_s"]<=sample["timestamp_s"]<group[0]["end_s"]):
                 raise InvalidTimeline("invalid page sample")
             if p["origin"] not in ("auto","manual") or (p["origin"]=="manual") != (p["origin_segment_id"] is None) or (p["origin_segment_id"] is not None and p["origin_segment_id"] not in segmap) or p["last_edit"] not in ("auto","insert","replace") or (p["origin"]=="auto" and p["last_edit"]=="insert") or (p["origin"]=="manual" and p["last_edit"]=="auto"): raise InvalidTimeline("invalid page provenance")
             if sample["ordinal"]<=previous_page:raise InvalidTimeline("page observations must increase")
@@ -335,4 +374,21 @@ def payload_keyframes(snap,pdf_path,pdf_sha,export_id):
             created_at=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             generator_version=VERSION,pdf_basename=Path(pdf_path).name,
             pdf_page_count=len(rows),pdf_sha256=pdf_sha))
+    if cfg.algorithm=="spatial-groups-v1":
+        from .spatial_json import detector_payload
+        value['schema_version']=5
+        value['detector']=detector_payload(cfg.spatial)
+        for boundary,transition in zip(value['detected_boundaries'],snap.transitions,strict=True):
+            scores=dict(transition.scores)
+            boundary.pop('adjacent_metrics');boundary.pop('anchor_metrics')
+            boundary['spatial_metrics']={k:float(scores[k]) for k in ('changed_fraction','changed_cell_fraction')}
+    version=timeline_version(snap)
+    if version in (6,7):
+        value['schema_version']=version
+        value['sampling']['selection_policy']=snap.selection_policy
+    if version==7:
+        value['sampling']['keyframe_index_complete']=snap.keyframe_index_complete
+        observed=set(snap.observation_sample_ids)
+        for sample,row in zip(snap.samples,value['samples'],strict=True):row['is_analysis_observation']=sample.sample_id in observed
+        if cfg.algorithm=='spatial-groups-v1':value['detector']['input_policy']=snap.selection_policy
     return validate(value)
