@@ -1,4 +1,4 @@
-name: Native installer candidates (source-built, unsigned beta)
+name: Native installer candidates (M10 half, source-built, unsigned beta)
 on:
   workflow_dispatch:
   push:
