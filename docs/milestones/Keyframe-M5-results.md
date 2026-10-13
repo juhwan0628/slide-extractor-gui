@@ -92,3 +92,20 @@ DMG 이름의 approved는 기존 빌드 입력 명칭이며 공개 릴리스 승
 | 모든 강의 정확도는 보장하지 않음 | 긴 GOP 등에서 누락이 있을 수 있음 |
 | 임의 입력의 native 성능은 별도 검증 | 기기/입력에 따라 저장 시간·메모리 비용이 달라짐 |
 | 라이선스 자료·설치 바이트 기술 감사는 법적 인증이 아님 | 별도 법적 판단은 제공하지 않음 |
+
+## 배포 자료 준비 — 2026-10-13
+
+사용자 실기기 확인은 아직 전입니다. main 병합·태그·공개 릴리스를 수행하지 않았으며 공개 승인false를 유지합니다.
+
+- [Draft PR #1](https://github.com/juhwan0628/slide-extractor-gui/pull/1): 키프레임 전용 변경과 검증된 두 OS 후보의 main 통합 검토. 현재 main을 포함하는 브랜치로 통합 충돌이 없습니다.
+- [후보 자료 준비38326933040](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/38326933040): 기존 후보/감사/대응 소스의 정확한 바이트를 검증하고 네 파일 생성 성공. 공개 권한이나 릴리스 변경 명령이 없습니다.
+- [대응 소스·라이선스 포함 후보 자료 ZIP](https://github.com/juhwan0628/slide-extractor-gui/actions/runs/38326933040/artifacts/11780983990): DMG, EXE, Sources-Licenses.zip, SHA256SUMS.txt 네 파일. 일반 설치에는 앞의 OS별 설치 ZIP만 사용하세요. 자료 artifact 보관 기한은2026-11-12 UTC입니다.
+- 준비 워크플로 변경 후 서버847 passed180.24s, exit0; sourceCI38326933049 전체 작업 성공. App 및 native 빌드 입력은 변경하지 않았습니다.
+- 연결 도구512MiB 한도보다 원본 소스 artifact가 커서, Actions에서 직접 받아 검증·조합했습니다. 압축 후 모든 원본 지원 자료의 바이트를 재검증합니다.
+
+| 후보 파일 | bytes | SHA256 |
+|---|---:|---|
+| `SHA256SUMS.txt` | 329 | `9931d1f35b0229c086f93edb42ce263e977b2dfa0c7ccb79ca9da1eaef4badc4` |
+| `SlideExtractor-v0.5.0b1-Setup-Windows-x64.exe` | 69415169 | `0e63e6864f3ba2ec63eea0fac31901fc5f6a67523609e7e1bfdde5721858aa63` |
+| `SlideExtractor-v0.5.0b1-Sources-Licenses.zip` | 686543701 | `38250ec5b8cebd4be82bbb29f2c9107485310e3f75eed8b0ce2865405597f8b7` |
+| `SlideExtractor-v0.5.0b1-macOS-arm64.dmg` | 84815404 | `dc93248fa7954a6123daaafce7a0c494770735a772ac651db3bf1498104c4498` |
