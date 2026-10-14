@@ -1,0 +1,43 @@
+{
+  "status": "APPROVED",
+  "public_release_approved": true,
+  "version": "0.5.0b2",
+  "commit": "2b803a2689d2c6e29a632551576a0fb20c76b450",
+  "run_id": "38460514435",
+  "source_ci_run_id": "38460514398",
+  "license_audit_run_id": "38514499414",
+  "audit_commit": "e3626aea027b40dafa81804cdedaeaf1511a8b19",
+  "assets": {
+    "macos-arm64": {
+      "path": "macOS-ARM64/dist/SlideExtractor-v0.5.0b2-macOS-arm64-approved.dmg",
+      "sha256": "fc2fc1069eb8ece0aaed97c858b42162228367d3db4d74fd0eb9fecddf05b83e"
+    },
+    "windows-x64": {
+      "path": "Windows-X64/dist/SlideExtractor-v0.5.0b2-Setup-Windows-x64.exe",
+      "sha256": "951e1fa091f3ba71ba592914ec5a80ff4a4e10bcce50dd866ba2d269a5f460f2"
+    }
+  },
+  "audits": {
+    "macos-arm64": {
+      "status": "PASSED",
+      "errors": [],
+      "version": "0.5.0b2",
+      "commit": "2b803a2689d2c6e29a632551576a0fb20c76b450",
+      "run_id": "38460514435",
+      "platform": "macOS-ARM64",
+      "installer_sha256": "fc2fc1069eb8ece0aaed97c858b42162228367d3db4d74fd0eb9fecddf05b83e",
+      "manifest_sha256": "7d0a5713694172776e8f6ad19a6b59e33b33d93df51002bd09c226f1079a6867"
+    },
+    "windows-x64": {
+      "status": "PASSED",
+      "errors": [],
+      "version": "0.5.0b2",
+      "commit": "2b803a2689d2c6e29a632551576a0fb20c76b450",
+      "run_id": "38460514435",
+      "platform": "Windows-X64",
+      "installer_sha256": "951e1fa091f3ba71ba592914ec5a80ff4a4e10bcce50dd866ba2d269a5f460f2",
+      "manifest_sha256": "416202b7619f6279441a792115427791dea0b5967864005cfc2492e587640c56"
+    }
+  },
+  "review_scope": "User confirmed macOS operation and explicitly authorized official public beta release on 2026-10-14 KST. Both native CI operating systems passed bundled/installed/Qt replacement native half and lazy editing checks, same-commit source CI passed, separate installed/source/relink audits passed. Exact installer SHA256 independently matches audit report. Physical-device lecture timing is not measured; server FFmpeg6 timing is not a performance claim for this FFmpeg8 package."
+}

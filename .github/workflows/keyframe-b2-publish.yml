@@ -1,0 +1,181 @@
+name: Publish verified 0.5.0b2 native half beta
+on:
+  push:
+    branches: [release/keyframe-m10-candidate]
+    paths: [packaging/b2-beta-review.json, packaging/b2-release-approval.json]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: beta-review-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  stage:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify successful candidate and source tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,os,re,subprocess
+          from pathlib import Path
+          c=json.loads(Path('packaging/b2-beta-review.json').read_text())
+          approval=json.loads(Path('packaging/b2-release-approval.json').read_text())
+          assert c['public_release_approved'] is True and approval['public_release_approved'] is True and approval['status']=='APPROVED'
+          assert approval['version']==c['version'] and approval['commit']==c['candidate_commit'] and str(approval['run_id'])==str(c['candidate_run_id'])
+          assert re.fullmatch(r'0\.[0-9]+\.[0-9]+(?:rc|b)[0-9]+',c['version'])
+          assert re.fullmatch(r'[0-9a-f]{40}',c['candidate_commit'])
+          for field,path in [('candidate_run_id','.github/workflows/native-build-template.yml'),('source_ci_run_id','.github/workflows/ci.yml')]:
+              assert str(c[field]).isdigit()
+              r=json.loads(subprocess.check_output(['gh','api',f"repos/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{c[field]}"],text=True))
+              assert r['repository']['full_name']==os.environ['GITHUB_REPOSITORY']
+              assert r['path']==path and r['conclusion']=='success' and r['event']=='push'
+              assert r['head_sha']==c['candidate_commit']
+          audit=json.loads(subprocess.check_output(['gh','api',f"repos/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{c['license_audit_run_id']}"],text=True))
+          assert audit['path']=='.github/workflows/keyframe-b2-audit.yml' and audit['conclusion']=='success' and audit['head_sha']==c['audit_commit']
+          source=subprocess.check_output(['git','show',c['candidate_commit']+':slide_core/version.py'],text=True)
+          assert f'VERSION = "{c["version"]}"' in source or f"VERSION = '{c['version']}'" in source
+          allowed={'.github/workflows/keyframe-b2-audit.yml','.github/workflows/keyframe-b2-publish.yml','packaging/b2-candidate-review.json','.github/workflows/keyframe-b2-audit.yml','.github/workflows/beta-release-review.yml','packaging/review_candidate.py','packaging/candidate-review.json','packaging/b2-beta-review.json','packaging/third-party/OpenSSL-LICENSE.txt','packaging/third-party/RUNTIME-NOTICES.md','RELEASE_NOTES.md','README.md','INSTALL-MAC.md','INSTALL-WINDOWS.md','RELEASING.md','packaging/QA_STATUS.md','packaging/b2-release-approval.json','packaging/rc2-superseded.md','packaging/compact_release.py','packaging/compact-release.json','.github/workflows/compact-release.yml','tests/test_compact_release.py','docs/milestones/Keyframe-M5-plan.md','docs/milestones/Keyframe-M5-results.md','docs/milestones/Keyframe-0.5-design.md','tests/test_beta_review_docs.py','.github/workflows/prepare-candidate-assets.yml','docs/downloads/beta.svg','docs/downloads/macos.json','docs/downloads/macos.svg','docs/downloads/platform-macos.svg','docs/downloads/platform-windows.svg','docs/downloads/total.json','docs/downloads/total.svg','docs/downloads/windows.json','docs/downloads/windows.svg'}
+          changed=set(subprocess.check_output(['git','diff','--name-only',c['candidate_commit'],os.environ['GITHUB_SHA']],text=True).splitlines())
+          assert changed<=allowed, 'Application/build inputs changed after candidate: '+str(changed-allowed)
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write(f"AUDIT_RUN_ID={c['license_audit_run_id']}\n")
+              f.write(f"CANDIDATE_RUN_ID={c['candidate_run_id']}\nRELEASE_TAG=v{c['version']}\nCANDIDATE_SHA={c['candidate_commit']}\n")
+          PY
+      - name: Download exact native candidates and corresponding sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          for platform in macOS-ARM64 Windows-X64; do
+            gh run download "$CANDIDATE_RUN_ID" --name "native-candidate-$platform" --dir "candidates/$platform"
+            gh run download "$CANDIDATE_RUN_ID" --name "native-inputs-$platform" --dir "native-inputs/$platform"
+            gh run download "$AUDIT_RUN_ID" --name "b2-reviewed-audit-$platform" --dir "license-audits/$platform"
+          done
+      - name: Verify installers, reports and sources before staging
+        shell: python
+        run: |
+          import hashlib,json,os,shutil,zipfile
+          from pathlib import Path
+          c=json.loads(Path('packaging/b2-beta-review.json').read_text())
+          approval=json.loads(Path('packaging/b2-release-approval.json').read_text())
+          output=Path('review-assets');output.mkdir()
+          evidence=Path('review-evidence');evidence.mkdir()
+          observed={}
+          installers={'macOS-ARM64':f"SlideExtractor-v{c['version']}-macOS-arm64-approved.dmg",
+                      'Windows-X64':f"SlideExtractor-v{c['version']}-Setup-Windows-x64.exe"}
+          for platform,filename in installers.items():
+              root=Path('candidates')/platform
+              for name in ('installed-smoke.json','installer-smoke.json','qt-replacement-smoke.json'):
+                  report=json.loads((root/'build'/name).read_text())
+                  import runpy
+                  runpy.run_path('packaging/keyframe_release_contract.py')['validate_smoke'](report,c['version'],require_native=True)
+                  assert report['status']=='success' and report['frozen'] and report['bundled_tools_checked']
+                  assert report['version']==c['version'] and report['pdf_only_checked'] and report['output_lock_cleanup_checked']
+              manifest=json.loads((root/'build/build-manifest.json').read_text())
+              assert manifest['version']==c['version']
+              assert manifest['provenance']['GITHUB_SHA']==c['candidate_commit']
+              assert str(manifest['provenance']['GITHUB_RUN_ID'])==c['candidate_run_id']
+              inventory=json.loads((root/'build/candidate-inventory.json').read_text())
+              assert inventory['candidate_version']==c['version']
+              assert inventory['build_manifest_sha256']==hashlib.sha256((root/'build/build-manifest.json').read_bytes()).hexdigest()
+              installer=root/'dist'/filename
+              assert installer.is_file() and not installer.is_symlink()
+              friendly=filename.replace('-approved.dmg','.dmg')
+              shutil.copy2(installer,output/friendly)
+              observed[platform]={'asset':friendly,'sha256':hashlib.sha256(installer.read_bytes()).hexdigest()}
+              audit_dir=Path('license-audits')/platform
+              audited=json.loads((audit_dir/'audit-report.json').read_text())
+              key={'macOS-ARM64':'macos-arm64','Windows-X64':'windows-x64'}[platform]
+              assert audited==approval['audits'][key]
+              assert observed[platform]['sha256']==approval['assets'][key]['sha256']
+              assert audited['status']=='PASSED' and audited['errors']==[]
+              assert audited['version']==c['version'] and audited['commit']==c['candidate_commit'] and str(audited['run_id'])==str(c['candidate_run_id'])
+              assert audited['installer_sha256']==observed[platform]['sha256']
+              assert audited['manifest_sha256']==hashlib.sha256((audit_dir/'reviewed-manifest.json').read_bytes()).hexdigest()
+              shutil.copytree(root/'build',evidence/platform)
+              shutil.copytree(audit_dir,evidence/platform/'license-audit')
+              inputs=Path('native-inputs')/platform
+              for item in inputs.iterdir():
+                  if item.name in ('sources','ffmpeg','ffprobe','ffmpeg.exe','ffprobe.exe'):continue
+                  target=evidence/platform/'inputs'/item.name
+                  target.parent.mkdir(exist_ok=True)
+                  if item.is_dir():shutil.copytree(item,target)
+                  elif item.is_file():shutil.copy2(item,target)
+          for platform in installers:
+              inputs=Path('native-inputs')/platform
+              opencv=json.loads((inputs/'opencv-build.json').read_text())
+              patch=inputs/'sources'/opencv['source_patch']
+              assert hashlib.sha256(patch.read_bytes()).hexdigest()==opencv['source_patch_sha256']
+              shutil.copy2(patch,output/f'opencv-image-only-{platform}.patch')
+              # Durable source-built FFmpeg inputs for subsequent CI builds.
+              with zipfile.ZipFile(output/f'ffmpeg-inputs-{platform}.zip','w',zipfile.ZIP_DEFLATED) as z:
+                  for name in ('ffmpeg','ffprobe','ffmpeg.exe','ffprobe.exe','binary-manifest.json'):
+                      path=inputs/name
+                      if path.is_file():z.write(path,name)
+          sources=json.loads(Path('packaging/native-sources.lock.json').read_text())
+          assert sources==json.loads(__import__('subprocess').check_output(['git','show',c['candidate_commit']+':packaging/native-sources.lock.json'],text=True))
+          for component,item in sources.items():
+              filename=item['url'].rsplit('/',1)[-1]
+              for platform in installers:
+                  archive=Path('native-inputs')/platform/'sources'/filename
+                  assert archive.is_file() and hashlib.sha256(archive.read_bytes()).hexdigest()==item['sha256']
+              shutil.copy2(Path('native-inputs/macOS-ARM64/sources')/filename,output/filename)
+          for extra in Path('packaging/third-party').iterdir():
+              if extra.is_file():shutil.copy2(extra,output/extra.name)
+          record={**c,'release_commit':os.environ['GITHUB_SHA'],'status':'APPROVED_RELEASE','installers':observed}
+          (output/'BETA_REVIEW.json').write_text(json.dumps(record,indent=2)+'\n')
+          with zipfile.ZipFile(output/'build-and-review-evidence.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for path in sorted(evidence.rglob('*')):
+                  if path.is_file():z.write(path,path.relative_to(evidence))
+          (output/'SHA256SUMS.txt').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.name}\n' for p in sorted(output.iterdir())))
+          notes=Path('RELEASE_NOTES.md').read_text()
+          notes+='\n\n## 검증 기록\n\n같은 커밋의 맥·Windows 설치본, 빈 PATH 분석·PDF·잠금 정리 및 Qt 라이브러리 교체 실행 검사가 통과했습니다. 별도 설치본 출고 감사도 PASSED입니다. 원본 소스·패치·라이선스 및 해시는 첨부 자료에 있습니다. 초기 후보의 release-gate.txt는 승인 전 관찰 기록이며 license-audit/audit-report.json이 최종 출고 검사입니다. 이 릴리스는 아직 공개 전 초안입니다.\n'
+          Path('draft-notes.md').write_text(notes)
+      - name: Consolidate corresponding sources, licenses and evidence
+        shell: bash
+        run: python packaging/compact_release.py --input review-assets --output public-assets --version "${RELEASE_TAG#v}"
+      - name: Stage exact approved assets privately
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view "$RELEASE_TAG" --json isDraft > existing-release.json 2>/dev/null; then
+            python -c "import json; assert json.load(open('existing-release.json'))['isDraft'], 'Cannot overwrite a published release'"
+            gh release edit "$RELEASE_TAG" --target "$GITHUB_SHA" --draft --prerelease --title "Slide Extractor $RELEASE_TAG — beta review" --notes-file draft-notes.md
+            gh release upload "$RELEASE_TAG" public-assets/* --clobber
+          else
+            gh release create "$RELEASE_TAG" public-assets/* --target "$GITHUB_SHA" --draft --prerelease --title "Slide Extractor $RELEASE_TAG — beta review" --notes-file draft-notes.md
+          fi
+      - name: Verify uploaded bytes and publish exact approved beta
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/releases" > uploaded-releases.json
+          python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          releases=json.loads(Path('uploaded-releases.json').read_text())
+          release=next(r for r in releases if r['tag_name']==os.environ['RELEASE_TAG'])
+          assert release['draft'] is True and release['target_commitish']==os.environ['GITHUB_SHA']
+          assets={a['name']:a for a in release['assets']}
+          expected={p.name for p in Path('public-assets').iterdir()}
+          assert set(assets)==expected
+          for p in Path('public-assets').iterdir():
+              assert assets[p.name]['digest']=='sha256:'+hashlib.sha256(p.read_bytes()).hexdigest()
+          print('All uploaded installer, source, patch, notice and audit bytes match approved files')
+          PY
+          gh release edit "$RELEASE_TAG" --draft=false --prerelease --title "Slide Extractor $RELEASE_TAG (beta)" --notes-file RELEASE_NOTES.md
+          gh release view "$RELEASE_TAG" --json url,isDraft,tagName,assets

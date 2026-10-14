@@ -1,0 +1,9 @@
+{
+  "version": "0.5.0b2",
+  "candidate_commit": "2b803a2689d2c6e29a632551576a0fb20c76b450",
+  "candidate_run_id": "38460514435",
+  "source_ci_run_id": "38460514398",
+  "public_release_approved": true,
+  "license_audit_run_id": "38514499414",
+  "audit_commit": "e3626aea027b40dafa81804cdedaeaf1511a8b19"
+}
