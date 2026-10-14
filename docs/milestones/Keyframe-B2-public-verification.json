@@ -1,0 +1,35 @@
+{
+  "status": "PASSED",
+  "release_id": 412354938,
+  "url": "https://github.com/juhwan0628/slide-extractor-gui/releases/tag/v0.5.0b2",
+  "target_commit": "81f3a836264052833dd9c5e11ec5696dce9f2792",
+  "draft": false,
+  "prerelease": true,
+  "assets": [
+    {
+      "name": "SHA256SUMS.txt",
+      "size": 329,
+      "digest": "sha256:f815377f9ec16fd376f79b3efa639371b5aaff6c4c9d3d760e0fe43c6d5e3a5e",
+      "browser_download_url": "https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.5.0b2/SHA256SUMS.txt"
+    },
+    {
+      "name": "SlideExtractor-v0.5.0b2-macOS-arm64.dmg",
+      "size": 95356391,
+      "digest": "sha256:fc2fc1069eb8ece0aaed97c858b42162228367d3db4d74fd0eb9fecddf05b83e",
+      "browser_download_url": "https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.5.0b2/SlideExtractor-v0.5.0b2-macOS-arm64.dmg"
+    },
+    {
+      "name": "SlideExtractor-v0.5.0b2-Setup-Windows-x64.exe",
+      "size": 79520335,
+      "digest": "sha256:951e1fa091f3ba71ba592914ec5a80ff4a4e10bcce50dd866ba2d269a5f460f2",
+      "browser_download_url": "https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.5.0b2/SlideExtractor-v0.5.0b2-Setup-Windows-x64.exe"
+    },
+    {
+      "name": "SlideExtractor-v0.5.0b2-Sources-Licenses.zip",
+      "size": 737636403,
+      "digest": "sha256:101c2919eae93f1bf64c8b7f6bdebac326e3ea6e16f886ded3c173e54789fef8",
+      "browser_download_url": "https://github.com/juhwan0628/slide-extractor-gui/releases/download/v0.5.0b2/SlideExtractor-v0.5.0b2-Sources-Licenses.zip"
+    }
+  ],
+  "helper_relink_kits_retained": true
+}
