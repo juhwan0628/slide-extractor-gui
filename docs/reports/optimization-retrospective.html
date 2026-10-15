@@ -1,0 +1,369 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Slide Extractor 개발 회고. CLI부터 0.5.0b2까지 캐시, 디코딩, 키프레임, half, 검출 코어의 성능 개선과 시행착오."><title>Slide Extractor — 개발과 최적화의 기록</title><style>
+:root{--bg:#f7f8fa;--paper:#fff;--ink:#192331;--muted:#667384;--line:#e1e6ed;--accent:#145bda;--green:#168576}*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:32px}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;line-height:1.85;word-break:keep-all;overflow-wrap:anywhere}a{color:var(--accent);text-underline-offset:4px}header{background:#14283e;color:#fff;padding:64px max(6vw,24px) 54px}header .inner{max-width:1140px;margin:auto}.eyebrow{font-size:12px;letter-spacing:.15em;color:#a1c9ff;font-weight:700}h1{font-size:clamp(32px,4.5vw,58px);line-height:1.2;letter-spacing:-.045em;margin:20px 0}header p{max-width:740px;color:#c7d5e4;font-size:17px}header .meta{font-size:13px;color:#9eb1c8}.buttons{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}.button{display:inline-block;text-decoration:none;border:1px solid #52687e;border-radius:6px;padding:8px 17px;color:#fff;font-size:14px}.button.primary{background:white;color:#162e48;border-color:white}.layout{max-width:1260px;margin:0 auto;display:grid;grid-template-columns:220px minmax(0,1fr);gap:46px;padding:40px 28px 70px}aside{position:sticky;top:24px;align-self:start;font-size:12px;max-height:90vh;overflow:auto}aside b{display:block;font-size:11px;color:var(--muted);letter-spacing:.12em;margin-bottom:13px}aside a{display:block;padding:5px 0;text-decoration:none;color:#566579;line-height:1.55}aside a:hover{color:var(--accent)}main{min-width:0}.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.card{padding:23px;background:var(--paper);border:1px solid var(--line);border-radius:9px}.card span{font-size:12px;color:var(--muted)}.card strong{display:block;font-size:34px;letter-spacing:-.04em;line-height:1.5}.card p{font-size:12px;color:var(--muted);margin:6px 0 0}.card.estimate{background:#f1f5fb;border-style:dashed}.tag{display:inline-block;border:1px solid #d8e2ef;padding:1px 7px;border-radius:20px;font-size:10px;color:#47617d;letter-spacing:.02em;margin-bottom:6px}.overview{margin:26px 0 38px;border-bottom:1px solid var(--line);padding-bottom:30px}.chart{background:white;border:1px solid var(--line);border-radius:9px;padding:24px;margin:16px 0}.chart h3{margin:0 0 16px;font-size:15px}.bar-row{display:grid;grid-template-columns:155px minmax(0,1fr) 70px;align-items:center;gap:10px;font-size:12px;margin:10px 0}.track{background:#f0f3f7;height:17px;border-radius:3px;overflow:hidden}.bar{height:100%;min-width:2px}.old{background:#8e9db1}.mid{background:#7ba5e9}.new{background:var(--green)}.bar-row b{text-align:right;font-variant-numeric:tabular-nums}.bar-row small{font-weight:400;color:var(--muted)}.chart p{font-size:11px;color:var(--muted);margin:17px 0 0}article{font-size:15px}article h2{font-size:24px;line-height:1.5;letter-spacing:-.025em;margin:48px 0 19px;padding-top:18px;border-top:1px solid var(--line)}article h2:first-child{margin-top:0}article p{margin:14px 0}article ul,article ol{padding-left:23px}article li{margin:9px 0}article strong{font-weight:700;color:#102b4a}code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.86em;background:#edf1f6;padding:2px 5px;border-radius:3px;overflow-wrap:anywhere}.table-scroll{overflow:auto;margin:23px 0;border:1px solid var(--line);border-radius:7px;background:white}table{border-collapse:collapse;width:100%;font-size:12px;line-height:1.75;min-width:590px}th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}th{background:#edf2f8;color:#38506b;font-weight:600}tr:last-child td{border-bottom:0}blockquote{border-left:3px solid var(--accent);padding:8px 20px;margin:24px 0;background:#edf3fe}footer{font-size:12px;color:var(--muted);margin-top:50px;border-top:1px solid var(--line);padding-top:22px}.reading-note{font-size:12px;color:var(--muted);margin:18px 0}.skip{position:absolute;left:-10000px}.skip:focus{left:20px;top:10px;background:white;padding:8px;z-index:10}.mobile-toc{display:none}button{cursor:pointer}
+@media(max-width:1000px){.layout{grid-template-columns:1fr;max-width:900px;gap:16px}aside{display:none}.mobile-toc{display:block;border-bottom:1px solid var(--line);padding-bottom:16px}.mobile-toc a{display:block;font-size:12px;padding:5px 0}.cards{gap:10px}.card{padding:17px}.card strong{font-size:29px}}@media(max-width:600px){header{padding:38px 20px 32px}header p{font-size:15px}.layout{padding:24px 18px 50px}.cards{grid-template-columns:1fr}.card{display:grid;grid-template-columns:1fr 1fr;column-gap:10px}.card p{grid-column:1/-1}.card strong{grid-column:2;grid-row:1/3;text-align:right}.card .tag{justify-self:start}.bar-row{grid-template-columns:112px minmax(0,1fr) 55px;font-size:10px;gap:6px}.chart{padding:17px 13px}article{font-size:14px}article h2{font-size:21px}.buttons .button{font-size:12px}}@media print{body{background:white;color:black;font-size:10pt}header{background:white;color:black;padding:0 0 20px}header p,header .meta,.eyebrow{color:#444}.layout{display:block;padding:0;max-width:none}aside,.buttons,.mobile-toc{display:none}.cards{display:flex}.card{flex:1;break-inside:avoid}.chart{break-inside:avoid}article h2{break-after:avoid;margin-top:28px}.table-scroll{overflow:visible}table{min-width:0;font-size:9pt}a{color:inherit}.card strong{font-size:23px}header h1{font-size:30px}}
+</style></head><body><a class="skip" href="#report">본문으로 건너뛰기</a><header><div class="inner"><div class="eyebrow">ENGINEERING RETROSPECTIVE · 2026.09.30 — 10.14</div><h1>Slide Extractor<br>개발과 최적화의 기록</h1><p>캐시 쓰기에서 패킷 선택까지. 병목을 찾아 구조를 바꾸고,<br>필요한 슬라이드를 남기기 위해 다시 설계한 과정.</p><div class="meta">허주환 · 2026.10.15 정리 · 0.5.0b2 공식 베타 기준 · 개발 잠정 중단 시점의 회고</div><div class="buttons"><a class="button primary" href="https://github.com/juhwan0628/slide-extractor-gui" target="_blank" rel="noopener noreferrer">GitHub 저장소 ↗</a><a class="button" href="https://github.com/juhwan0628/slide-extractor-gui/releases/tag/v0.5.0b2" target="_blank" rel="noopener noreferrer">0.5.0b2 릴리스 ↗</a><a class="button" href="https://github.com/juhwan0628/slide-extractor-gui/blob/main/docs/reports/optimization-retrospective.html" target="_blank" rel="noopener noreferrer">보고서 소스 ↗</a></div></div></header><div class="layout"><aside aria-label="목차"><b>CONTENTS</b><a href="#chapter-0">성능을 먼저 살펴보면</a><a href="#chapter-1">1. 9월 30일: CLI의 불필요한 영상·이미지 작업 줄이기</a><a href="#chapter-2">2. 10월 5~8일: 검출 정확성과 GUI 사용 흐름 정리</a><a href="#chapter-3">3. 10월 9일, v0.4.4~0.4.5: 계측 후 캐시 병목 제거</a><a href="#chapter-4">4. v0.4.6~0.4.8: GPU와 스레드를 실험하고 실제로 빠른 CPU 경로 채택</a><a href="#chapter-5">5. 0.4.11~0.4.12: 백그라운드 준비와 재사용으로 클릭 후 대기 줄이기</a><a href="#chapter-6">6. 0.5 초기 M1~M5: FPS에서 키프레임·원본 PTS 중심으로 전환</a><a href="#chapter-7">7. E1E3 및 M6M7: 절반을 쓰되 디코딩 이전에 선택하기</a><a href="#chapter-8">8. 검출 코어 재설계: 사람의 검토량도 최적화</a><a href="#chapter-9">9. M8: half의 비용 절감과 전체 편집 가능성 양립</a><a href="#chapter-10">10. M9: 가장 신뢰할 수 있는 최신 전체 강의 반복 성능</a><a href="#chapter-11">11. M10~0.5.0b2: 측정한 구조를 실제 배포 가능한 제품으로 마무리</a><a href="#chapter-12">PDF와초기~최신누적수치에대한정리</a><a href="#chapter-13">근거와 연결</a><a href="#chapter-14">시행착오에서 남은 판단</a></aside><main id="report"><details class="mobile-toc"><summary>보고서 목차</summary><a href="#chapter-0">성능을 먼저 살펴보면</a><a href="#chapter-1">1. 9월 30일: CLI의 불필요한 영상·이미지 작업 줄이기</a><a href="#chapter-2">2. 10월 5~8일: 검출 정확성과 GUI 사용 흐름 정리</a><a href="#chapter-3">3. 10월 9일, v0.4.4~0.4.5: 계측 후 캐시 병목 제거</a><a href="#chapter-4">4. v0.4.6~0.4.8: GPU와 스레드를 실험하고 실제로 빠른 CPU 경로 채택</a><a href="#chapter-5">5. 0.4.11~0.4.12: 백그라운드 준비와 재사용으로 클릭 후 대기 줄이기</a><a href="#chapter-6">6. 0.5 초기 M1~M5: FPS에서 키프레임·원본 PTS 중심으로 전환</a><a href="#chapter-7">7. E1E3 및 M6M7: 절반을 쓰되 디코딩 이전에 선택하기</a><a href="#chapter-8">8. 검출 코어 재설계: 사람의 검토량도 최적화</a><a href="#chapter-9">9. M8: half의 비용 절감과 전체 편집 가능성 양립</a><a href="#chapter-10">10. M9: 가장 신뢰할 수 있는 최신 전체 강의 반복 성능</a><a href="#chapter-11">11. M10~0.5.0b2: 측정한 구조를 실제 배포 가능한 제품으로 마무리</a><a href="#chapter-12">PDF와초기~최신누적수치에대한정리</a><a href="#chapter-13">근거와 연결</a><a href="#chapter-14">시행착오에서 남은 판단</a></details><div class="cards"><div class="card"><span class="tag">당시 Mac 기록</span><strong>약 4.3×</strong><span>초기 GUI 분석 개선</span><p>80.40 → 18.79초 · 시간 약76.6% 감소<br>초기 원본 기록 일부 미확보</p></div><div class="card"><span class="tag">서버 반복 실측</span><strong>약 2.4×</strong><span>CPU/all → native/half</span><p>전체 강의3개·총27회<br>시간 약56.8~58.6% 감소</p></div><div class="card estimate"><span class="tag">단계별 배율 단순 연결</span><strong>약 10×</strong><span>개략적인 산술 추정</span><p>4.28 × 2.32~2.42 ≈ 9.9~10.4<br>환경이 다른 결과의 곱 · 누적 직접 실측 아님</p></div></div><div class="overview"><p class="reading-note">숫자 읽기: 실측, 당시 기록, 산술 추정을 구분한다. 페이지 수는 정확도와 같지 않으며, 표의 시간은 명시된 작업 범위에 한한다.</p><div class="chart"><h3>Mac · 초기 최적화 기록</h3><div class="bar-row"><span>초기</span><div class="track"><div class="bar old" style="width:100.00%"></div></div><b>80.40<small> s</small></b></div><div class="bar-row"><span>캐시 개선</span><div class="track"><div class="bar mid" style="width:32.41%"></div></div><b>26.06<small> s</small></b></div><div class="bar-row"><span>픽셀 검사 개선</span><div class="track"><div class="bar new" style="width:23.37%"></div></div><b>18.79<small> s</small></b></div><p>31분·720p 강의. 당시 기록 기준. 캐시·CPU 비교는 별도 실행이며 초기 원본 JSON 일부 미확보.</p></div><div class="chart"><h3>Oracle · 전체 강의 반복 실험</h3><div class="bar-row"><span>SP · CPU/all</span><div class="track"><div class="bar old" style="width:38.63%"></div></div><b>37.87<small> s</small></b></div><div class="bar-row"><span>SP · native/half</span><div class="track"><div class="bar new" style="width:16.06%"></div></div><b>15.75<small> s</small></b></div><div class="bar-row"><span>멀티코어 · CPU/all</span><div class="track"><div class="bar old" style="width:100.00%"></div></div><b>98.04<small> s</small></b></div><div class="bar-row"><span>멀티코어 · native/half</span><div class="track"><div class="bar new" style="width:41.38%"></div></div><b>40.57<small> s</small></b></div><div class="bar-row"><span>AI윤리 · CPU/all</span><div class="track"><div class="bar old" style="width:67.30%"></div></div><b>65.98<small> s</small></b></div><div class="bar-row"><span>AI윤리 · native/half</span><div class="track"><div class="bar new" style="width:29.07%"></div></div><b>28.50<small> s</small></b></div><p>FFmpeg6 · 방식별3회 중앙값. probe+준비+분석 포함, GUI·PDF 제외. 두 그래프 간 직접 비교는 하지 않음.</p></div></div><article><h2 id="chapter-0">성능을 먼저 살펴보면</h2>
+<p>최적화는 크게 세 차례 병목을 옮겼다. 처음에는 이미지 저장과 캐시 관리, 다음은 디코딩·불필요한 전 프레임 작업, 마지막은 만들어야 하는 이미지 수와 사용자가 검토할 페이지 수였다.</p>
+<ul>
+<li><strong>초기 Mac 최적화:</strong> 당시 대화에 기록된 31분 720p 강의의 분석 시간은 80.40초 → 캐시 개선 26.06초 → 불필요한 픽셀 검증 제거 18.79초. 초기 대비 약 <strong>4.28배</strong>, 시간 <strong>76.6% 감소</strong>다. 단, 초기 80.40초·26.06초는 당시 대화의 회고 기록이며 이번 조사에서 원본 Mac JSON을 재확인하지 못했다. 26.76초 → 18.79초 비교는 당시 v0.4.8 README에도 남아 있다.</li>
+<li><strong>최신 서버 반복 측정:</strong> 키프레임 전부를 쓰는 기존 CPU 경로 대비 전용 디코더+half가 전체 강의 3개에서 <strong>2.32~2.42배</strong>, 시간 <strong>56.8~58.6% 감소</strong>. JPEG 수와 캐시 크기도 약 절반이다. 원자료 27회에서 중앙값을 다시 계산했다.</li>
+<li><strong>단계별 배율 단순 연결값은 약10배다.</strong> 초기 Mac의 약4.28배와 최신 서버의 약2.32<del>2.42배를 곱하면 약9.9</del>10.4배다. 서로 다른 영상·환경·버전의 개선폭을 연결한 참고 추정이며, 최초와 최종 버전을 동일 조건에서 직접 측정한 누적 성능은 아니다.</li>
+</ul>
+<h2 id="chapter-1">1. 9월 30일: CLI의 불필요한 영상·이미지 작업 줄이기</h2>
+<p>초기에는 저FPS로 영상을 샘플링하고 ROI·화면 변화를 분석한 뒤 대표 프레임을 PDF로 만드는 구조였다. 이 시점부터 다음 최적화가 실제 커밋에 남아 있다.</p>
+<div class="table-scroll" tabindex="0"><table>
+<thead>
+<tr>
+<th>변경</th>
+<th>줄이려던 비용</th>
+<th>기록과 판단</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FFmpeg에서 ROI 자르기·축소, 분석 이미지를 PNG에서 JPEG로 변경</td>
+<td>큰 이미지의 변환·저장·읽기</td>
+<td><code>b879f1b</code> 코드 확인. 원본 PDF 출력용 이미지와 분석용 이미지를 분리</td>
+</tr>
+<tr>
+<td>키프레임이 촘촘한 강의의 샘플링·직접 탐색</td>
+<td>처음부터 전체 영상을 순차 처리하는 비용</td>
+<td><code>228ac86</code>, <code>cc56c63</code>. 후일의 전용 디코더/선택 패킷 방식과는 다른 초기 시도</td>
+</tr>
+<tr>
+<td>원본 해상도 프레임 추출 시 VideoCapture 재사용</td>
+<td>페이지마다 프로세스·영상 핸들을 여는 비용</td>
+<td><code>ddc98d8</code>: 하나의 VideoCapture에서 필요한 시점들을 탐색·추출</td>
+</tr>
+<tr>
+<td>qpdf 최적화</td>
+<td>PDF 파일 저장·전달 비용</td>
+<td><code>39f7c70</code>. 전체 분석 가속과는 별도 항목</td>
+</tr>
+</tbody></table></div>
+<p>이전/이후 동일 조건의 강의 처리 시간은 확보하지 못했으므로 이 시점의 배율은 쓰지 않는다. 또한 초기 직접 탐색은 모든 입력에서 빠르지 않았다. 10월 8일 대화의 합성 120초 실험에서는 자동 탐색 약5.0초, 연속 FFmpeg 디코딩 약2.2초였다. 이는 탐색이 잦거나 프로세스를 반복 실행하면 순차 처리보다 느릴 수 있음을 보여준 제한적인 실험이다.</p>
+<h2 id="chapter-2">2. 10월 5~8일: 검출 정확성과 GUI 사용 흐름 정리</h2>
+<p>지정사 강의에서 슬라이드 누락과 과검출을 다루며 전역 차이뿐 아니라 국소 타일 변화, 기준 프레임·인접 프레임, 시간적 확인, 안정적인 대표 프레임을 검토했다. 같은 슬라이드가 다시 등장하는 경우를 무조건 지우지 않도록 전역 pHash 중복 제거도 기본 경로에서 배제했다.</p>
+<p>이 단계의 핵심은 속도 배율이 아니라 <strong>무엇을 보존해야 하는지 정의하는 것</strong>이었다. 65개 테스트 통과나 추출 페이지 수 증가는 의미상 정확도 향상의 직접 증거가 아니다. 지정사 1~5장의 상태와 PDF 페이지 수 일치는 파이프라인 일관성 검증이며, 모든 교과목의 정답을 맞혔다는 뜻도 아니다.</p>
+<p>CLI에서 필요한 코어를 가져와 독립 데스크톱 GUI로 확장했다. 저해상도 분석·미리보기와 최종 원본 출력 분리는 이후에도 유지했다.</p>
+<h2 id="chapter-3">3. 10월 9일, v0.4.4~0.4.5: 계측 후 캐시 병목 제거</h2>
+<p>먼저 준비·ROI·검출·JPEG 인코딩·캐시 쓰기·FFmpeg 대기를 분리해 기록했다. 프로파일의 sampling에는 JPEG/캐시 시간이 포함되므로 겹치는 항목을 더하지 않는다. decode_wait도 순수 디코더 CPU 시간이 아니다.</p>
+<p>캐시 쓰기에서는 임시 JPEG마다 수행하던 디스크 동기화와 반복적인 저장소 조사·메타데이터 갱신을 줄였다.</p>
+<ul>
+<li>임시 JPEG의 독점 생성·원자적 rename은 유지하고 이미지마다 fsync는 제거.</li>
+<li>사용량을 증분 계산하고 저장공간을 최대8MiB 단위로 예약.</li>
+<li>manifest는 32이미지 또는2초마다 갱신하고 완료 시 정확히 기록.</li>
+<li>미완성 캐시를 재사용하지 않고 활성 세션의 소유권과 정리를 관리.</li>
+<li>최종 PDF·JSON 출력 트랜잭션의 내구성은 유지.</li>
+</ul>
+<div class="table-scroll" tabindex="0"><table>
+<thead>
+<tr>
+<th>실험</th>
+<th align="right">이전</th>
+<th align="right">이후</th>
+<th>해석</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Linux ARM64, 8×8 JPEG 256장, 각 3회 중앙값</td>
+<td align="right">1.5918초</td>
+<td align="right">0.03079초</td>
+<td>캐시 미세 벤치마크 약51.7배. 앱 전체가51.7배 빨라졌다는 뜻 아님</td>
+</tr>
+<tr>
+<td>당시 Mac 강의 회고 기록</td>
+<td align="right">80.40초</td>
+<td align="right">26.06초</td>
+<td>약3.09배, 시간67.6% 감소. 원본 Mac JSON은 이번 조사에서 재확보하지 못함</td>
+</tr>
+</tbody></table></div>
+<p>캐시 미세 벤치마크 원본: <code>slide-extractor-gui/packaging/cache-benchmark-v045.json</code>.</p>
+<h2 id="chapter-4">4. v0.4.6~0.4.8: GPU와 스레드를 실험하고 실제로 빠른 CPU 경로 채택</h2>
+<p>사용자 Mac에서 31분720p 강의, 0.5FPS의 937샘플·17페이지 조건으로 비교한 기록이다. 아래 두 표는 서로 다른 벤치마크 실행이므로 CPU26.71과26.76의 차이를 추가 성능 개선으로 해석하지 않는다.</p>
+<div class="table-scroll" tabindex="0"><table>
+<thead>
+<tr>
+<th>스레드/하드웨어 비교 실행</th>
+<th align="right">처리 시간</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CPU 자동 스레드</td>
+<td align="right">26.71초</td>
+</tr>
+<tr>
+<td>CPU 2 스레드</td>
+<td align="right">33.58초</td>
+</tr>
+<tr>
+<td>CPU 4 스레드</td>
+<td align="right">31.64초</td>
+</tr>
+<tr>
+<td>VideoToolbox</td>
+<td align="right">45.07초</td>
+</tr>
+</tbody></table></div>
+<div class="table-scroll" tabindex="0"><table>
+<thead>
+<tr>
+<th>불필요한 검사·전송 구조 비교 실행</th>
+<th align="right">처리 시간</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>기존 CPU</td>
+<td align="right">26.76초</td>
+</tr>
+<tr>
+<td>사용하지 않는 전 프레임 픽셀 체크섬·통계 제거</td>
+<td align="right"><strong>18.79초</strong></td>
+</tr>
+<tr>
+<td>VideoToolbox 전체 프레임 다운로드</td>
+<td align="right">45.52초</td>
+</tr>
+<tr>
+<td>VideoToolbox 선택 후 다운로드</td>
+<td align="right">92.33초</td>
+</tr>
+</tbody></table></div>
+<p>CPU 최적화는 샘플PTS·페이지PTS·구간과 JPEG 픽셀이 동일한 채 시간을29.8% 줄였다. 타이밍·색상·크기·인터레이스 메타데이터 검사는 유지했다. 제거한 것은 검증에 쓰이지 않던 픽셀 체크섬·통계 계산이다.</p>
+<p>결론은 이 영상·기기의 구현에서는 CPU 자동 스레드가 명시적2/4 스레드와 GPU 경로보다 빨랐다는 것이다. VideoToolbox 지연 원인을 전송 하나로 확정할 분리 실험은 없으므로 하드웨어↔CPU 전달·필터 구조의 가능성으로만 기록한다. GPU 자체가 일반적으로 느리다는 결론도 아니다.</p>
+<p>추가로 캐시 JPEG의 중복 사전 읽기를 없애고, 샘플/페이지 조회를 인덱스로 바꾸며, 원본 프레임 추출에도 최적화된 CPU 옵션을 사용했다(<code>4bc1329</code>). 각각의 독립적인 전체 처리 시간 감소율은 없다.</p>
+<h2 id="chapter-5">5. 0.4.11~0.4.12: 백그라운드 준비와 재사용으로 클릭 후 대기 줄이기</h2>
+<p>영상 선택 직후 백그라운드에서 샘플을 준비하고 Analyze에서 같은 캐시를 재사용하도록 했다. 준비가 끝나기 전에 분석을 눌러도 중복 디코딩하지 않도록 관리했다. 총120초 제한은 긴 강의를 잘못 중단시키므로 실제 진척이 멈춘 시간을 감시하는 방식으로 바꿨다. 실패한 준비 재시도, 취소·정리, 최신 미리보기 우선 처리도 보완했다.</p>
+<p>이 작업은 <strong>전체 계산량 감소와 클릭 후 대기 감소를 구분해야 한다.</strong> 영상 선택과 동시에 분석을 누르면 숨겨둘 준비 시간이 거의 없다. 사용자가 0.5 초기 배포 후 “기대만큼 빠르지 않다”고 느낀 맥락도 이 차이와 연결된다.</p>
+<p>M4의117분 영상에서 준비 완료 후 Analyze는 클릭~결과40.61초였지만 준비252.55초가 클릭 전에 수행됐다. 조기 Analyze는387.49초였다. 두 실행의 서버 부하도 달랐으므로 이 비율을 알고리즘의 속도 향상으로 쓰지 않는다.</p>
+<h2 id="chapter-6">6. 0.5 초기 M1~M5: FPS에서 키프레임·원본 PTS 중심으로 전환</h2>
+<p>출력 FPS를 낮춰도 FFmpeg가 중간 프레임까지 디코딩하면 영상처리 비용이 남는다. 따라서 디코더에서 비키프레임을 건너뛰고 실제 키프레임 PTS를 유지하는 구조로 전환했다. 고정FPS 격자를 전제로 한 모델·편집·JSON도 관측 순서와 원본 PTS 기반으로 바꿨다. FPS 경로는 제품에서 격리한 외부 비교 기준으로만 남겼다.</p>
+<p>Linux Oracle A1 4 CPU, FFmpeg6.1.1, 동일 300초 구간 각 방식3회, 준비+캐시 분석 중앙값:</p>
+<div class="table-scroll" tabindex="0"><table>
+<thead>
+<tr>
+<th>강의</th>
+<th align="right">0.5FPS</th>
+<th align="right">키프레임 all</th>
+<th align="right">시간 감소</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>시스템프로그램</td>
+<td align="right">15.154초</td>
+<td align="right">10.239초</td>
+<td align="right">32.4%</td>
+</tr>
+<tr>
+<td>멀티코어</td>
+<td align="right">13.945초</td>
+<td align="right">12.911초</td>
+<td align="right">7.4%</td>
+</tr>
+<tr>
+<td>AI윤리</td>
+<td align="right">14.414초</td>
+<td align="right">13.005초</td>
+<td align="right">9.8%</td>
+</tr>
+</tbody></table></div>
+<p>FFmpeg null 출력 대조에서는 CPU 시간이 SP78.6%, 멀티코어64.2%, 윤리65.1% 감소했다. 이 대조는 RGB·JPEG·캐시·검출·PDF를 제외한다. SP는각 3회 중앙값, 다른 두 강의는각1회다.</p>
+<p>CPU가 크게 줄어도 앱 전체 향상이 제한된 이유는 키프레임이 약1초마다 있어 0.5FPS보다 이미지가 약2배 생겼기 때문이다. JPEG·캐시와 비교 비용이 증가했다. 예컨대34.9분SP 전체 1회에서는 준비94.35→58.30초지만 분석6.03→11.29초로 늘어, 합계100.38→69.59초였다.</p>
+<p>이 시점의 인식 전환은 <strong>디코딩만 줄여서는 부족하며, 이후의 RGB·JPEG·캐시·검출 작업량도 줄여야 한다</strong>는 것이었다.</p>
+<h2 id="chapter-7">7. E1<del>E3 및 M6</del>M7: 절반을 쓰되 디코딩 이전에 선택하기</h2>
+<p>경쟁작의 패킷·GOP 정책을 조사한 뒤, 키프레임 간격이 짧으면 절반만 쓰는 아이디어를 검증했다.</p>
+<ol>
+<li>FFmpeg가 이미 디코딩한 프레임 중 절반을 버리는 실험에서는 디코더 CPU가 거의 줄지 않았다. SP2.874→2.870초, 멀티코어3.393→3.375초, 윤리3.568→3.557초였다.</li>
+<li>C++/libavformat/libavcodec에서 H.264 IDR 패킷을 디코더에 넣기 전에 골랐다. 제한된300초 클립에서 all→half CPU가 대략절반, 선택한PTS/YUV해시는 동일했다. JPEG·GUI는 이 실험에 포함되지 않았다.</li>
+<li>RGB·JPEG·캐시·실제 분석을 연결한 E3 프로토타입에서는 총시간25.8~50.9% 감소했다. 1회씩이고 제품 표시변환과 차이가 있어 최종제품 수치로 쓰지 않는다.</li>
+<li>M6에서 제품의 표시변환을 전용 디코더와 일치시켜 all 경로의 PTS/RGB/JPEG/전환을 대조했다. 이후 M7에서 디코딩 전half를 연결했다.</li>
+</ol>
+<p>마지막에 채택한 정책은 <strong>패킷 검사상 GOP가 엄격히2초 미만이면 half, 그 밖은 all</strong>이다. 지원하지 않는 native 입력은 CPU의 전체 키프레임 경로로 돌아간다. FPS/P·B프레임 보충은 넣지 않았다. 요청한 정책과 실제 적용 정책도 구분해 기록한다.</p>
+<h2 id="chapter-8">8. 검출 코어 재설계: 사람의 검토량도 최적화</h2>
+<p>half 비교 중 윤리2~5번이 같은 슬라이드의 상태이고6번이 다른 짧은 슬라이드임을 사용자가 지적했다. 추적 결과 필요한 화면은 half에도 관측됐지만 기존 안정성·미래 확인 조건이 전환 확정을 막았다. 디코더가 관측하지 않은 문제와 검출기가 관측한 것을 버린 문제를 분리해야 했다.</p>
+<p>지속적 국소 필기·순간 포인터는 같은 페이지 안에서 묶고, <strong>짧게 나타나도 큰 구조 변화면 보존</strong>하도록 공간 변화 기반 그룹을 만들었다. 대표 프레임은 단순 마지막 프레임이나 오래 지속된 프레임 대신 누적 필기의 지지와 가림을 평가했다. 한 번만 관측된 큰 전환도 유효 그룹으로 남겼다.</p>
+<div class="table-scroll" tabindex="0"><table>
+<thead>
+<tr>
+<th>초기 검토300초 클립</th>
+<th align="right">기존 all/half 후보</th>
+<th align="right">사용자 검토를 거쳐 수용된 그룹 all/half</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SP</td>
+<td align="right">30 / 24</td>
+<td align="right">3 / 3</td>
+</tr>
+<tr>
+<td>멀티코어</td>
+<td align="right">28 / 21</td>
+<td align="right">4 / 4</td>
+</tr>
+<tr>
+<td>AI윤리</td>
+<td align="right">9 / 4</td>
+<td align="right">6 / 6</td>
+</tr>
+</tbody></table></div>
+<p>이 수치는 해당클립의 결과이며 일반적인 중복제거율·정확도가 아니다. 페이지 수가 줄어도 정답을 잃었으면 실패다. 실제 추가SP검증에서는 경계 기준이 작은 의미상 전환을 합쳤고 이를 드러내고 수정했다. 별도의 Notes 슬라이드는 오직 half가 버린 홀수키프레임에만 나타나 끝내 자동 검출에서 누락됐다. 후자는 검출기로 복구할 수 없는 입력 한계다.</p>
+<p>슬라이드 회귀 식별은 사용자가 보류했으므로 과거페이지로 돌아온 정상적인 재방문을 무조건 지우지 않았다. 어시스턴트가 중간에 all을 기본으로 강제한 해석은 합의와 달랐고 M8에서half 기본과 편집을 복원했다. 이는 최적화 정책 수정 이력으로 남기며 all이 최종 기본인 것처럼 정리하지 않는다.</p>
+<h2 id="chapter-9">9. M8: half의 비용 절감과 전체 편집 가능성 양립</h2>
+<p>분석에 쓰는 이미지와 편집 가능한 키프레임 목록을 분리했다. 전체 PTS 인덱스는 유지하되 초기 JPEG는 절반만 만든다. 건너뛴 프레임이 미리보기·추가·교체·출력에 필요할 때 정확한 원본 PTS로 복원한다. 실제 backend/policy와 관측을 JSONv7에 기록하고 캐시 재사용도 정책에 맞춰 관리한다.</p>
+<p>이 방식은 처음부터 전체JPEG를 만들지 않는 비용 이점을 유지하면서 수동 복구 가능성을 남긴다. 다만 사용자가 열어보지 않은 누락페이지를 자동으로 알아내는 기능은 아니다.</p>
+<h2 id="chapter-10">10. M9: 가장 신뢰할 수 있는 최신 전체 강의 반복 성능</h2>
+<p>Oracle Linux ARM64 4 CPU, FFmpeg6.1.1, 전체 강의3개×방식 3개×각 3회 = 27회. 새 프로세스·새 응용 캐시, 순차 실행. OS페이지캐시는 비우지 않았다. 중앙값은 probe+준비+캐시 분석이며 Python시작/모듈 import·정리·GUI·PDF는 제외한다.</p>
+<div class="table-scroll" tabindex="0"><table>
+<thead>
+<tr>
+<th>전체 강의</th>
+<th align="right">CPU/all</th>
+<th align="right">Native/all</th>
+<th align="right">Native/half</th>
+<th align="right">CPU/all 대비시간 감소</th>
+<th align="right">배속</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SP01-S01-15</td>
+<td align="right">37.87초</td>
+<td align="right">30.17초</td>
+<td align="right"><strong>15.75초</strong></td>
+<td align="right"><strong>58.4%</strong></td>
+<td align="right"><strong>2.40배</strong></td>
+</tr>
+<tr>
+<td>멀티코어 Issue(Memory)</td>
+<td align="right">98.04초</td>
+<td align="right">78.07초</td>
+<td align="right"><strong>40.57초</strong></td>
+<td align="right"><strong>58.6%</strong></td>
+<td align="right"><strong>2.42배</strong></td>
+</tr>
+<tr>
+<td>AI윤리제1장</td>
+<td align="right">65.98초</td>
+<td align="right">54.20초</td>
+<td align="right"><strong>28.50초</strong></td>
+<td align="right"><strong>56.8%</strong></td>
+<td align="right"><strong>2.32배</strong></td>
+</tr>
+</tbody></table></div>
+<p>같은 실험 안에서 전용 디코더만 적용한 효과는17.9<del>20.4% 감소다. Native/all에서half로 줄인 추가 효과는47.4</del>48.0% 감소다. 이 두 감소율을 더하지 않고 실제 CPU/all→half의56.8<del>58.6%를 쓴다. 패킷 검사 약0.37</del>0.62초도 준비 시간에 포함돼 있다.</p>
+<div class="table-scroll" tabindex="0"><table>
+<thead>
+<tr>
+<th>강의</th>
+<th align="right">초기 JPEG수 all→half</th>
+<th align="right">JPEG캐시MiB all→half</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SP</td>
+<td align="right">2020→1010</td>
+<td align="right">83.6→41.7</td>
+</tr>
+<tr>
+<td>멀티코어</td>
+<td align="right">4121→2061</td>
+<td align="right">237.6→118.8</td>
+</tr>
+<tr>
+<td>AI윤리</td>
+<td align="right">3021→1511</td>
+<td align="right">150.4→75.2</td>
+</tr>
+</tbody></table></div>
+<p>전체 편집 인덱스는2020/4121/3021개를 유지한다. half의 메모리가 무조건절반이라는 주장은 하지 않는다. 부모 Python 메모리는 주로64<del>71MiB였고 자식 최대치는CPU/all 약87</del>89MiB→ native 약58MiB였다. 서로 다른 시점의 최댓값을 더해 동시 전체 메모리라 부르지 않는다.</p>
+<p>SP전체all44회/half39회, 멀티코어11/11, 윤리59/59였다. 이것은시간순 페이지 출현 수로, 고유 슬라이드 수나 정답 재현율이 아니다. SP Notes 홀수 키프레임 누락도 남는다. 세번반복의결과일치는재현성증거이며 모든영상의정확성보장은아니다.</p>
+<h2 id="chapter-11">11. M10~0.5.0b2: 측정한 구조를 실제 배포 가능한 제품으로 마무리</h2>
+<p>전용 디코더와 고정 소스FFmpeg8.1.2를MacARM64·Windowsx64에 동봉했다. 실제 OS에서 설치 후half·지연복원·편집·PDF/JSON·Qt교체실행을검증했고, 한글 경로와 Mac Bash 호환성을 수정했다. 대응 소스·라이선스·재링크 자료와 파일 해시를 묶어 공개했다. 최종 소스 테스트1012개 통과, 사용자가 Mac 작동을 확인한 뒤 공식 베타0.5.0b2를 게시했다.</p>
+<p>FFmpeg6→8품질 확인은6개 클립의 관측 PTS·24개 그룹 구간 동일, 대표 PTS8개 변경은 이미지 비교로 점검했다. 새 배포본의전체 강의처리 시간은 실기기에서 반복 측정하지 않았다. 따라서 M9의2.4배를새 배포본의모든기기성능보장으로 전환하지 않는다.</p>
+<h2 id="chapter-12">PDF와초기~최신누적수치에대한정리</h2>
+<p>PDF는원본 해상도 출력·정확한 PTS·검증·파일 크기에 영향받는다. 초기 일괄 추출·qpdf·조회 최적화와 검출 후보 감소는 도움이 되지만 동일 페이지·동일 화질의 초기/최신 반복 대조가 없다. M4의970상태PDF저장1147초와나중의적은 페이지 저장을 비교해 저장 속도 향상이라 부르면 작업량이 달라 왜곡된다.</p>
+<p>안전하게 설명할 성과는 아래 세 가지다.</p>
+<ol>
+<li><strong>Mac에서 확인한 초기 개선:</strong> 캐시와 불필요한 픽셀 작업을 줄여 당시 회고 기준80.40→18.79초. 약4.28배, 원본 일부 재확인 제한을 함께 표기.</li>
+<li><strong>최신 서버 반복 실험:</strong> 기존 키프레임 CPU/all 대비 전용 디코더+half로56.8<del>58.6%시간 감소, 약2.32</del>2.42배. JPEG캐시는약 절반.</li>
+<li><strong>품질·사용성 개선:</strong> 필기·포인터 중복을 묶고 짧은 큰 전환을 보존하며, 초기 이미지를 줄인 상태에서도 전체 키프레임 편집을 유지. 입력 누락·회귀 식별의 남은 한계는 명시.</li>
+</ol>
+<p>전체 과정을 관통하는 설계는 <strong>비싼 처리를 더 일찍 줄이고, 필요할 때만 원본을 복원하는 것</strong> 이었다. 파라미터만 낮추는 최적화가 아니라 디스크·픽셀 검증·디코딩·이미지수·사람의 검토량을 차례로 줄인 과정이다.</p>
+<h2 id="chapter-13">근거와 연결</h2>
+<p>아래 공개 기록과 초기 저장소의 코드·캐시 벤치마크, 당시 Mac 실험 대화를 대조했다. 새 벤치마크를 실행한 보고서는 아니다. 원자료를 다시 계산한 최신 수치와 당시 대화만 남아 있는 초기 수치를 구분했다.</p>
+<ul>
+<li><a target="_blank" rel="noopener noreferrer" href="https://github.com/juhwan0628/slide-extractor-gui">Slide Extractor GUI · GitHub</a> — 현재 제품 소스와 사용법</li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://github.com/juhwan0628/slide-extractor">초기 CLI · GitHub</a> — 9월30일 시작한 원형</li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://github.com/juhwan0628/slide-extractor-gui/blob/main/docs/milestones/Keyframe-M4-results.md">M4 실제 강의 검증</a> — FPS·키프레임 비교와 비용 분해</li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://github.com/juhwan0628/slide-extractor-gui/blob/main/docs/milestones/Keyframe-M6-results.md">M6 전용 디코더 통합</a> · <a target="_blank" rel="noopener noreferrer" href="https://github.com/juhwan0628/slide-extractor-gui/blob/main/docs/milestones/Keyframe-M7-results.md">M7 half·윤리 누락 진단</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://github.com/juhwan0628/slide-extractor-gui/blob/main/docs/milestones/Detector-C4-results.md">대표 프레임 실험 C4</a> · <a target="_blank" rel="noopener noreferrer" href="https://github.com/juhwan0628/slide-extractor-gui/blob/main/docs/milestones/Detector-C5-results.md">추가 강의에서 발견한 실패 C5</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://github.com/juhwan0628/slide-extractor-gui/blob/main/docs/milestones/Detector-Validation2-results.md">Notes 누락 검증</a> · <a target="_blank" rel="noopener noreferrer" href="https://github.com/juhwan0628/slide-extractor-gui/blob/main/docs/milestones/Keyframe-M8-half-correction-results.md">half 정책 복원과 M8</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://github.com/juhwan0628/slide-extractor-gui/blob/main/docs/milestones/Keyframe-M9-results.md">M9 반복 성능 보고서</a> · <a target="_blank" rel="noopener noreferrer" href="https://github.com/juhwan0628/slide-extractor-gui/blob/main/docs/milestones/Keyframe-M9-performance.json">27회 원자료 JSON</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://github.com/juhwan0628/slide-extractor-gui/blob/main/docs/milestones/Keyframe-M10-results.md">M10 네이티브 검증</a> · <a target="_blank" rel="noopener noreferrer" href="https://github.com/juhwan0628/slide-extractor-gui/blob/main/docs/milestones/Keyframe-B2-release-results.md">B2 배포 기록</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://github.com/juhwan0628/slide-extractor-gui/releases/tag/v0.5.0b2">0.5.0b2 공식 베타와 다운로드</a></li>
+</ul>
+<p>초기 구현 근거 커밋: <a target="_blank" rel="noopener noreferrer" href="https://github.com/juhwan0628/slide-extractor/commit/b879f1b2906c66f4fb2f711c8763db81c00a80fb">FFmpeg 전처리</a>, <a target="_blank" rel="noopener noreferrer" href="https://github.com/juhwan0628/slide-extractor/commit/cc56c6311dea25d6274e377594e4b7afacc3dcad">직접 탐색</a>, <a target="_blank" rel="noopener noreferrer" href="https://github.com/juhwan0628/slide-extractor/commit/ddc98d81e9790f16a0848b289eacc651f6066740">원본 추출 핸들 재사용</a>. Mac80.40초·26.06초는 당시 대화 기록이며 이번 조사에서 원본 JSON을 재확보하지 못했다. CPU26.76→18.79초는 당시 v0.4.8 README에도 기록돼 있다.</p>
+<h2 id="chapter-14">시행착오에서 남은 판단</h2>
+<div class="table-scroll" tabindex="0"><table>
+<thead>
+<tr>
+<th>시도 또는 문제</th>
+<th>실제로 확인한 것</th>
+<th>남긴 결정</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>직접 탐색이면 언제나 빠를 것이라는 가정</td>
+<td>짧은 합성 영상에서 연속 디코딩이 더 빨랐음</td>
+<td>프로세스 시작·탐색 비용까지 포함해 비교</td>
+</tr>
+<tr>
+<td>GPU 디코딩과 명시적 스레드 제한</td>
+<td>해당 Mac 강의에서는 CPU 자동보다 느림</td>
+<td>하드웨어 이름 대신 전체 경로 실측으로 기본값 결정</td>
+</tr>
+<tr>
+<td>키프레임 전환만으로 큰 체감 향상을 기대</td>
+<td>디코딩 CPU는 크게 줄었지만 JPEG·분석 대상은 증가</td>
+<td>디코더 이후의 데이터 생성량도 최적화</td>
+</tr>
+<tr>
+<td>디코딩 후 절반을 버림</td>
+<td>CPU시간 거의 동일</td>
+<td>패킷을 디코더에 넣기 전에 선택</td>
+</tr>
+<tr>
+<td>페이지 수가 줄었으니 품질이 떨어졌다는 해석</td>
+<td>SP에서 빠진6개는 사용자가 모두 중복으로 판정</td>
+<td>검출수와 정확도를 분리하고 이미지로 확인</td>
+</tr>
+<tr>
+<td>오래 보이는 변화만 보존</td>
+<td>잠깐 보인 필수 슬라이드까지 제거</td>
+<td>짧더라도 큰 구조 변화면 그룹으로 보존</td>
+</tr>
+<tr>
+<td>마지막·가장 어두운 프레임을 대표로 선택</td>
+<td>포인터·메뉴 가림이 이기거나 필기가 덜 완성된 상태 선택</td>
+<td>지지되는 필기와 가림을 함께 평가</td>
+</tr>
+<tr>
+<td>기존 클립에서 잘 되면 일반화됐다는 판단</td>
+<td>추가SP에서 작은 의미상 전환이 합쳐짐</td>
+<td>실패를 기록하고 추가 입력으로 경계 검증</td>
+</tr>
+<tr>
+<td>half 누락을 all 강제로 해결</td>
+<td>합의한 성능·정책과 어긋남</td>
+<td>GOP 조건부half 복원, 전체 편집 인덱스와 지연 복원</td>
+</tr>
+<tr>
+<td>해시로 반복 슬라이드를 바로 합침</td>
+<td>압축·필기 변화가 있고 정상 재방문도 존재</td>
+<td>시간순 출현을 보존하고 회귀 식별은 보류</td>
+</tr>
+<tr>
+<td>로컬 테스트가 통과하면 네이티브도 동일할 것이라는 가정</td>
+<td>MacBash3·Windows한글경로·서명된별칭 문제가 실제CI에서 발생</td>
+<td>실제OS 설치·실행·출력·소스 감사까지 수행</td>
+</tr>
+</tbody></table></div>
+<p>개발은 0.5.0b2 공개 배포를 기준으로 잠정 중단한다. 남은 범위는 실기기 전체 강의 반복 성능, half가 관측하지 않은 짧은 내용의 자동 복구, 슬라이드 회귀 식별과 더 넓은 입력 품질 평가다. 기능을 구현한 사실과 모든 입력에서 정확하다는 주장은 구분해 둔다.</p>
+</article><footer>Slide Extractor · 성능 수치는 해당 실험 조건의 관측값입니다. 이 페이지는 외부 리소스 없이 동작하는 단일 HTML 보고서입니다.<br><a href="https://github.com/juhwan0628/slide-extractor-gui">GitHub</a> · <a href="#report">본문 처음으로 ↑</a></footer></main></div></body></html>
