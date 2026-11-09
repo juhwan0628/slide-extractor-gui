@@ -14,17 +14,7 @@ def keyframes(source):
  result=subprocess.check_output(['ffprobe','-v','error','-select_streams','v:0','-show_frames','-show_entries','frame=key_frame,pts','-of','json',str(source.path)],timeout=30)
  return [int(f['pts']) for f in json.loads(result)['frames'] if f['key_frame']==1]
 
-def video(path,codec='mpeg4',offset=0,vfr=False):
- encoders=subprocess.check_output(['ffmpeg','-hide_banner','-encoders'],stderr=subprocess.DEVNULL,text=True)
- if codec not in encoders:pytest.skip('Test encoder unavailable: '+codec)
- cmd=['ffmpeg','-hide_banner','-loglevel','error','-y','-f','lavfi','-i','testsrc2=size=96x64:rate=10:duration=2.4']
- if vfr:cmd+=['-vf','setpts=floor(N/2)*3+mod(N\\,2)']
- elif offset:cmd+=['-vf',f'setpts=PTS+{offset}/TB']
- cmd+=['-c:v',codec,'-g','5','-bf','2','-fps_mode','passthrough']
- if codec=='libx264':cmd+=['-preset','ultrafast','-x264-params','scenecut=0']
- if codec=='libx265':cmd+=['-preset','ultrafast','-x265-params','pools=1:frame-threads=1:scenecut=0']
- subprocess.run(cmd+[str(path)],check=True,timeout=40,stdout=subprocess.DEVNULL,stderr=subprocess.PIPE)
- return probe_source(path)
+from tests.cli_fixtures import video
 
 @pytest.mark.parametrize('codec,offset,vfr',[('mpeg4',0,False),('mpeg4',8,False),('mpeg4',0,True),('libx264',0,False),('libx265',0,False)])
 def test_keyframe_images_pair_with_original_decoder_pts(tmp_path,codec,offset,vfr):

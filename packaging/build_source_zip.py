@@ -4,7 +4,7 @@ import hashlib,zipfile
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
-BASE=('app.py','requirements.txt','README.md','LICENSE',
+BASE=('pyproject.toml','docs/cli.md','app.py','requirements.txt','README.md','LICENSE',
       'BUILD-WINDOWS.bat','INSTALL-WINDOWS.md','packaging/build_windows_personal.py','packaging/windows_media.py','packaging/build_windows_kit.py',
       'scripts/validate-windows-portable.bat',
       'LICENSE_AUDIT.md','THIRD_PARTY_NOTICES.md','docs/KEYFRAME-JSON-v4.md',
@@ -24,7 +24,7 @@ BASE=('app.py','requirements.txt','README.md','LICENSE',
 
 def build(output:Path, *, include_tests=False):
     files=[ROOT/name for name in BASE]
-    for folder in ('gui','slide_core'):
+    for folder in ('gui','slide_core','slide_cli'):
         files.extend(sorted((ROOT/folder).glob('*.py')))
     for path in files:
         if not path.is_file() or path.is_symlink():
