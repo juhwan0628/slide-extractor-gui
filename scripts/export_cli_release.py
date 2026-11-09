@@ -42,7 +42,7 @@ def export_release(repo,commit,destination):
  if not re.fullmatch(r'[0-9A-Za-z.+!-]+',version):raise ValueError('Invalid version')
  for name in ('tests/__init__.py','tests/cli_fixtures.py','tests/test_cli.py','tests/test_cli_batch.py','tests/test_cli_pipeline.py'):
   files[name]=read(name)
- templates={'gitattributes':'.gitattributes','README.md':'README.md','CHANGELOG.md':'CHANGELOG.md','pyproject.toml':'pyproject.toml','cli.md':'docs/cli.md',
+ templates={'build_release.py':'scripts/build_release.py','publish-cli.yml':'.github/workflows/publish-cli.yml','MANIFEST.in':'MANIFEST.in','gitattributes':'.gitattributes','README.md':'README.md','CHANGELOG.md':'CHANGELOG.md','pyproject.toml':'pyproject.toml','cli.md':'docs/cli.md',
             'requirements-test.lock':'requirements-test.lock','ci.yml':'.github/workflows/ci.yml',
             'verify_snapshot.py':'scripts/verify_snapshot.py','test_install.py':'tests/test_install.py'}
  for name,target in templates.items():

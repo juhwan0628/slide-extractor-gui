@@ -11,7 +11,7 @@ def module():
 def repo(tmp_path):
  p=tmp_path/'repo';p.mkdir()
  files={'slide_core/version.py':'VERSION = "0.5.0b2"\n','slide_core/__init__.py':'','slide_cli/__init__.py':'','slide_cli/cli.py':'# cli\n','LICENSE':'MIT\n','THIRD_PARTY_NOTICES.md':'Notices\n','docs/cli.md':'# Usage\n','gui/window.py':'PRIVATE GUI','secret.env':'secret','pyproject.toml':'not exported'}
- for name in ['pyproject.toml','README.md','cli.md','requirements-test.lock','ci.yml','verify_snapshot.py','test_install.py','CHANGELOG.md','gitattributes']:
+ for name in ['pyproject.toml','README.md','cli.md','requirements-test.lock','ci.yml','verify_snapshot.py','test_install.py','CHANGELOG.md','gitattributes','MANIFEST.in','publish-cli.yml','build_release.py']:
   files['packaging/cli_release/'+name]=(ROOT/'packaging/cli_release'/name).read_text()
  for name in ['__init__.py','cli_fixtures.py','test_cli.py','test_cli_batch.py','test_cli_pipeline.py']:
   files['tests/'+name]=(ROOT/'tests'/name).read_text()
@@ -55,7 +55,7 @@ def test_snapshot_contains_independent_tests_ci_and_validator(repo,tmp_path):
  module().export_release(p,sha,out)
  required=['tests/cli_fixtures.py','tests/test_cli.py','tests/test_cli_batch.py',
            'tests/test_cli_pipeline.py','tests/test_install.py','scripts/verify_snapshot.py',
-           '.github/workflows/ci.yml','requirements-test.lock','CHANGELOG.md']
+           '.github/workflows/ci.yml','requirements-test.lock','CHANGELOG.md','MANIFEST.in','.github/workflows/publish-cli.yml','scripts/build_release.py']
  assert all((out/name).is_file() for name in required)
  check=subprocess.run([sys.executable,str(out/'scripts/verify_snapshot.py')],capture_output=True,text=True)
  assert check.returncode==0,check.stderr
