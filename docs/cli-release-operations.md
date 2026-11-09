@@ -21,7 +21,9 @@ CLI 저장소에서 코어를 직접 고치지 않는다. 긴급 수정도 원�
 3. 원본 폴더에서 해당 확정 SHA를 export한다. 목적지는 기존에 없는 ignored 경로여야 한다.
 
 ```bash
-SOURCE_SHA=$(git rev-parse HEAD)
+git fetch origin main
+SOURCE_SHA=$(git rev-parse origin/main)
+# 기록한 원격 main의 40자리 SHA와 SOURCE_SHA가 같은지 확인한 뒤 진행한다.
 python scripts/export_cli_release.py --commit "$SOURCE_SHA" --output "dist/cli-$SOURCE_SHA"
 python "dist/cli-$SOURCE_SHA/scripts/verify_snapshot.py"
 ```
