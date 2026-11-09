@@ -28,6 +28,10 @@
 - **같은 앱, 두 OS:** 공통 Python·Qt 소스로 Apple Silicon Mac과 Windows x64 설치 파일을 만듭니다.
 - **출력 선택:** 기본은 PDF 단독 저장이며, 분석 결과 화면의 `Save options…`에서 타임스탬프 JSON을 함께 저장할 수 있습니다.
 
+## CLI 자동 처리
+
+GUI와 같은 코어를 사용하는 CLI는 [별도 배포 저장소](https://github.com/juhwan0628/slide-extractor)에서 제공한다. [설치·사용법](docs/cli.md) · [업데이트·복구 운영](docs/cli-release-operations.md). 개발은 이 저장소의 브랜치에서 진행한다.
+
 ## 다운로드
 
 현재 공개 설치본은 **0.5.0b2 키프레임 전용 베타**입니다. Mac·Windows CI에서 설치 후 실행과 별도 소스·자료 감사를 검증합니다. 실제 사용자 기기의 긴 강의 처리 시간은 별도 측정 대상입니다.
