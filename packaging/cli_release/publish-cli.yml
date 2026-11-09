@@ -2,7 +2,6 @@ name: Publish verified CLI prerelease
 on:
   push:
     branches: ['publish/cli-*']
-    paths: ['.github/workflows/publish-cli.yml']
   workflow_dispatch:
 permissions:
   contents: read
