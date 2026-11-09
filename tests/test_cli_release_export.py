@@ -11,7 +11,7 @@ def module():
 def repo(tmp_path):
  p=tmp_path/'repo';p.mkdir()
  files={'slide_core/version.py':'VERSION = "0.5.0b2"\n','slide_core/__init__.py':'','slide_cli/__init__.py':'','slide_cli/cli.py':'# cli\n','LICENSE':'MIT\n','THIRD_PARTY_NOTICES.md':'Notices\n','docs/cli.md':'# Usage\n','gui/window.py':'PRIVATE GUI','secret.env':'secret','pyproject.toml':'not exported'}
- for name in ['pyproject.toml','README.md','cli.md','requirements-test.lock','ci.yml','verify_snapshot.py','test_install.py','CHANGELOG.md']:
+ for name in ['pyproject.toml','README.md','cli.md','requirements-test.lock','ci.yml','verify_snapshot.py','test_install.py','CHANGELOG.md','gitattributes']:
   files['packaging/cli_release/'+name]=(ROOT/'packaging/cli_release'/name).read_text()
  for name in ['__init__.py','cli_fixtures.py','test_cli.py','test_cli_batch.py','test_cli_pipeline.py']:
   files['tests/'+name]=(ROOT/'tests'/name).read_text()
@@ -76,3 +76,14 @@ def test_validator_rejects_incomplete_or_unexpected_snapshot(repo,tmp_path,damag
   except OSError:pytest.skip('Symlink privilege unavailable')
  result=subprocess.run([sys.executable,str(out/'scripts/verify_snapshot.py')],capture_output=True,text=True)
  assert result.returncode!=0
+
+def test_snapshot_hashes_survive_autocrlf_checkout(repo,tmp_path):
+ import sys
+ p,sha=repo;out=tmp_path/'export';checkout=tmp_path/'checkout'
+ module().export_release(p,sha,out)
+ subprocess.run(['git','init',str(out)],check=True,capture_output=True)
+ subprocess.run(['git','-C',str(out),'add','.'],check=True,capture_output=True)
+ subprocess.run(['git','-C',str(out),'-c','user.name=Test','-c','user.email=test@example.test','commit','-m','snapshot'],check=True,capture_output=True)
+ subprocess.run(['git','-c','core.autocrlf=true','clone',str(out),str(checkout)],check=True,capture_output=True)
+ result=subprocess.run([sys.executable,str(checkout/'scripts/verify_snapshot.py')],capture_output=True,text=True)
+ assert result.returncode==0,result.stderr
