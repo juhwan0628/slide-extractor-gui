@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "slide-extractor"
+version = "@VERSION@"
+description = "Extract slide PDFs and timelines from local videos"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
+dependencies = ["numpy>=2.0", "opencv-python-headless>=4.10", "Pillow>=10.0", "reportlab>=4.2", "pypdf>=5"]
+
+[project.optional-dependencies]
+test = ["pytest>=8.0"]
+
+[project.scripts]
+slide-extractor = "slide_cli.cli:main"
+
+[tool.setuptools]
+packages = ["slide_core", "slide_cli"]

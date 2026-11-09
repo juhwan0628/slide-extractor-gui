@@ -94,9 +94,24 @@ GitHub Releases에서 설치 파일을 직접 다운로드합니다. **Python·Q
 
 [릴리스 노트](RELEASE_NOTES.md) · [검증 기록](packaging/QA_STATUS.md)
 
+## CLI 설치와 실행
+
+저장소를 받은 뒤 Python 3.12 이상의 가상환경에서 설치합니다. CLI 기본 설치에는 Qt가 포함되지 않습니다.
+
+```bash
+python -m pip install .
+slide-extractor lecture.mp4 --json detailed
+slide-extractor first.mp4 second.mp4 --output-dir slides
+```
+
+FFmpeg와 FFprobe는 별도로 설치하고 PATH에 등록해야 합니다. qpdf는 선택적인 PDF 압축 도구이며 없어도 PDF·JSON을 생성합니다.
+일반 Python wheel에는 네이티브 키프레임 도우미와 미디어 도구가 포함되지 않습니다. 도우미가 없으면 기존 CPU 키프레임 경로로 대체되므로 네이티브 GUI 설치본과 실효 정책·성능이 다를 수 있습니다.
+GUI를 Python 환경에서 함께 실행하려면 `python -m pip install '.[gui]'` 후 `python -m app`을 사용합니다.
+여기서 안내하는 설치는 현재 체크아웃한 소스 기준이며 PyPI 공개 배포를 의미하지 않습니다. [CLI 옵션과 종료 코드](docs/cli.md)
+
 ## 개발과 기여
 
-기존 CLI [slide-extractor](https://github.com/juhwan0628/slide-extractor)와 별도 프로젝트입니다. 사용자는 설치 파일을 사용하고, 개발자는 아래 절차로 실행합니다.
+과거 FPS 기반 CLI와 달리, 현재 CLI는 이 저장소의 GUI와 추출 엔진을 공유합니다. 사용자는 설치 파일을 사용하고, 개발자는 아래 절차로 실행합니다.
 
 Python 3.12와 FFmpeg/FFprobe가 필요합니다.
 

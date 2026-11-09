@@ -24,3 +24,5 @@ vendor/
 .venv-native*/
 
 .superpowers/sdd/
+
+*.egg-info/
